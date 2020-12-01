@@ -75,24 +75,22 @@ within their published coordinate precision of 1[mm].
 
 _Limitations and Cautions_:
 
-* Not optimize for outer space based use (e.g. over 100[km] altitudes). The
-transforms "work" fine for these cases, but the precision and accuracy
-will vary from the specifications above. Precision reduced to approximately
-0.2[um] at lunar distances.
+* Not optimized for use in outer space (although
+	internal precision remains under approximately 0.2[um] at lunar
+	distances).
 
-* Algorithms do not support use for locations near the center of Earth.
-The current implementation provides results confirming with stated
-precision tolerances to a altitude of about -5800[km] although this
-is below the optimal domain and computation times might increase
-slightly.
+* Not optimized for use deep within Earth interior (although
+	transformations still meet design precision limits until
+	approximately below -5800[km] depths. 
 
 	* Locations involving altitudes below -6300[km], still transform
 	with sub[mm] precision (roundtrip consistency better than
-	100[um]). However, is this region is important, then you are
-	working in a extremely specialized and novel domain for which
-	creation of highly specialized and purpose-tuned algorithms may
-	be appropriate.
-
+	100[um]). However, if this region is important to you, then you
+	are working in a extremely specialized and novel domain that is
+	not within scope here.
+	
+* For detail on precision inside and outside the optimal domain
+refer to the section on [Transformation Precision](#xform-precision)
 
 
 ## Peridetic - Project
@@ -107,7 +105,7 @@ convert coordinate locations expressed in one system into equivalent
 coordinates expressed in the other.
 
 Geographic transformations provide the means to convert the GNSS Cartesian
-coordinate data values (aka "ECEF", "XYZ") into and/or from coordiantes
+coordinate data values (aka "ECEF", "XYZ") into and/or from coordinates
 expressed in conventional terrestrial Geographic terms (aka "lon/lat" or
 "longitude, latitude, altitude").
 
@@ -144,6 +142,19 @@ the important practical domain of operation that is "near" (within
 approximately +/- 100[km]) of Earth's surface (ref: [domain of
 validity](#domain-of-validity)).
 
+### Project Contributions
+
+Your consideration to use Peridetic is appreciated and respected and your
+comments, suggests, ideas and criticism  are all welcome with open arms
+feedback is most welcome at the email link below.
+
+The simple "vision" behind Peridetic is "simplicity".
+
+Feedback pertaining to further simplification of the code, its description
+and/or project structure are especially welcome (esp to improve documentation).
+
+If you graciously wish to offer specific changes, please fork the
+repository and issue a pull request (from a rebased branch).
 
 
 ## Peridetic - Getting Started
@@ -151,36 +162,55 @@ validity](#domain-of-validity)).
 To get started refer to:
 
 * Documentation
+
 	* Here
-	* TODO - Doxygen
-	* TODO - github pages?
+
+	* TODO - Doxygen (github pages?)
+
 * Installation/Use
+
 	* Quick Hack: "git clone" this repo into a directory that
 		is in the compiler include path.
-	* A bit more civilized: Copy the two header files from here into
-		whatever directory you want (e.g. your own project or system
-		include structure as you like).
-	* TODO - debian packages
-		* headers
-		* test environment
-		* documentation
-* Use
-	* Simple Examples - ref below -- TODO
+
+	* A bit more civilized: Copy the two header files
+		(peridetic.h and periDetail.h) from here into
+		whatever directory you want (e.g. your own project
+		or local or system include directories as you like).
+
+	* To build example programs (command line batch coordinate conversions),
+		please refer to the related github project TODO - perideticExamples.
+
+	* TODO - packages
+
+		* TODO - header-only install package
+
+		* TODO - examples package
+
+		* TODO - documentation package
+
+		* TODO - development and test environment package
+
+* Usage
+
+	* Simple Examples - ref further below -- TODO
+
 	* Detail Examples - ref Doxygen documents - TODO
+
 	* Full Program Example -- TODO
+
 * Questions and Feedback
+
 	* TODO - FAQ
+
 	* (Email)[mailto://peridetic@stellacore.com]
+
 	* TODO - Feature requests (ref email)
-* Contributions
-	* (CONTRIBUTIONS.md)[file://CONTRIBUTIONS.md]
-	* TODO - fork and pull requests
 
 
 
 ## Peridetic - General Use
 
-The Peridetic transformations are very easy to use. Include the source
+Peridetic transformations are very easy to use. Include the source
 header file and call one of the transformation functions that are in the
 "peri" namespace. Functions use standard C++ structures for argument and
 return types. All data values are interpreted consistently in standard
@@ -192,6 +222,7 @@ Illustrative code snippet:
     #include "peridetic.h" // indirectly includes implementation periDetail.h
 
 	// standard C++ data types
+	//	(generally, just use peri::LPA and peri::XYZ as defined in header)
 	using LPA = std::array<double, 3u>;
 	using XYZ = std::array<double, 3u>;
 
@@ -205,7 +236,7 @@ A complete demonstration examples may be found here
 
 	* TODO - [here](http://example.com).
 
-	* TODO - link to doxy
+	* TODO - link to doxygen generated outputs
 
 
 
@@ -242,7 +273,7 @@ it is associated with a very specific "Figure of Earth".
 
 For standard geographic coordinate conversions, the Figure of Earth, is
 accepted to be an ellipsoid of revolution (specifically an oblate one).
-The peridetic header files include definitions for two shapes,
+Peridetic header files include definitions for two shapes,
 the WGS84 and GRS80 ellipsoids, which are commonly encountered with GNSS
 data and modern geodetic activities. Other and custom ellipsoids are
 easily created and can be supplied to these transformations.
@@ -250,7 +281,7 @@ easily created and can be supplied to these transformations.
 The transformations offer the WGS84 as a default ellipsoid so that they
 are out-of-box compatible with most modern GNSS data.
 Note that, in practical terms, the WGS84 ellipsoid is the essentially
-same shape as the GRS80 ellipoid (within 0.1[mm] at the North pole).
+same shape as the GRS80 ellipsoid (within 0.1[mm] at the North pole).
 
 ### Peridetic - Software Considerations
 
@@ -273,12 +304,12 @@ using the ["cmake" paradigms](https://cmake.org/documentation/)
 #### Licensing
 
 This code may be used for any purpose (including commercial) provided
-the copy right notice is retained per the legal description in the
+the copy right notice is retained as described in the
 [MIT (aka X11) License)](https://directory.fsf.org/wiki/License:X11)
 
 #### Software Environment
 
-Software development points o interest include:
+Software development points include:
 
 Language
 
@@ -411,7 +442,7 @@ the underlying coordinate frames for both XYZ and LPA data values.
 * Specific reference ellipsoid may be provided to each transformation. If
 none is provided then a current (as of 2020) WGS84 ellipsoid is used.
 
-#### <a id=#XYZ-Coordinates></a>XYZ
+#### XYZ <a id=#XYZ-Coordinates></a>
 
 The abbreviation "XYZ" is used to denote coordinates in a Cartesian
 Coordinate system that are also known commonly as the "ECEF" (Earth
@@ -450,7 +481,7 @@ Using XYZ coordinates, distances and angles can be computed directly
 from the coordinate component values (e.g. via Pythagorean theorem,
 the law of cosines, etc).
 
-#### <a id=#LPA-Coordinates></a>LPA
+#### LPA <a id=#LPA-Coordinates></a>
 
 Geodetic Surface Location is expressed by three values denoted as
 "LPA", where
@@ -499,14 +530,14 @@ equatorial radius of the ellipsoid. Every point in space has this dual
 LPA representation. Also, the origin (center of Earth) has an infinite
 number of LPA representations.
 
-The Peridetic transformations are concerned only with the locations on and
+Peridetic transformations are concerned only with the locations on and
 "near" the surface of Earth (ref: [domain of validity](#domain-of-validity)).
 In this case, the singularity at the center of Earth is mostly irrelevant
 (ref: [special cases](#special-cases)).  Of the two dual LPA representations,
 only one is in the domain of validity (the one with altitude that has the
 smallest absolute value).
 
-###<a id=domain-of-validity></a>Domain of Validity
+### Domain of Validity <a id=domain-of-validity></a>
 
 The quality of the results produced by the code in this project is
 associated with a particular domain of validity. Results are fairly useful
@@ -553,43 +584,146 @@ The root evaluations are not algebraic operations but are themselves
 evaluated by iterative algorithms (generally within math library source
 code, processor firmware, or in transistor hardware structures).
 
-The Peridetic algorithms utilize a simple, fast and precise direct
+Peridetic algorithms utilize a simple, fast and precise direct
 iterative approach followed by the use of two trig function (std::atan2())
 evaluations used to express the solution in angular units to
 return the longitude/parallel coordinates as angle values.
 
 The XYZ from LPA algorithm utilizes a single std::sqrt() call.
 
-### Transformation Precision
+### Transformation Precision <a id=xform-precision></a>
 
-TODO - redo after precision refinement - currently more like 7.6[nm]
+For purposes here, "precision" is defined loosely as "self-consistency",
+"repeatability", "computational significance". It is an intrinsic
+metric that describes the quality of the computations more so than
+the quality associated with data values.
 
-On Earth surface a 1[mm] displacement corresponds to an angular change
-(e.g. in "L" or "P" value) of approximately 157[pRad] Conversely, a
-1000[pRad] angular change corresponds with approximately 6[mm] surface
-displacement. Note units: pRad is unit of pico-Radians or 10^-12 rad.
+Peridetic transformations are self-consistent with a precision on
+the order of 7.6[nm] for locations within within the operational optimal
+design domain (i.e. within +/-100[km] from Earth surface). This level
+of precision extends considerably farther although runtime performance
+efficiency may drop slightly if operating outside the optimal domain.
 
-The transformations are implemented and tested to be self-consistent at a
-level of precision corresponding with 1[mm] surface displacements. Note
-that self-consistency does _not_ constitute a proof of correctness. That
-leaves the possibility (although considered unlikely) that this
-implementation is consistent within itself, but somehow differs from
-others. It is hoped that the open source transparency of this code
-and opportunity for peer review provides assurance on the absolute
-compatibility with external conventions and expectations. If you are
-concerned about this, please re-read the "AS IS" clause of the associated
-license.
+The precision (worst case for any coordinate component) changes as
+function of point location altitudes (Alt values):
 
-To evaluate external consistency, the transformations are applied to pairs
-of [XYZ/LPA test points](file://coordPairsCORS.h.h) associated with the NGS
-"CORS" coordinate system reference network as
-[published by the US/NOAA National Geodetic Service](https://geodesy.noaa.gov/CORS_Map/).
+ * Alt < -6300[km]: -- Out of range! Don't do - expect garbage. If you
+ 	expect to be using data in this range, then put guard code before
+	or after calling peri::xyzForLpa() to ensure it is only called or
+	results are only used when the altitude value is in range.
 
-### Transformation Accuracy
+ * -6300[km] <= Alt < -5800[km]: -- Reduced precision, < 100[um]
 
-NOAA NGS CORS network comparisions:
+ * -5800[km] <= Alt < +11[Mm]: -- Meets design precision, < 7.6[nm]
+
+ * +11[Mm] <= Alt < +405[Mm]: -- Reduced precision, < 0.2[um]
+
+ * Beyond lunar distances, precision will continue to drop as
+	altitude increases.  For example of the extreme: at the altitude
+	of the black hole, Sagittarius A-star at the center of the
+	Milkyway, transform precision reduces to < 100[km]. On the order
+	of 1/4 of the way to Andromeda gallaxy, a 64-bit double completely
+	loses all precision for expressing distances relative to the size
+	of Earth.
+
+For precision testing, the transformations are evaluated for
+self-consistency.  Note that self-consistency does _not_ constitute a
+proof of correctness, but only provides a measure of numeric/computational
+noise involved.  Therefore, even if transformation computations
+are precise, there is the completely independent question if they are
+accurate (correct).
+
+The question of accuracy is addressed in the section
+[Transform Accuracy](#xform-accuracy) below.
+
+### Transformation Accuracy <a id=xform-accuracy></a>
+
+To determine transformation accuracy it is necessary to compare results
+with "absolute" or "known" values.
+
+This current implementation of Peridetic is evaluated using the
+published data sources described in the following sections.
+
+#### NOAA NGS CORS network comparisions:
+
+A sampling of published CORS station locations is used to evaluate the
+accuracy of the geographic from/into transformations.
+
+The National Geodetic Survey ([NGS](https://www.ngs.noaa.gov/)) is
+a branch of the United States National Oceanic and Atmospheric Administration
+[NOAA](https://www.noaa.gov/) responsible for:
+
+	"NOAA’s National Geodetic Survey (NGS) provides the framework
+	for all positioning activities in the Nation."
+
+The NGS manages the Continuously Operating Reference Stations
+([CORS](https://www.ngs.noaa.gov/CORS/)) network of survey locations.
+Although concentrated within the U.S. the network includes a number
+of stations scattered around the globe.
+
+The following stations were selected with an emphasis on variation 
+of geographic location (longitude and latitude) and elevation
+(altitude).
+
+	* // PARAKOU (BJPA),  BORGOU
+	* // WESTEAST__AK2008 (AC60),  ALASKA
+	* // EAST DOCK (EDOC),  ALASKA
+	* // AMERICAN SAMOA (ASPA),  AMERICAN SAMOA
+	* // FORTALEZA 2005 (BRFT),  UNIDENTIFIED STATE OF BRAZIL
+	* // IRAQ SURVY BASRAH (ISBS),  IRAQ
+	* // ZANDERIJ (SRZN),  UNIDENTIFIED DISTRICT OF SURINAM
+	* // BOULDER (DSRC),  COLORADO
+	* // STEAMBOAT SPRINGS (STBT),  COLORADO
+	* // MEXICO CITY WAAS (MMX1),  DISTRITO FEDERAL
+
+For each station, NGS publishes both geographic and Cartesian coordinates.
+The following is an example of the published data values obtainable
+from the interactive [NGS CORS Map](https://geodesy.noaa.gov/CORS_Map/):
+
+	> ITRF2014 POSITION (EPOCH 2010.0)
+	> Computed in Jul 2020 using 14 days of data.
+	>     X =  -3851330.396 m     latitude    =  52 42 52.63061 N
+	>     Y =    399608.571 m     longitude   = 174 04 34.56698 E
+	>     Z =   5051382.453 m     ellipsoid height =   18.309   m
+
+These values are used to evaluate Peridetic transforms via a process
+that includes:
+
+* Cut-n-paste data from the interactive map site into a header
+	file (in the peridetic development and testing codebase).
+
+* Unit test reads data from the header file and populates variables
+	with these "expected" data values (after decoding d-m-s values
+	into Radians).
+
+* The expected values are transformed in each direction to obtain "got"
+	values. E.g.
+
+	* gotXYZ=xyzForLpa(expLPA)
+
+	* gotLPA=lpaForXYZ(expXYZ).
+
+* The "got" values are compared with the corresponding "expected" values
+	and differences from zero are compared against tolerance values that
+	reflect the provided data precision. I.e.
+
+	* Angular tolerance of { 172. / 1024./1024./1024./1024. };
+		This is <.16[nRad] (published values have resolution of
+		approximately .049[nRad], but the +/-1[mm] surface distance
+		for comparison corresponds with the larger angle ~.16[nRad]
+		which is therefore used for testing.
+
+	* Linear tolerance of { 1./1024. }; // CORS files only good to [mm]
+
 
 * Meet domain design/testing specifications (ref above).
+
+Overall, these transforms are thought to be correct and it is hoped
+that the open source transparency of the implementation code and
+opportunity for peer review should help provides assurance on its
+agreement with external conventions and expectations.
+
+However, please _note_ the _"AS IS"_ clause of the associated license.
 
 ### Transformation Quality and Testing
 
