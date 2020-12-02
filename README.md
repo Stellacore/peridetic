@@ -160,14 +160,23 @@ criticisms - all are welcome with open arms at the email link below.
 
 The simple "vision" behind Peridetic is "simplicity".
 
+* Description/Documentation:
 Feedback pertaining to further simplification of the code, its description
 and/or project structure are especially welcome (esp to improve documentation).
 
+* Correspoinding Coordinates:
 Another useful contribution would be identification and selection of
 known transformation pair data in the form of corresponding coordinates
 at other stations around the world. E.g. Station locations associated
 with different national systems and reference networks
 (ref [Accuracy section](#Transformation-Accuracy)
+
+* Terminology:
+The Peridetic project (code and documentation) strives to use consistent
+accepted terminology. However, the initial version did not focus on this.
+Identification of wrong or ambiguous terminology is most welcome. As a
+target, the Peridetic project terminology should be consistent with the
+[NGS glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
 
 If you graciously wish to offer specific changes, please fork the
 repository and issue a pull request (from a rebased branch).
@@ -474,45 +483,6 @@ Default implementations are provided for:
 * Custom ellipsoids are easily crated with peri::Shape and peri::EarthModel
 data classes. Ref advanced documentation - TODO.
 
-#### XYZ <a id=XYZ-Coordinates></a>
-
-The abbreviation "XYZ" is used to denote coordinates in a Cartesian
-Coordinate system that are also known commonly as the "ECEF" (Earth
-Centered, Earth Fixed) coordinates.
-
-Ref: ["coordinate, Cartesian"](https://www.ngs.noaa.gov/PUBS_LIB/GEOID/Droman_papers/glossary/xml/C.xml)
-
-##### Remarks on XYZ Coordinates
-
-The XYZ (ECEF) Cartesian coordinate frame is often useful when working
-with GNSS (Global Navigation Satellite System) observations and/or other
-computations that are global in scope.
-
-* Origin -  Is associated with the geometric center of the reference
-ellipsoid. For most ellipsoids, this is approximately at the centroid of
-Earth's mass distribution.
-
-* Z - is the axis orthogonal to the equator (The rotation plane of symmetry
-associated with the ellipsoid under consideration). On Earth, points toward
-the North pole.
-
-* X - is axis orthogonal to "Z" (in the equatorial plane) and directed
-toward the prime meridian. On Earth points approximately toward Gulf
-of Guinea.
-
-* Y - is axis mutually orthogonal to Z and X in "right-hand" sense. On
-Earth, points approximately south of Bay of Bengal.
-
-The XYZ is a classic orthonormal rectangular coordinate system. It is
-associated with three basis vectors (aka "axes"). Each basis vector
-has unit magnitude (is "normalized"). The three axes are mutually
-perpendicular (are "orthogonal") and have a dextral (aka "right-handed")
-chirality interpretation (in the order: "X", "Y", "Z").
-
-Using XYZ coordinates, distances and angles can be computed directly
-from the coordinate component values (e.g. via Pythagorean theorem,
-the law of cosines, etc).
-
 #### LPA <a id=LPA-Coordinates></a>
 
 Geodetic Surface Location is expressed by three values denoted as
@@ -520,7 +490,8 @@ Geodetic Surface Location is expressed by three values denoted as
 
 * Origin.LP - is on the surface of ellipsoid at a point on its equator
 chosen (arbitrarily) to be identified with the prime meridian of 
-particular convention (e.g. Greenwich, Paris, Meca, etc).
+particular convention (e.g. Greenwich, Paris, Mecca,
+[and others](https://en.wikipedia.org/wiki/Prime_meridian#List_of_prime_meridians_on_Earth)).
 
 * L(ongitude) - is an azimuthal angle (in radians), positive Eastward
 from the prime meridian.
@@ -570,7 +541,46 @@ In this case, the singularity at the center of Earth is mostly irrelevant
 only one is in the domain of validity (the one with altitude that has the
 smallest absolute value).
 
-### Domain of Validity <a id=domain-of-validity></a>
+#### XYZ <a id=XYZ-Coordinates></a>
+
+The abbreviation "XYZ" is used to denote coordinates in a Cartesian
+Coordinate system that are also known commonly as the "ECEF" (Earth
+Centered, Earth Fixed) coordinates.
+
+Ref: ["coordinate, Cartesian"](https://www.ngs.noaa.gov/PUBS_LIB/GEOID/Droman_papers/glossary/xml/C.xml)
+
+##### Remarks on XYZ Coordinates
+
+The XYZ (ECEF) Cartesian coordinate frame is often useful when working
+with GNSS (Global Navigation Satellite System) observations and/or other
+computations that are global in scope.
+
+* Origin -  Is associated with the geometric center of the reference
+ellipsoid. For most ellipsoids, this is approximately at the centroid of
+Earth's mass distribution.
+
+* Z - is the axis orthogonal to the equator (The rotation plane of symmetry
+associated with the ellipsoid under consideration). On Earth, points toward
+the North pole.
+
+* X - is axis orthogonal to "Z" (in the equatorial plane) and directed
+toward the prime meridian. On Earth, for the Greenwich prime meridian,
+this points approximately toward Gulf of Guinea.
+
+* Y - is axis mutually orthogonal to Z and X in "right-hand" sense. On
+Earth, points approximately south of Bay of Bengal.
+
+The XYZ is a classic orthonormal rectangular coordinate system. It is
+associated with three basis vectors (aka "axes"). Each basis vector
+has unit magnitude (is "normalized"). The three axes are mutually
+perpendicular (are "orthogonal") and have a dextral (aka "right-handed")
+chirality interpretation (in the order: "X", "Y", "Z").
+
+Using XYZ coordinates, distances and angles can be computed directly
+from the coordinate component values (e.g. via Pythagorean theorem,
+the law of cosines, etc).
+
+### Altitude Domain of Validity <a id=domain-of-validity></a>
 
 The quality of the results produced by the code in this project is
 associated with a particular domain of validity. Results remain fairly useful
