@@ -30,7 +30,7 @@
 
 Peridetic is an extremely lightweight, easy-to-use, simple C++ header
 implementation providing precise, accurate and fast transformations
-between Geographic (lon/lat/alt) and Cartesian (x/y/z) coordinate
+between Geodetic (lon/lat/alt) and Cartesian (x/y/z) coordinate
 expressions.
 
 [Example Usage](#General-Use)
@@ -93,7 +93,7 @@ _Limitations and Cautions_:
 	are working in a extremely specialized and novel domain that is
 	not within scope here.
 
-* This implementation addresses standard geographic coordinate
+* This implementation addresses standard geodetic coordinate
 	conversions in which longitude/paralell angles are associated
 	with an ellipsoidal Figure of Earth. By contrast, astrometric
 	lon/par values are referenced to a Geoid (local level surface)
@@ -109,15 +109,15 @@ to the section on [Transformation Precision](#xform-precision)
 ### Project Motivation
 
 GNSS (Global Navigation Satellite System) receivers are everywhere
-(e.g. phones, cars, etc), and existing geographic information is
+(e.g. phones, cars, etc), and existing geodetic information is
 ubiquitous (e.g. maps, infrastructure databases, etc). Therefore,
 software operating with either or both types of data often needs to
 convert coordinate locations expressed in one system into equivalent
 coordinates expressed in the other.
 
-Geographic transformations provide the means to convert the GNSS Cartesian
+Geodetic transformations provide the means to convert the GNSS Cartesian
 coordinate data values (aka "ECEF", "XYZ") into and/or from coordinates
-expressed in conventional terrestrial Geographic terms (aka "lon/lat" or
+expressed in conventional terrestrial geodetic terms (aka "lon/lat" or
 "longitude, latitude, altitude").
 
 Software development projects, even simple ones, often need to perform
@@ -128,7 +128,7 @@ dealing with the package learning curve, and, most critically, can create
 the need to carry (potentially large) dependencies forward in the
 (often small) project work at hand.
 
-Peridetic addresses this need by offering the two essential geographic
+Peridetic addresses this need by offering the two essential geodetic
 transformations without the overhead of installing or learning a new
 environment and without creating any unnecessary dependencies for software
 development or runtime environments.
@@ -140,7 +140,7 @@ for you.
 ### Project Concept
 
 Peridetic provides (MIT license) C++ (header) code that performs
-precise and accurate transformation from/into geographic coordinates
+precise and accurate transformation from/into geodetic coordinates
 (longitude, latitude, and ellipsoidal altitude) and Cartesian "XYZ"
 (Earth Centered Earth Fixed - ECEF). The transformations are optimized
 for locations "near" (within +/- 100[km]) of Earth's ellipsoidal surface.
@@ -155,31 +155,36 @@ validity](#domain-of-validity)).
 
 ### Project Contributions
 
-Thank you for considering to provide comments, suggestions, ideas and/or
-criticisms - all are welcome with open arms at the email link below.
+Thank you for your interest in Perdetic and for considering to provide
+comments, suggestions, ideas and/or criticisms - all of which are
+welcomed with open arms.
 
-The simple "vision" behind Peridetic is "simplicity".
+For quick comments, please send a short
+[Email](mailto://peridetic@stellacore.com). If you wish to offer more
+extensive specific change suggestions, please fork the repository and
+issue a pull request from a rebased branch in the fork repo.
+
+The "vision" behind Peridetic is "utility with simplicity"
 
 * Description/Documentation:
-Feedback pertaining to further simplification of the code, its description
-and/or project structure are especially welcome (esp to improve documentation).
+	Feedback pertaining to further simplification of the code, its
+	description and/or this github project structure are particularly
+	welcome (especially to improve documentation).
 
 * Correspoinding Coordinates:
-Another useful contribution would be identification and selection of
-known transformation pair data in the form of corresponding coordinates
-at other stations around the world. E.g. Station locations associated
-with different national systems and reference networks
-(ref [Accuracy section](#Transformation-Accuracy)
+	Another useful contribution would be identification and selection
+	of known transformation pair data in the form of corresponding
+	coordinates at other stations around the world. E.g. Station
+	locations associated with different national systems and reference
+	networks (ref [Accuracy section](#Transformation-Accuracy))
 
 * Terminology:
-The Peridetic project (code and documentation) strives to use consistent
-accepted terminology. However, the initial version did not focus on this.
-Identification of wrong or ambiguous terminology is most welcome. As a
-target, the Peridetic project terminology should be consistent with the
-[NGS glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
-
-If you graciously wish to offer specific changes, please fork the
-repository and issue a pull request (from a rebased branch).
+	The Peridetic project (code and documentation) strives to use
+	consistent accepted terminology. However, the initial version
+	did not focus on this.	Identification of misleading or ambiguous
+	terminology is most welcome. As a target, the Peridetic
+	project terminology should be consistent with the [NGS
+	glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
 
 
 ## Peridetic - Getting Started <a id=Getting-Started></a>
@@ -188,7 +193,7 @@ To get started refer to:
 
 * Documentation
 
-	* Here
+	* Top-level README.md
 
 	* TODO - Doxygen (github pages?)
 
@@ -202,10 +207,7 @@ To get started refer to:
 		whatever directory you want (e.g. your own project
 		or local or system include directories as you like).
 
-	* To build example programs (command line batch coordinate conversions),
-		please refer to the related github project TODO - perideticExamples.
-
-	* TODO - packages
+	* Auxiliary Packages:
 
 		* TODO - header-only install package
 
@@ -227,7 +229,7 @@ To get started refer to:
 
 	* TODO - FAQ
 
-	* (Email)[mailto://peridetic@stellacore.com]
+	* [Email](mailto://peridetic@stellacore.com)
 
 	* TODO - Feature requests (ref email)
 
@@ -277,10 +279,10 @@ technical math speak - the three components of a vector as it is expressed
 with respect to a orthonormal dextral (right-handed) basis. For code, all
 data values (input arguments and return values) are interpreted as _meters_.
 
-* "LPA" is used herein to denote geographic coordinates. The letters stand
+* "LPA" is used herein to denote geodetic coordinates. The letters stand
 for "Longitude", "Parallel" (of latitude), and (ellipsoidal) "Altitude".
 The use of the "P" (instead of a second 'L') provides an easy way to
-distinguish the two geographic angles in notation.
+distinguish the two geodetic location angles in single-letter notation.
 
 Note that "Altitude" is used herein to mean "ellipsoidal height" - I.e.
 the distance between point of interest and the (outer facing) ellipsoidal
@@ -290,14 +292,14 @@ surface.
 
 This package provides two fundamental transformations:
 
-* LPA coordinates from XYZ coordinates - Geographic from Cartesian
+* LPA coordinates from XYZ coordinates - Geodetic from Cartesian
 
-* XYZ coordinates from LPA coordinates - Cartesian from Geographic
+* XYZ coordinates from LPA coordinates - Cartesian from Geodetic
 
-The concept of geographic location (the LP parts) is only meaningful if
+The concept of geodetic location (the LP parts) is only meaningful if
 it is associated with a very specific "Figure of Earth".
 
-For standard geographic coordinate conversions, the Figure of Earth, is
+For standard geodetic coordinate conversions, the Figure of Earth, is
 accepted to be an ellipsoid of revolution (specifically an oblate one).
 Peridetic header files include definitions for two shapes,
 the WGS84 and GRS80 ellipsoids, which are commonly encountered with GNSS
@@ -435,7 +437,7 @@ for itself in terms of providing values that are meaningful in a geodetic
 sense.
 
 For example, negative altitude values with magnitude greater than
-the ellipsoid's polar radius are not valid geographic coordinates.
+the ellipsoid's polar radius are not valid geodetic coordinates.
 To avoid the overhead in testing for such a silly condition, Peridetic
 assumes the consuming code is sufficiently responsible to avoid this.
 
@@ -462,7 +464,7 @@ are described in detail further below.
 
 It is important to note that the conversion between XYZ/LPA representations
 is inextricably associated with a specific model for the Figure of Earth.
-For Peridetic (as for geographic coordinates in general), the Earth shape
+For Peridetic (as for geodetic coordinates in general), the Earth shape
 model is an ellipsoid. (Note: astrometric lon/par values are referenced
 to Geoid instead of an ellipsoid. Astrometric conversions are outside 
 the scope of these Peridetic transformations).
@@ -703,7 +705,7 @@ published data sources described in the following sections.
 
 A sampling of published CORS geodetic network reference station
 locations is used to evaluate the accuracy of the Peridetic
-geographic from/into transformations.
+coordinate expression transformations.
 
 The National Geodetic Survey ([NGS](https://www.ngs.noaa.gov/)) is
 a branch of the United States National Oceanic and Atmospheric Administration
@@ -718,7 +720,7 @@ Although concentrated within the U.S. the network includes a number
 of stations scattered around the globe.
 
 The following stations were selected with an emphasis on variation 
-of geographic location (longitude and latitude) and elevation
+of geodetic location (longitude and latitude) and elevation
 (altitude).
 
 	* // PARAKOU (BJPA),  BORGOU
@@ -732,7 +734,7 @@ of geographic location (longitude and latitude) and elevation
 	* // STEAMBOAT SPRINGS (STBT),  COLORADO
 	* // MEXICO CITY WAAS (MMX1),  DISTRITO FEDERAL
 
-For each station, NGS publishes both geographic and Cartesian coordinates.
+For each station, NGS publishes both Geodetic and Cartesian coordinates.
 The following is an example of the published data values obtainable
 from the interactive [NGS CORS Map](https://geodesy.noaa.gov/CORS_Map/):
 
