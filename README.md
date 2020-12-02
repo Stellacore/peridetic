@@ -1,27 +1,6 @@
 
 	MIT License
-
 	Copyright (c) 2020 Stellacore Corporation.
-
-	Permission is hereby granted, free of charge, to any person obtaining
-	a copy of this software and associated documentation files (the
-	"Software"), to deal in the Software without restriction, including
-	without limitation the rights to use, copy, modify, merge, publish,
-	distribute, sublicense, and/or sell copies of the Software, and to
-	permit persons to whom the Software is furnished to do so, subject
-	to the following conditions:
-
-	The above copyright notice and this permission notice shall be
-	included in all copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
-	KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-	WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-	NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-	BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-	AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-	IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-	THE SOFTWARE.
 
 
 # Peridetic - Easy and Effective Geodetic Transformations
@@ -35,47 +14,67 @@ expressions.
 
 [Quick Start](#Getting-Started)
 
-## Peridetic - Key Points
+[MIT/X11 License](LICENSE)
 
-_Easy_: Simplicity, simplicity, simplicity
+Content:
 
-* Install (or simply clone or copy) the (two) header files, compile and go.
+	* [Key Points](#Key-Points)
+	* [Project Info](#Project-Info)
+	* [Getting Started](#Getting-Started)
+	* [General Use](#General-Use)
+	* [Technical Detail](#Technical-Detail)
+	* [Transformation Details](#Transformation-Details)
+	* [Technical Deep Dive](#Technical-Deep-Dive)
 
-_Freedom_:
+
+
+## Peridetic - Key Points <a id=Key-Points></a>
+
+#### _Easy_:
+Simplicity, simplicity, simplicity
+
+* Install (or simply clone or copy) the (two) header files from /include
+	directory, compile and go.
+
+#### _Freedom_:
 
 * Peridetic is a liberally licensed (MIT/X11) for any uses including
-commercial ones.
+	commercial ones.
 
-_Useful_:
+#### _Useful_:
 
-Provides the two fundamental and ubiquitous geodetic/rectangular
+Provides the two most fundamental and ubiquitous geodetic/rectangular
 coordinate transformations:
 
 * Longitude/Parallel(latitude)/(ellipsoidal)Altitude from Cartesian (XYZ)
 
 * Cartesian XYZ coordinates from Longitude/Parallel/Altitude
 
-_Applications_:
+#### _Applications_:
 
 * Land/Terrestrial - E.g. infrastructure, vehicles, pedestrians,
-mountain climbers, etc.
+	mountain climbers, etc.
 
 * Bathymetric - E.g. ships, submarines, undersea cables, buoys, etc.
 
 * Aviation - E.g. aircraft, UAV/drones, balloons, instrumented birds, etc.
 
-_Testing/Verification_:
+#### _Testing/Verification_:
 
 * Optimal Domain is within +/-100[km] altitude from Earth's (ellipsoid)
-surface.
+	surface. (ref [Altitude Domain of Validity](#domain-of-validity)
 
-* Precision: Better than ~7.6[nm] within optimal domain (this corresponds
-	with computational relative precision of approximately 1.e-15).
+* Precision: Better than ~7.6[nm] within the
+	[optimal domain](#domain-of-validity) which corresponds
+	with computational relative precision of approximately
+	1.e-15 which approaches the limit of [64-bit IEEE-754 'double'
+	type](https://en.wikipedia.org/wiki/Decimal64_floating-point_format)
+	(with a touch of room for computation noise).
 
 * Accuracy: Agrees with select globally distributed NOAA/NGS CORS stations
-within their published coordinate precision of 1[mm].
+	within their published coordinate precision of 1[mm].
 
-_Limitations and Cautions_:
+#### _Limitations and Cautions_:
 
 * Not optimized for use in outer space (although
 	internal precision remains under approximately 0.2[um] at lunar
@@ -99,10 +98,10 @@ _Limitations and Cautions_:
 	Peridetic transformations.
 
 * For detail on precision both inside and outside the optimal domain refer
-to the section on [Transformation Precision](#xform-precision)
+	to the section on [Transformation Precision](#Transformation-Precision)
 
 
-## Peridetic - Project
+## Peridetic - Project Info <a id=Project-Info ></a>
 
 ### Project Motivation
 
@@ -189,21 +188,19 @@ The "vision" behind Peridetic is "utility with simplicity"
 
 To get started refer to:
 
-* Documentation
+* Documentation:
 
-	* Top-level README.md
+	* Top-level README.md (this file)
 
 	* TODO - Doxygen (github pages?)
 
-* Installation/Use
+* Installation:
 
-	* Quick Hack: "git clone" this repo into a directory that
-		is in the compiler include path.
-
-	* A bit more civilized: Copy the two header files
-		(peridetic.h and periDetail.h) from here into
-		whatever directory you want (e.g. your own project
-		or local or system include directories as you like).
+	* Quick Hack: download or cut/paste the two header files
+		(peridetic.h and periDetail.h) from this repo's "include"
+		directory and put them into whatever directory you
+		want (e.g. your own project or a local or system include
+		directory as you like).
 
 	* Auxiliary Packages:
 
@@ -215,19 +212,19 @@ To get started refer to:
 
 		* TODO - development and test environment package
 
-* Usage
+* Usage:
 
-	* Simple Examples - ref further below -- TODO
+	* Simple Examples - Ref [General Use](#General-Use) section below.
 
 	* Detail Examples - ref Doxygen documents - TODO
 
 	* Full Program Example -- TODO
 
-* Questions and Feedback
+* Questions and Feedback:
 
 	* TODO - FAQ
 
-	* [Email](mailto://peridetic@stellacore.com)
+	* Comments and questions via [Email](mailto://peridetic@stellacore.com).
 
 	* TODO - Feature requests (ref email)
 
@@ -241,7 +238,17 @@ header file and call one of the transformation functions that are in the
 return types. All data values are interpreted consistently in standard
 units: _radians_ for angles; _meters_ for distances.
 
-### Illustrative Example: <a id=Illustrative-Example></a>
+### Illustrative Description: <a id=Illustrative-Example></a>
+
+In succinct terms, the core usage is:
+
+	{
+	using namespace peri;
+	LPA const gotLPA{ lpaFromXyz( XYZ{ -1266326., -4725993., 4877986. }) };
+	XYZ const gotXYZ{ xyzFromLpa( LLA{ .6981317, -1.8325957, 0. }) };
+	}
+
+With a bit more explanation:
 
 	// include header file
     #include "peridetic.h" // indirectly includes implementation periDetail.h
@@ -257,8 +264,9 @@ units: _radians_ for angles; _meters_ for distances.
 	LPA const gotLPA{peri::lpaFromXyz(XYZ{-1266326., -4725993., 4877986.})};
 	XYZ const gotXYZ{peri::xyzFromLpa(LLA{.6981317, -1.8325957, 0.})};
 
-### Example Code
-A complete demonstration examples may be found here
+### Detailed Example Code
+
+A complete collection of demonstration examples may be found here
 
 	* TODO - [here](http://example.com).
 
@@ -266,21 +274,23 @@ A complete demonstration examples may be found here
 
 
 
-## Peridetic - Technical Detail
+## Peridetic - Technical Detail <a id=Technical-Detail></a>
 
 ### Terminology
 
 A comment on terminology and notation:
 
 * "XYZ" is used herein to denote classic Cartesian coordinates. In
-technical math speak - the three components of a vector as it is expressed
-with respect to a orthonormal dextral (right-handed) basis. For code, all
-data values (input arguments and return values) are interpreted as _meters_.
+	technical math speak - the three components of a vector as it is
+	expressed with respect to a orthonormal dextral (right-handed)
+	basis. For code, all data values (input arguments and return
+	values) are interpreted as _meters_.
 
 * "LPA" is used herein to denote geodetic coordinates. The letters stand
-for "Longitude", "Parallel" (of latitude), and (ellipsoidal) "Altitude".
-The use of the "P" (instead of a second 'L') provides an easy way to
-distinguish the two geodetic location angles in single-letter notation.
+	for "Longitude", "Parallel" (of latitude), and (ellipsoidal)
+	"Altitude".  The use of the "P" (instead of a second 'L')
+	provides an easy way to distinguish the two geodetic location
+	angles in single-letter notation.
 
 Note that "Altitude" is used herein to mean "ellipsoidal height" - I.e.
 the distance between point of interest and the (outer facing) ellipsoidal
@@ -288,50 +298,29 @@ surface.
 
 ### Basic Geodesy
 
-This package provides two fundamental transformations:
-
-* LPA coordinates from XYZ coordinates - Geodetic from Cartesian
-
-* XYZ coordinates from LPA coordinates - Cartesian from Geodetic
-
-The concept of geodetic location (the LP parts) is only meaningful if
-it is associated with a very specific "Figure of Earth".
+The concept of geodetic location (the LP parts) is only meaningful when
+the angles are associated with a very specific "Figure of Earth".
 
 For standard geodetic coordinate conversions, the Figure of Earth, is
-accepted to be an ellipsoid of revolution (specifically an oblate one).
-Peridetic header files include definitions for two shapes,
-the WGS84 and GRS80 ellipsoids, which are commonly encountered with GNSS
-data and modern geodetic activities. Other and custom ellipsoids are
-easily created and can be supplied to these transformations.
+accepted to be an ellipsoid of revolution (specifically an oblate one
+with equatorial radius larger then polar radius).
+
+Peridetic header files include definitions for two shapes, the WGS84
+and GRS80 ellipsoids, which are commonly encountered with GNSS data
+and modern geodetic activities. Other and custom ellipsoids are easily
+created and can be supplied to these transformations.
 
 The transformations offer the WGS84 as a default ellipsoid so that they
 are out-of-box compatible with most modern GNSS data.
 Note that, in practical terms, the WGS84 ellipsoid is the essentially
 same shape as the GRS80 ellipsoid (within 0.1[mm] at the North pole).
 
-### Peridetic - Software Considerations
+### Peridetic - Software Considerations <a id=Software-Considerations></a>
 
 This Peridetic project (in it's simplest form, is a pair of public/private
 C++ header files) provides the two most useful geodetic transformations
 that provide high accuracy and precision results and fast runtime 
 performance within this operational domain.
-
-#### Use and Integration
-
-This project can be used in your own code in two ways:
-
-* Copy the "peridetic.h" public header file, and the "periDetail.h" 
-implementation detail header file wherever you wish, then include
-the "peridetic.h" file in your own source code, compile and go.
-
-* -or- TODO - Incorporate this project into another development effort
-using the ["cmake" paradigms](https://cmake.org/documentation/)
-
-#### Licensing
-
-This code may be used for any purpose (including commercial) provided
-the copy right notice is retained as described in the
-[MIT (aka X11) License)](https://directory.fsf.org/wiki/License:X11)
 
 #### Software Environment
 
@@ -370,6 +359,23 @@ Thread safety:
 * Functions are both re-entrant and thread safe
 
 	* TODO - should be, but needs verification
+
+#### Use and Integration
+
+This project can be used in your own code in two ways:
+
+* Copy the "peridetic.h" public header file, and the "periDetail.h"
+	implementation detail header file wherever you wish, then include
+	the "peridetic.h" file in your own source code, compile and go.
+
+* -or- TODO - Incorporate this project into another development effort
+	using the ["cmake" paradigms](https://cmake.org/documentation/)
+
+#### Licensing
+
+This code may be used for any purpose (including commercial) provided
+the copy right notice is retained as described in the
+[MIT (aka X11) License)](https://directory.fsf.org/wiki/License:X11)
 
 #### Data Preconditions
 
@@ -446,7 +452,7 @@ utility functions from the project test environment: TODO-
 
 
 
-## Peridetic - Transformation Details
+## Peridetic - Transformation Details <a id=Transformation-Details></a>
 
 ### Transformations for Location Representations
 
@@ -474,14 +480,23 @@ the underlying coordinate frames for both XYZ and LPA data values.
 Specific reference ellipsoid may be provided to each transformation. If
 none is provided then the WGS84 ellipsoid is used.
 
-Default implementations are provided for:
+There are many subtleties in exactly what constitutes a
+"best-fit" ellipsoid means when it pertains to the
+["Figure of the Earth"](https://en.wikipedia.org/wiki/Figure_of_the_Earth).
+However most commonly used ellipsoid definitions have dimensions that
+are within a few 100[m] of each other and the commonly used ellipsoids
+differ from a pure spherical model by less than about +/- 11[km] between
+equatorial and polar axes.
 
-* GRS80
+Peridetic provides two common Earth model specifications:
 
-* WGS84
+* GRS80 - ref peri::model::GRS80
 
-* Custom ellipsoids are easily crated with peri::Shape and peri::EarthModel
-data classes. Ref advanced documentation - TODO.
+* WGS84 - ref peri::model::WGS84
+
+* Other standard as well as custom ellipsoids may be
+	created easily via peri::Shape and peri::EarthModel data
+	structures. Ref advanced documentation - TODO.
 
 #### LPA <a id=LPA-Coordinates></a>
 
@@ -489,29 +504,35 @@ Geodetic Surface Location is expressed by three values denoted as
 "LPA", where
 
 * Origin.LP - is on the surface of ellipsoid at a point on its equator
-chosen (arbitrarily) to be identified with the prime meridian of 
-particular convention (e.g. Greenwich, Paris, Mecca,
-[and others](https://en.wikipedia.org/wiki/Prime_meridian#List_of_prime_meridians_on_Earth)).
+	chosen (arbitrarily) to be identified with the prime meridian
+	of particular convention (e.g. Greenwich, Paris, Mecca, [and
+	others](https://en.wikipedia.org/wiki/Prime_meridian#List_of_prime_meridians_on_Earth)).
 
 * L(ongitude) - is an azimuthal angle (in radians), positive Eastward
-from the prime meridian.
+	from the prime meridian.
 
 * P(arallel) - (of latitude) is an elevation angle (in radians),
-positive Northward from the equator.
+	positive Northward from the equator.
 
 * Origin.A - is dynamically defined to lie on the surface of the ellipsoid
-at a location specified by the LP coordinates.
+	at a location specified by the LP coordinates.
 
 * A(ltitude) - is the distance of a point from the Origin.A location.
-The "A" value is associated with a distance value that is "stationary"
-with respect to small changes in LP coordinates.  In practice, dual
-solutions are resolved by selecting the "A" to be the shortest distance
-from the ellipsoid surface to the point of interest.
+	The "A" value is associated with a distance value that is
+	"stationary" with respect to small changes in LP coordinates.
+	In practice, dual solutions are resolved by selecting the "A"
+	to be the shortest distance from the ellipsoid surface to the
+	point of interest.
 
-Ref: ["coordinate, geocentric"](https://www.ngs.noaa.gov/PUBS_LIB/GEOID/Droman_papers/glossary/xml/C.xml)
+For explanation of Longitude and Latitude angles, ref: the NGS glossary
+entry for
+["coordinate, geocentric"](https://www.ngs.noaa.gov/PUBS_LIB/GEOID/Droman_papers/glossary/xml/C.xml).
 
-Note that Peridetic uses the term "altitude" to be clear that the
-interpretation is applied to an ellipsoid (not a specialized Geoid surface).
+Note that Peridetic uses the term "parallel" in place of latitude
+(to facility unique naming notation) and uses the term "altitude"
+to be clear that the interpretation is applied to an ellipsoid (in
+effort to reduce confusion associated with the many uses of "height"
+and "elevation").
 
 ##### Remarks on LPA Coordinates
 
@@ -556,19 +577,19 @@ with GNSS (Global Navigation Satellite System) observations and/or other
 computations that are global in scope.
 
 * Origin -  Is associated with the geometric center of the reference
-ellipsoid. For most ellipsoids, this is approximately at the centroid of
-Earth's mass distribution.
+	ellipsoid. For most ellipsoids, this is approximately at the
+	centroid of Earth's mass distribution.
 
-* Z - is the axis orthogonal to the equator (The rotation plane of symmetry
-associated with the ellipsoid under consideration). On Earth, points toward
-the North pole.
+* Z - is the axis orthogonal to the equator (The rotation plane of
+	symmetry associated with the ellipsoid under consideration). On
+	Earth, points toward the North pole.
 
 * X - is axis orthogonal to "Z" (in the equatorial plane) and directed
-toward the prime meridian. On Earth, for the Greenwich prime meridian,
-this points approximately toward Gulf of Guinea.
+	toward the prime meridian. On Earth, for the Greenwich prime
+	meridian, this points approximately toward Gulf of Guinea.
 
 * Y - is axis mutually orthogonal to Z and X in "right-hand" sense. On
-Earth, points approximately south of Bay of Bengal.
+	Earth, points approximately south of Bay of Bengal.
 
 The XYZ is a classic orthonormal rectangular coordinate system. It is
 associated with three basis vectors (aka "axes"). Each basis vector
@@ -600,15 +621,11 @@ practical use-cases. Higher altitudes are conventionally associated with
 "outer space" while lower altitudes are physically inaccessible with
 current technology.
 
-There are many subtleties in exactly what a "best-fit" ellipsoid means
-when it pertains to the
-["Figure of the Earth"](https://en.wikipedia.org/wiki/Figure_of_the_Earth).
-However most commonly used ellipsoid definitions have dimensions that
-are within a few 100[m] of each other and the commonly used ellipsoids
-differ from a pure spherical model by less than about +/- 11[km] between
-equatorial and polar axes.
+The [Transformation Precision](#Transformation-Precision) section describes
+what to expect for transformation of locations outside this optimum
+domain, 
 
-## Peridetic - Technical Deep Dive
+## Peridetic - Technical Deep Dive <a id=Technical-Deep-Dive></a>
 
 ### Transformation Algorithms
 
@@ -639,7 +656,7 @@ The mathematical formula and algorithm detail is described in:
 
 * PerideticMath.{lyx,pdf} -- TODO
 
-### Transformation Precision <a id=xform-precision></a>
+### Transformation Precision <a id=Transformation-Precision></a>
 
 For purposes here, "precision" is defined loosely as "self-consistency",
 "repeatability", "computational significance". As such, it is an intrinsic
@@ -721,16 +738,16 @@ The following stations were selected with an emphasis on variation
 of geodetic location (longitude and latitude) and elevation
 (altitude).
 
-	* // PARAKOU (BJPA),  BORGOU
-	* // WESTEAST__AK2008 (AC60),  ALASKA
-	* // EAST DOCK (EDOC),  ALASKA
-	* // AMERICAN SAMOA (ASPA),  AMERICAN SAMOA
-	* // FORTALEZA 2005 (BRFT),  UNIDENTIFIED STATE OF BRAZIL
-	* // IRAQ SURVY BASRAH (ISBS),  IRAQ
-	* // ZANDERIJ (SRZN),  UNIDENTIFIED DISTRICT OF SURINAM
-	* // BOULDER (DSRC),  COLORADO
-	* // STEAMBOAT SPRINGS (STBT),  COLORADO
-	* // MEXICO CITY WAAS (MMX1),  DISTRITO FEDERAL
+	// PARAKOU (BJPA),  BORGOU
+	// WESTEAST__AK2008 (AC60),  ALASKA
+	// EAST DOCK (EDOC),  ALASKA
+	// AMERICAN SAMOA (ASPA),  AMERICAN SAMOA
+	// FORTALEZA 2005 (BRFT),  UNIDENTIFIED STATE OF BRAZIL
+	// IRAQ SURVY BASRAH (ISBS),  IRAQ
+	// ZANDERIJ (SRZN),  UNIDENTIFIED DISTRICT OF SURINAM
+	// BOULDER (DSRC),  COLORADO
+	// STEAMBOAT SPRINGS (STBT),  COLORADO
+	// MEXICO CITY WAAS (MMX1),  DISTRITO FEDERAL
 
 For each station, NGS publishes both Geodetic and Cartesian coordinates.
 The following is an example of the published data values obtainable
