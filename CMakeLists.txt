@@ -115,7 +115,7 @@ add_subdirectory(doc)
 # Override default install location for testing this package
 # In general default (no command here) will install to /usr/{lib,bin,...}
 # - but here, set package to sandbox location for easier/safer testing
-set (DEB_PACKAGE_ROOT "/tmp/local/${PerideticProjName}")
+# set (DEB_PACKAGE_ROOT "/tmp/local/${PerideticProjName}")
 # - default is "/usr" (e.g. for system packages)
 # - specify explicitly as "/usr/local" as a developer local package
 ## set (DEB_PACKAGE_ROOT "/usr/local/")
