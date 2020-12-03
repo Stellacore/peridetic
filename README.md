@@ -203,6 +203,8 @@ To get started refer to:
 		want (e.g. your own project or a local or system include
 		directory as you like).
 
+	* More civilized: install from one of the prebuilt packages.
+
 	* Auxiliary Packages:
 
 		* TODO - header-only install package
@@ -350,6 +352,10 @@ Compilers
 * GCC - primary
 
 * Clang - TODO
+
+Documentation
+
+* Via doxygen utility
 
 Processors
 
