@@ -203,6 +203,8 @@ To get started refer to:
 		want (e.g. your own project or a local or system include
 		directory as you like).
 
+	* More civilized: install from one of the prebuilt packages.
+
 	* Auxiliary Packages:
 
 		* TODO - header-only install package
@@ -351,6 +353,10 @@ Compilers
 
 * Clang - TODO
 
+Documentation
+
+* Via doxygen utility
+
 Processors
 
 * Precision relies on 8-byte (64-bit) or larger "double" type.
@@ -358,6 +364,15 @@ Processors
 * Tested on
 
 	* x86 - (primary: AMD Ryzen 2700)
+
+Optimization:
+
+* NOTE! To obtain reasonable performance it is important to compile with
+	optimization enabled. (Implementation involves many, many short
+	inline functions and variable assignment operations that entirely
+	disappear when compiled with optimization, but will represent a
+	very large number of (slow) function calls and (redundant) copy
+	assignments if not compiled with optimization (such as debug builds).
 
 Error Handling:
 
@@ -593,7 +608,7 @@ with GNSS (Global Navigation Satellite System) observations and/or other
 computations that are global in scope.
 
 * Origin -  Is associated with the geometric center of the reference
-	ellipsoid. For most ellipsoids, this is approximately at the
+	ellipsoid. For most geodetic ellipsoids, this is associated with the
 	centroid of Earth's mass distribution.
 
 * Z - is the axis orthogonal to the equator (The rotation plane of
