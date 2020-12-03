@@ -83,7 +83,7 @@ set(BUILD_FLAGS_FOR_VISUAL
 # === Configure project library
 #
 
-##@ set(peridetic_LIBVERSION ${PROJECT_NAME}-${PROJECT_VERSION})
+##@ set(peridetic_LIBVERSION ${PerideticProjName}-${PerideticVersion})
 
 # === GNU standard paths
 include(GNUInstallDirs)  # creates "CMAKE_INSTALL_<dir>"
@@ -115,7 +115,7 @@ add_subdirectory(doc)
 # Override default install location for testing this package
 # In general default (no command here) will install to /usr/{lib,bin,...}
 # - but here, set package to sandbox location for easier/safer testing
-set (DEB_PACKAGE_ROOT "/tmp/local/${PROJECT_NAME}")
+set (DEB_PACKAGE_ROOT "/tmp/local/${PerideticProjName}")
 # - default is "/usr" (e.g. for system packages)
 # - specify explicitly as "/usr/local" as a developer local package
 ## set (DEB_PACKAGE_ROOT "/usr/local/")
@@ -132,7 +132,7 @@ set(CPACK_GENERATOR "DEB")
 	set(Peridetic_PACKAGE_MAINTAINER "https://github.com/Stellacore/peridetic")
 
 	# Specify generic cross-package distribuation properties
-	# set(CPACK_PACKAGE_NAME ${PROJECT_NAME}) # same as default
+	# set(CPACK_PACKAGE_NAME ${PerideticProjName}) # same as default
 	set(CPACK_PACKAGE_VENDOR "${Peridetic_PACKAGE_VENDOR}")
 	set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 	set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
