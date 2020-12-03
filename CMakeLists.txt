@@ -118,7 +118,8 @@ add_subdirectory(doc)
 # set (DEB_PACKAGE_ROOT "/tmp/local/${PerideticProjName}")
 # - default is "/usr" (e.g. for system packages)
 # - specify explicitly as "/usr/local" as a developer local package
-## set (DEB_PACKAGE_ROOT "/usr/local/")
+# - extract from command line
+set (DEB_PACKAGE_ROOT "${CMAKE_INSTALL_PREFIX}")
 set(CPACK_PACKAGING_INSTALL_PREFIX "${DEB_PACKAGE_ROOT}")
 
 # list of packages to create (e.g. "DEB;RPM;...") if all tools installed
