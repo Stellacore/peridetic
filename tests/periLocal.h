@@ -182,7 +182,7 @@ namespace peri
 	{
 		return
 			{  isValid(value)
-			&& (! (minIncluded < value))
+			&& (! (value < minIncluded))
 			&& (value < maxExcluded)
 			};
 	}
