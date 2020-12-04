@@ -95,6 +95,10 @@ add_subdirectory(include)
 # Specify documentation generation
 add_subdirectory(doc)
 
+# Project test programs - via CTest
+enable_testing()
+add_subdirectory(tests)
+
 
 #
 # === Configure project unit tests
