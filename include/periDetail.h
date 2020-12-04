@@ -124,9 +124,16 @@ namespace peri
 		)
 	{
 		return std::inner_product
+			( vecA.begin(), vecA.end()
+			, vecB.begin(), 0.
+			);
+		/*
+		// C++17 syntax
+		return std::inner_product
 			( std::cbegin(vecA), std::cend(vecA)
 			, std::cbegin(vecB), 0.
 			);
+		*/
 	}
 
 	/*! \brief Unitary direction associated with non-zero orig
@@ -279,6 +286,16 @@ namespace peri
 	{
 		//! Parameters describing the underlying shape.
 		Shape theShape{};
+
+		//! Value construction.
+		inline
+		explicit
+		ShapeClosure
+			( Shape const & shape
+			)
+			: theShape{ shape }
+		{
+		}
 
 		//! Default creates a null instance (member values are NaN)
 		ShapeClosure
@@ -473,7 +490,7 @@ namespace peri
 			( Shape const & shape
 			)
 			: theEllip(shape)
-			, theMeritFunc{ theEllip.theShapeNorm }
+			, theMeritFunc(theEllip.theShapeNorm)
 		{ }
 
 		//! Geodetic coordinates associated with Cartesian coordinates xVec
@@ -630,92 +647,6 @@ namespace peri
 
 } // [peri]
 
-
-//! Static instances of Shapes commonly used in Geodesy
-namespace peri::shape
-{
-	/*! \brief Defining parameters for GRS80 ellipsoid.
-	 *
-	 * Note that the shape of the GRS80 ellipsoid is _defined_ in terms
-	 * of the equatorial axis and the second order harmonic (J2). This
-	 * means that the flattening factors are _derived_ quantities that
-	 * need to be computed.
-	 *
-	 * Ref:
-	 * \arg http://geoweb.mit.edu/~tah/12.221_2005/grs80_corr.pdf
-	 * , 1/f = 298.257222101 // Significant figs to about 6um at pole
-	 * \arg https://iag.dgfi.tum.de/media/archives/HB2000/part4/grs80_corr.htm
-	 * , 1/f = 298.257222101 // Moritz is one of the accepted definitions
-	 * \arg https://geodesy.noaa.gov/library/pdfs/NOAA_Manual_NOS_NGS_0005.pdf
-	 * , 1/f = 298.25722210088 // Good to about 16-digits at pole
-	 * \arg https://en.wikipedia.org/wiki/Geodetic_Reference_System_1980
-	 * , 1/f = 298.257 222 100 882 711 243;
-	 *
-	 * Flattening factor needs about 11 decimal digits after the decimal
-	 * point (so about 14 overall) to provide full 'double' type precision
-	 * in computed polar radius.
-	 *
-	 * The values in (the above copy of) report by Moritz differs from the
-	 * longer precision values by about 10[nm] at the pole.
-	 *
-	 */
-	static Shape const sGRS80
-		{ Shape::fromMajorInvFlat
-			( 6378137.0 // set by definition
-			, 298.257222100883 // this precision provides 16-digits at pole
-			)
-		};
-
-	/*! \brief Defining parameters for WGS84 ellipsoid.
-	 *
-	 * The WGS84 ellipsoid shape uses _both_ the equatorial radius and
-	 * the (first) flattening factor to _define_ its shape.
-	 *
-	 * Ref:
-	 * \arg
-	 * ftp://ftp.nga.mil/pub2/gandg/website/wgs84/NGA.STND.0036_1.0.0_WGS84.pdf
-	 * (pg 3-4): a == 6378137.0 [m], 1/f == 298.257223563 [-].
-	 * \arg https://earth-info.nga.mil/GandG/publications/tr8350.2/wgs84fin.pdf
-	 * (pg 3-2) a == 6378137.0 [m], 1/f == 298.257223563 [-].
-	 */
-	 // * 		- GM == 3.986004418e+14 [m^3/s^2]
-	 // * 		- omega == 7.292115 × 10−05 [rad/s]
-	static Shape const sWGS84
-		{ Shape::fromMajorInvFlat
-			( 6378137.0 // set by definition
-			, 298.257223563 // set by definition
-			)
-		};
-
-} // [peri::shape]
-
-
-/*! \brief Static instances of commonly used EarthModels
- *
- * Static instances that are available to consuming code. Others
- * can be created simply by constructing a peri::Shape instance with
- * the desired size and shape values and then using that shape to
- * construct a peri::EarthModel for use with transformations.
- *
- * E.g.:
- * \code
- *	static peri::EarthModel const myEarthModel
-		( peri::Shape::fromMajorInvFlat
- *			( myEquatorialRadius
- *			, myInverseFlattening
- *			)
- *		);
- * \endcode
- */
-namespace peri::model
-{
-	//! \brief Earth model based on GRS80 ellipsoid
-	static EarthModel const GRS80(shape::sGRS80);
-
-	//! \brief Earth model based on WGS84 ellipsoid
-	static EarthModel const WGS84(shape::sWGS84);
-
-} // [peri::model]
 
 
 // Definitions for functions

@@ -793,7 +793,8 @@ WARN_LOGFILE           =
 INPUT                  = \
 	@CMAKE_CURRENT_SOURCE_DIR@/.. \
 	@CMAKE_CURRENT_SOURCE_DIR@/../include/peridetic.h \
-	@CMAKE_CURRENT_SOURCE_DIR@/../include/periDetail.h \
+
+##	@CMAKE_CURRENT_SOURCE_DIR@/../include/periDetail.h \
 
 
 # This tag can be used to specify the character encoding of the source files
