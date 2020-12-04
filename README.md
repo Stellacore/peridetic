@@ -343,9 +343,7 @@ Software development points include:
 
 Language
 
-* Standard C++17 or later
-
-	* TODO - check if C++11 works (should)
+* Standard C++11 for usage (i.e. public headers), but C++17 for test code.
 
 Compilers
 
