@@ -34,7 +34,7 @@ set(perideticTests
 	testLocal # check development and testing tools
 	testXforms # check fundamental transformation syntax/calling
 	testCORS # check CORS data values parsing
-#	#	testAccuracy # check transformation external accuracy (vs CORS data)
+	testAccuracy # check transformation external accuracy (vs CORS data)
 
 	)
 
