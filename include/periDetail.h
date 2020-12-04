@@ -124,9 +124,16 @@ namespace peri
 		)
 	{
 		return std::inner_product
+			( vecA.begin(), vecA.end()
+			, vecB.begin(), 0.
+			);
+		/*
+		// C++17 syntax
+		return std::inner_product
 			( std::cbegin(vecA), std::cend(vecA)
 			, std::cbegin(vecB), 0.
 			);
+		*/
 	}
 
 	/*! \brief Unitary direction associated with non-zero orig
@@ -279,6 +286,16 @@ namespace peri
 	{
 		//! Parameters describing the underlying shape.
 		Shape theShape{};
+
+		//! Value construction.
+		inline
+		explicit
+		ShapeClosure
+			( Shape const & shape
+			)
+			: theShape{ shape }
+		{
+		}
 
 		//! Default creates a null instance (member values are NaN)
 		ShapeClosure
@@ -473,7 +490,7 @@ namespace peri
 			( Shape const & shape
 			)
 			: theEllip(shape)
-			, theMeritFunc{ theEllip.theShapeNorm }
+			, theMeritFunc(theEllip.theShapeNorm)
 		{ }
 
 		//! Geodetic coordinates associated with Cartesian coordinates xVec
@@ -632,7 +649,9 @@ namespace peri
 
 
 //! Static instances of Shapes commonly used in Geodesy
-namespace peri::shape
+namespace peri // ::shape // nested namespace c++ 17
+{
+namespace shape
 {
 	/*! \brief Defining parameters for GRS80 ellipsoid.
 	 *
@@ -687,6 +706,7 @@ namespace peri::shape
 			)
 		};
 
+} // [shape]
 } // [peri::shape]
 
 
@@ -707,7 +727,9 @@ namespace peri::shape
  *		);
  * \endcode
  */
-namespace peri::model
+namespace peri // ::model // nested namespace c++ 17
+{
+namespace model
 {
 	//! \brief Earth model based on GRS80 ellipsoid
 	static EarthModel const GRS80(shape::sGRS80);
@@ -715,6 +737,7 @@ namespace peri::model
 	//! \brief Earth model based on WGS84 ellipsoid
 	static EarthModel const WGS84(shape::sWGS84);
 
+} // [model]
 } // [peri::model]
 
 
