@@ -9,6 +9,7 @@
 set(perideticExamps
 
 	lpaForXyz
+	xyzForLpaDegrees
 	xyzForLpaRadians
 
 	)
