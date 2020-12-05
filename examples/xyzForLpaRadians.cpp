@@ -54,7 +54,7 @@ main
 	}
 	else
 	{
-		// Example: Important part
+		// Example: the coordinate conversion part
 
 		// note: atof values are 0 if decoding error, but not the point here
 		peri::LPA const locLPA
@@ -69,6 +69,7 @@ main
 		// For useful formatting functions, ref. .../tests/periLocal.h
 		std::cout << std::fixed ;
 		using std::setw;
+		// code usage/design units are radians/meters
 		std::cout << "input: locLPA: "
 			<< std::setprecision(9)
 			<< " " << setw(12) << locLPA[0]
@@ -77,6 +78,17 @@ main
 			<< " " << setw(12) << locLPA[2]
 			<< " " << "[rad,rad,m]"
 			<< std::endl;
+		// Note that "degrees" are external units - used here only as example
+		double const degPerRad{ 45. / std::atan(1.) };
+		std::cout << "inDeg: locLPA: "
+			<< std::setprecision(7)
+			<< " " << setw(12) << degPerRad * locLPA[0]
+			<< " " << setw(12) << degPerRad * locLPA[1]
+			<< std::setprecision(3)
+			<< " " << setw(12) << locLPA[2]
+			<< " " << "[deg,deg,m]"
+			<< std::endl;
+		// code usage/design units in meters
 		std::cout << "equiv: locXYZ: "
 			<< std::setprecision(3)
 			<< " " << setw(12) << locXYZ[0]
