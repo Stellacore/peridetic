@@ -247,8 +247,10 @@ In succinct terms, the core usage is:
 
 	{
 	using namespace peri;
-	LPA const gotLPA{ lpaFromXyz( XYZ{ -1266326., -4725993., 4877986. }) };
-	XYZ const gotXYZ{ xyzFromLpa( LPA{ .6981317, -1.8325957, 0. }) };
+	LPA const gotLPA
+		{ lpaFromXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
+	XYZ const gotXYZ
+		{ xyzFromLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 	}
 
 With a bit more explanation:
@@ -262,10 +264,10 @@ With a bit more explanation:
 	using XYZ = std::array<double, 3u>;
 
 	// Start using the transformations (angle *Radians*, linear *meters*)
-	// Note: these numeric values only approximately match each other
-	//       (ref: Precision further below for full detail on precision)
-	LPA const gotLPA{peri::lpaFromXyz(XYZ{-1266326., -4725993., 4877986.})};
-	XYZ const gotXYZ{peri::xyzFromLpa(LPA{.6981317, -1.8325957, 0.})};
+	LPA const gotLPA
+		{ lpaFromXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
+	XYZ const gotXYZ
+		{ xyzFromLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 
 ### Detailed Example Code
 
