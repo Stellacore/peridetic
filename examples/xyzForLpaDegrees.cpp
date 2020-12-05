@@ -54,7 +54,7 @@ main
 	}
 	else
 	{
-		// Example: Important part
+		// Example: the coordinate conversion part
 
 		// note: atof values are 0 if decoding error, but not the point here
 		double const radPerDeg{ std::atan(1.) / 45. };
@@ -70,6 +70,7 @@ main
 		// For useful formatting functions, ref. .../tests/periLocal.h
 		std::cout << std::fixed ;
 		using std::setw;
+		// Note that "degrees" are external units - used here only as example
 		double const degPerRad{ 45. / std::atan(1.) };
 		std::cout << "input: locLPA: "
 			<< std::setprecision(7)
@@ -79,6 +80,7 @@ main
 			<< " " << setw(12) << locLPA[2]
 			<< " " << "[deg,deg,m]"
 			<< std::endl;
+		// code usage/design units are radians/meters
 		std::cout << "inRad: locLPA: "
 			<< std::setprecision(9)
 			<< " " << setw(12) << locLPA[0]
