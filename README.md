@@ -219,9 +219,9 @@ To get started refer to:
 
 	* Simple Examples - Ref [General Use](#General-Use) section below.
 
-	* Detail Examples - ref Doxygen documents - TODO
+	* Code Examples in "/examples" directory (stand-alone conversion programs)
 
-	* Full Program Example -- TODO
+	* Detail Examples - ref Doxygen documents - TODO
 
 * Questions and Feedback:
 
