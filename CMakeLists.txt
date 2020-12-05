@@ -99,6 +99,9 @@ add_subdirectory(doc)
 enable_testing()
 add_subdirectory(tests)
 
+# Example programs
+add_subdirectory(examples)
+
 
 #
 # === Configure project unit tests
