@@ -9,7 +9,7 @@
 set(perideticExamps
 
 	lpaForXyz
-	#	xyzForLpa
+	xyzForLpaRadians
 
 	)
 
