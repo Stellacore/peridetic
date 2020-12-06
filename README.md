@@ -153,9 +153,9 @@ validity](#domain-of-validity)).
 
 ### Project Contributions
 
-Thank you for your interest in Perdetic and for considering to provide
-comments, suggestions, ideas and/or criticisms - all of which are
-welcomed with open arms.
+First of all, thank you for your interest in Perdetic and for considering
+to provide comments, suggestions, ideas and/or criticisms - all of which
+are welcomed with open arms.
 
 For quick comments, please send a short
 [Email](mailto://peridetic@stellacore.com). If you wish to offer more
@@ -175,32 +175,40 @@ The "vision" behind Peridetic is "utility with simplicity"
 	coordinates at other stations around the world. E.g. Station
 	locations associated with different national systems and reference
 	networks (ref [Accuracy section](#Transformation-Accuracy))
+	and/or high-accuracy cooresponding coordinate pairs associated
+	with other ellipsoid shapes.
 
 * Terminology:
-	The Peridetic project (code and documentation) strives to use
-	consistent accepted terminology. However, the initial version
-	did not focus on this.	Identification of misleading or ambiguous
+	The Peridetic project (code and documentation) strives to
+	use consistent accepted terminology. However, the initial
+	version did not focus on this and may be a bit sloppy with
+	terminology.  Identification of misleading or ambiguous
 	terminology is most welcome. As a target, the Peridetic
-	project terminology should be consistent with the [NGS
-	glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
+	project terminology should be consistent with the
+[NGS glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
 
 
 ## Peridetic - Getting Started <a id=Getting-Started></a>
 
-To get started refer to:
+To get started immediately:
 
-* Documentation:
+* Grab the two header files described in [Grab-n-Go](#Grab-n-Go)
+* Use in your application as described in:
+	* [Quick Illustrative Description](#Illustrative-Example) - nominal
+	* [Definitive Example Code](#Definitive-Example-Code) - definitive
 
-	* Top-level README.md (this file)
+Documentation sources include:
 
-	* API/Reference pages are available at (via doxygen): - TODO needs hosting
+* Top-level README.md (this file)
 
-	* Project documentation (doxygen pages) can be generated from a cloned
-		repository copy (ref [CMake Build](#CMake-Build) section.
+* API/Reference pages are available at (via doxygen): - TODO needs hosting
+
+* Project documentation (doxygen pages) can be generated from a cloned
+	repository copy (ref [CMake Build](#CMake-Build) section.
 
 ### Installation
 
-#### Quick Hack
+#### Grab-n-Go <a id=Grab-n-Go></a>
 
 Simply download or cut/paste the two header files
 [peridetic.h](https://github.com/Stellacore/peridetic/blob/main/include/peridetic.h)
@@ -249,11 +257,11 @@ content of the CMakeCache.txt file), installation will include:
 
 On any system that supports Debian formatted packages, continue with e.g.
 
-	$ sudo apt-get install ./peridetic-*-Linux.deb  # or version for '*'
+	$ sudo apt-get install ./peridetic-*-Linux.deb  # use version ID for '*'
 
 Cleanup
 
-	$ cd /tmp  # e.g. in you prefer to avoid deleting tree containing 'pwd'
+	$ cd /tmp  # e.g. if you prefer to avoid deleting tree containing 'pwd'
 	$ rm -rf /tmp/perideticWorkArea
 
 To uninstall (e.g. some time later)
@@ -266,9 +274,9 @@ To uninstall (e.g. some time later)
 	* Simple Illustrative Examples -- description in text below.
 		Ref [General Use](#General-Use) section below.
 
-	* Detailed Examples -- stand-alone programs from project
+	* Definitive Examples -- stand-alone programs from project
 		"/examples" directory.
-		Ref [Detail Examples](#Detailed-Example-Code)
+		Ref [Detail Examples](#Definitive-Example-Code)
 
 * Questions and Feedback:
 
@@ -292,7 +300,7 @@ units: _radians_ for angles; _meters_ for distances.
 NOTE: this section contains generally illustrative text (missing a
 few things and possibly including typos).
 For definitive compilable (correct) code, refer to the source files
-linked in [Detailed Example Code](#Detailed-Example-Code) section.
+linked in [Definitive Example Code](#Definitive-Example-Code) section.
 
 In succinct terms, the core usage is:
 
@@ -320,7 +328,7 @@ With a bit more explanation:
 	XYZ const gotXYZ
 		{ xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 
-### Detailed Example Code <a id=Detailed-Example-Code></a>
+### Definitive Example Code <a id=Definitive-Example-Code></a>
 
 The following main program source code files provide compilable
 use-case examples and also can be used as stand-alone coordinate conversion
@@ -328,16 +336,16 @@ utilities (e.g. for one off conversions, call from scripts, etc).
 
 Demonstration/utility example programs include:
 
-* [lpaForXyz.cpp](https://github.com/Stellacore/peridetic/blob/b_docs/examples/lpaForXyz.cpp)
+* [lpaForXyz.cpp](https://github.com/Stellacore/peridetic/blob/main/examples/lpaForXyz.cpp)
 	-- Report equivalent Geodetic coordinate values for three command line
 	Cartesian XYZ coordinate values expressed in meters.
 
-* [xyzForLpaRadians.cpp](https://github.com/Stellacore/peridetic/blob/b_docs/examples/xyzForLpaRadians.cpp)
+* [xyzForLpaRadians.cpp](https://github.com/Stellacore/peridetic/blob/main/examples/xyzForLpaRadians.cpp)
 	-- Report equivalent Cartesian coordinates for three command line
 	geodetic coordinate values with longitude/parallel(latitude)
 	expressed in radians and altitude expressed in meters.
 
-* [xyzForLpaDegrees.cpp](https://github.com/Stellacore/peridetic/blob/b_docs/examples/xyzForLpaDegrees.cpp)
+* [xyzForLpaDegrees.cpp](https://github.com/Stellacore/peridetic/blob/main/examples/xyzForLpaDegrees.cpp)
 	-- Report equivalent Cartesian coordinates for three command line
 	geodetic coordinate values with longitude/parallel(latitude)
 	expressed in (non-standard)*degrees* and altitude expressed in meters.
@@ -788,8 +796,8 @@ function of point location altitudes (Alt values):
 		is outside the scope of validity for using Peridetic.
 
 	* If you have a legitimate use-case for needing to do this, please
-		describe briefly in an email, and the author will buy you a
-		beverage.
+		describe briefly in an [email](mailto://peridetic@stellacore.com),
+		and the author will buy you a beverage.
 
  * -6300[km] <= Alt < -5800[km]: -- Reduced precision, < 100[um]
 
@@ -800,23 +808,22 @@ function of point location altitudes (Alt values):
  * +11000[km] <= Alt < +405[Mm]: -- Reduced precision, < 0.2[um]
 
  * Beyond lunar distances, precision will continue to drop as
-	altitude increases.  As an extreme example: at the altitude
-	of the black hole, Sagittarius A-star, at the center of the
-	Milkyway, the transform precision reduces to <100[km]. On the order
-	of 1/4 of the way to Andromeda gallaxy, a 64-bit double completely
-	loses all precision for expressing distances relative to the size
-	of Earth.
+	altitude increases.  As an extreme example: at the altitude of
+	the Milkyway's black hole, Sagittarius A-star, the transform
+	precision reduces to <100[km]. On the order of 1/4 of the way to
+	Andromeda gallaxy, a 64-bit double completely loses all precision
+	for expressing distances relative to the size of Earth.
 
 The above precision estimates are created by testing round trip
 transformations for various point locations well distributed with respect
-ellipsoid. For testing within the optimal domain, results at approximately
-1M point locations are evaluated.
+ellipsoid. For testing within the optimal domain, results for approximately
+1M point locations have been evaluated.
 
 For precision testing, the transformations are evaluated for
 self-consistency.  Note that self-consistency does _not_ constitute a
 proof of correctness, but only provides a measure of numeric/computational
 noise involved.  Therefore, even if transformation computations are
-precise, there is a completely independent question concerning how
+precise, there is the completely independent question concerning how
 accurate (correct) are the results.
 
 The question of accuracy is addressed in the section
@@ -878,6 +885,9 @@ that includes:
 
 * Cut-n-paste data from the interactive map site into a header
 	file (in the peridetic development and testing codebase).
+	Ref
+	[corsDataPairs.h](https://github.com/Stellacore/peridetic/blob/main/tests/corsDataPairs.h)
+	header in /tests directory.
 
 * Unit test reads data from the header file and populates variables
 	with these "expected" data values (after decoding d-m-s values
