@@ -16,7 +16,7 @@ Quick Links:
 * [Quick Start](#Getting-Started)
 * [MIT/X11 License](LICENSE)
 
-General Content:
+This Page Content:
 
 * [Key Points](#Key-Points)
 * [Project Info](#Project-Info)
@@ -88,11 +88,11 @@ For details ref [examples](#Definitive-Example-Code) section.
 	transformations still meet design precision limits until
 	approximately below -5800[km] depths. 
 
-	* Locations involving altitudes below -6300[km], still transform
-	with sub[mm] precision (roundtrip consistency better than
-	100[um]). However, if this region is important to you, then you
-	are working in a extremely specialized and novel domain that is
-	not within scope here.
+	* Locations until altitudes below -6300[km], still transform
+		with sub[mm] precision (roundtrip consistency better than
+		100[um]). However, if depths below this region are important
+		to you, then you are working in a extremely specialized
+		and novel domain that is not within scope here.
 
 * This implementation addresses standard geodetic coordinate
 	conversions in which longitude/paralell angles are associated
@@ -101,8 +101,9 @@ For details ref [examples](#Definitive-Example-Code) section.
 	instead.  Astrometric conversions are outside the scope of these
 	Peridetic transformations.
 
-* For detail on precision both inside and outside the optimal domain refer
-	to the section on [Transformation Precision](#Transformation-Precision)
+* For detail on transformation precision both inside and outside the
+	optimal domain refer to the section on
+	[Transformation Precision](#Transformation-Precision)
 
 
 ## Peridetic - Project Info <a id=Project-Info ></a>
