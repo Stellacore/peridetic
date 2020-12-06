@@ -198,7 +198,11 @@ To get started refer to:
 * Installation:
 
 	* Quick Hack: download or cut/paste the two header files
-		(peridetic.h and periDetail.h) from this repo's "include"
+[peridetic.h](https://github.com/Stellacore/peridetic/blob/main/include/peridetic.h)
+		and
+[periDetail.h](https://github.com/Stellacore/peridetic/blob/main/include/periDetail.h)
+		from this repo's
+		[/include](https://github.com/Stellacore/peridetic/tree/main/include)
 		directory and put them into whatever directory you
 		want (e.g. your own project or a local or system include
 		directory as you like).
