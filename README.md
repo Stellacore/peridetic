@@ -195,29 +195,51 @@ To get started refer to:
 
 	* TODO - Doxygen (github pages?)
 
-* Installation:
+### Installation
 
-	* Quick Hack: download or cut/paste the two header files
+#### Quick Hack
+
+Simply download or cut/paste the two header files
 [peridetic.h](https://github.com/Stellacore/peridetic/blob/main/include/peridetic.h)
-		and
+and
 [periDetail.h](https://github.com/Stellacore/peridetic/blob/main/include/periDetail.h)
 		from this repo's
 		[/include](https://github.com/Stellacore/peridetic/tree/main/include)
-		directory and put them into whatever directory you
+		directory and put them into your development environment wherever you
 		want (e.g. your own project or a local or system include
 		directory as you like).
 
-	* More civilized: install from one of the prebuilt packages.
+#### With cmake
 
-	* Auxiliary Packages:
+E.g. build in /tmp
 
-		* TODO - header-only install package
+	$ mkdir /tmp/perideticWorkArea  # or wherevever you like
+	$ cd /tmp/perideticWorkArea
+	$ git clone https://github.com/Stellacore/peridetic.git
+	$ mkdir tmpBuild  # i.e. /tmp/perideticWorkArea/tmpBuild
+	$ cd tmpBuild
+	$ cmake ../peridetic
+	$ make  # builds documentation with doxygen, peridetic{Targets,Config}.cmake
+	$ ctest # run package test programs
+	$ cpack # creates install packages
+		# peridetic-*-Linux.deb
 
-		* TODO - examples package
+Then continue with platform/package specific below
 
-		* TODO - documentation package
+#### For Debian packages (e.g. on Ubuntu/Debian linux)
 
-		* TODO - development and test environment package
+To install debian package continue with e.g.
+
+	$ sudo apt-get install ./peridetic-*-Linux.deb  # or version for '*'
+
+Cleanup
+
+	$ rm -rf /tmp/perideticWorkArea
+
+To uninstall (e.g. some time later)
+
+	$ sudu apt-get remove peridetic
+
 
 * Usage:
 
