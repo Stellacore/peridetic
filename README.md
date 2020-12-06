@@ -16,7 +16,7 @@ Quick Links:
 * [Quick Start](#Getting-Started)
 * [MIT/X11 License](LICENSE)
 
-General Content:
+This Page Content:
 
 * [Key Points](#Key-Points)
 * [Project Info](#Project-Info)
@@ -33,27 +33,29 @@ General Content:
 #### _Easy_:
 Simplicity, simplicity, simplicity, lightweight, small and easy.
 
-* Install (or simply clone or copy) the (two) header files from /include
-	directory, compile and go.
+* Install (or simply copy the (two) header files from /include directory)
+	compile and go. (ref [Getting Started](#Getting-Started))
 
 #### _Freedom_:
 
-* Peridetic is a liberally licensed (MIT/X11) for any uses including
-	commercial ones.
+* Peridetic is a liberally licensed [MIT/X11 License](LICENSE)
+	for any uses including commercial ones.
 
 #### _Useful_:
 
 Provides the two most fundamental and ubiquitous geodetic/rectangular
-coordinate transformations:
+coordinate transformations which can be used to obtain:
 
 * Longitude/Parallel(latitude)/(ellipsoidal)Altitude from Cartesian (XYZ)
 
 * Cartesian XYZ coordinates from Longitude/Parallel/Altitude
 
+For details ref [examples](#Definitive-Example-Code) section.
+
 #### _Applications_:
 
 * Land/Terrestrial - E.g. infrastructure, vehicles, pedestrians,
-	mountain climbers, etc.
+	mountain climbing, etc.
 
 * Bathymetric - E.g. ships, submarines, undersea cables, buoys, etc.
 
@@ -62,16 +64,18 @@ coordinate transformations:
 #### _Testing/Verification_:
 
 * Optimal Domain is within +/-100[km] altitude from Earth's (ellipsoid)
-	surface. (ref [Altitude Domain of Validity](#domain-of-validity)
+	surface. (ref [Altitude Domain of Validity](#domain-of-validity))
 
-* Precision: Better than ~7.6[nm] within the
+* [Precision](#Transformation-Precision):
+	Better than ~7.6[nm] within the
 	[optimal domain](#domain-of-validity) which corresponds
 	with computational relative precision of approximately
 	1.e-15 which approaches the limit of [64-bit IEEE-754 'double'
 	type](https://en.wikipedia.org/wiki/Decimal64_floating-point_format)
 	(with a touch of room for computation noise).
 
-* Accuracy: Agrees with select globally distributed NOAA/NGS CORS stations
+* [Accuracy](#Transformation-Accuracy):
+	Agrees with select globally distributed NOAA/NGS CORS stations
 	within their published coordinate precision of 1[mm].
 
 #### _Limitations and Cautions_:
@@ -84,11 +88,11 @@ coordinate transformations:
 	transformations still meet design precision limits until
 	approximately below -5800[km] depths. 
 
-	* Locations involving altitudes below -6300[km], still transform
-	with sub[mm] precision (roundtrip consistency better than
-	100[um]). However, if this region is important to you, then you
-	are working in a extremely specialized and novel domain that is
-	not within scope here.
+	* Locations until altitudes below -6300[km], still transform
+		with sub[mm] precision (roundtrip consistency better than
+		100[um]). However, if depths below this region are important
+		to you, then you are working in a extremely specialized
+		and novel domain that is not within scope here.
 
 * This implementation addresses standard geodetic coordinate
 	conversions in which longitude/paralell angles are associated
@@ -97,8 +101,9 @@ coordinate transformations:
 	instead.  Astrometric conversions are outside the scope of these
 	Peridetic transformations.
 
-* For detail on precision both inside and outside the optimal domain refer
-	to the section on [Transformation Precision](#Transformation-Precision)
+* For detail on transformation precision both inside and outside the
+	optimal domain refer to the section on
+	[Transformation Precision](#Transformation-Precision)
 
 
 ## Peridetic - Project Info <a id=Project-Info ></a>
