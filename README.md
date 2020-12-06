@@ -153,9 +153,9 @@ validity](#domain-of-validity)).
 
 ### Project Contributions
 
-Thank you for your interest in Perdetic and for considering to provide
-comments, suggestions, ideas and/or criticisms - all of which are
-welcomed with open arms.
+First of all, thank you for your interest in Perdetic and for considering
+to provide comments, suggestions, ideas and/or criticisms - all of which
+are welcomed with open arms.
 
 For quick comments, please send a short
 [Email](mailto://peridetic@stellacore.com). If you wish to offer more
@@ -175,14 +175,17 @@ The "vision" behind Peridetic is "utility with simplicity"
 	coordinates at other stations around the world. E.g. Station
 	locations associated with different national systems and reference
 	networks (ref [Accuracy section](#Transformation-Accuracy))
+	and/or high-accuracy cooresponding coordinate pairs associated
+	with other ellipsoid shapes.
 
 * Terminology:
-	The Peridetic project (code and documentation) strives to use
-	consistent accepted terminology. However, the initial version
-	did not focus on this.	Identification of misleading or ambiguous
+	The Peridetic project (code and documentation) strives to
+	use consistent accepted terminology. However, the initial
+	version did not focus on this and may be a bit sloppy with
+	terminology.  Identification of misleading or ambiguous
 	terminology is most welcome. As a target, the Peridetic
-	project terminology should be consistent with the [NGS
-	glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
+	project terminology should be consistent with the
+[NGS glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
 
 
 ## Peridetic - Getting Started <a id=Getting-Started></a>
@@ -192,7 +195,7 @@ To get started immediately:
 * Grab the two header files described in [Grab-n-Go](#Grab-n-Go)
 * Use in your application as described in:
 	* [Quick Illustrative Description](#Illustrative-Example) - nominal
-	* [Detailed Example Code](#Detailed-Example-Code) - definitive
+	* [Definitive Example Code](#Definitive-Example-Code) - definitive
 
 Documentation sources include:
 
@@ -271,9 +274,9 @@ To uninstall (e.g. some time later)
 	* Simple Illustrative Examples -- description in text below.
 		Ref [General Use](#General-Use) section below.
 
-	* Detailed Examples -- stand-alone programs from project
+	* Definitive Examples -- stand-alone programs from project
 		"/examples" directory.
-		Ref [Detail Examples](#Detailed-Example-Code)
+		Ref [Detail Examples](#Definitive-Example-Code)
 
 * Questions and Feedback:
 
@@ -297,7 +300,7 @@ units: _radians_ for angles; _meters_ for distances.
 NOTE: this section contains generally illustrative text (missing a
 few things and possibly including typos).
 For definitive compilable (correct) code, refer to the source files
-linked in [Detailed Example Code](#Detailed-Example-Code) section.
+linked in [Definitive Example Code](#Definitive-Example-Code) section.
 
 In succinct terms, the core usage is:
 
@@ -325,7 +328,7 @@ With a bit more explanation:
 	XYZ const gotXYZ
 		{ xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 
-### Detailed Example Code <a id=Detailed-Example-Code></a>
+### Definitive Example Code <a id=Definitive-Example-Code></a>
 
 The following main program source code files provide compilable
 use-case examples and also can be used as stand-alone coordinate conversion
