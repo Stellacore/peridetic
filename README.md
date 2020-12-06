@@ -260,11 +260,12 @@ To uninstall (e.g. some time later)
 
 * Usage:
 
-	* Simple Examples - Ref [General Use](#General-Use) section below.
+	* Simple Illustrative Examples -- description in text below.
+		Ref [General Use](#General-Use) section below.
 
-	* Code Examples in "/examples" directory (stand-alone conversion programs)
-
-	* Detail Examples - ref Doxygen documents - TODO
+	* Detailed Examples -- stand-alone programs from project
+		"/examples" directory.
+		Ref [Detail Examples](#Detailed-Example-Code)
 
 * Questions and Feedback:
 
@@ -285,6 +286,11 @@ return types. All data values are interpreted consistently in standard
 units: _radians_ for angles; _meters_ for distances.
 
 ### Illustrative Description: <a id=Illustrative-Example></a>
+
+NOTE: this section contains generally illustrative text (missing a
+few things and possibly including typos).
+For definitive compilable (correct) code, refer to the source files
+linked in [Detailed Example Code](#Detailed-Example-Code) section.
 
 In succinct terms, the core usage is:
 
@@ -312,9 +318,13 @@ With a bit more explanation:
 	XYZ const gotXYZ
 		{ xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 
-### Detailed Example Code
+### Detailed Example Code <a id=Detailed-Example-Code></a>
 
-A collection of demonstration examples may be found here
+The following main program source code files provide compilable
+use-case examples and also can be used as stand-alone coordinate conversion
+utilities (e.g. for one off conversions, call from scripts, etc).
+
+Demonstration/utility example programs include:
 
 * [lpaForXyz.cpp](https://github.com/Stellacore/peridetic/blob/b_docs/examples/lpaForXyz.cpp)
 	-- Report equivalent Geodetic coordinate values for three command line
