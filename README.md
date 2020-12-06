@@ -193,7 +193,10 @@ To get started refer to:
 
 	* Top-level README.md (this file)
 
-	* TODO - Doxygen (github pages?)
+	* API/Reference pages are available at (via doxygen): - TODO needs hosting
+
+	* Project documentation (doxygen pages) can be generated from a cloned
+		repository copy (ref [CMake Build](#CMake-Build) section.
 
 ### Installation
 
@@ -209,7 +212,7 @@ and
 		want (e.g. your own project or a local or system include
 		directory as you like).
 
-#### With cmake
+#### CMake Build <a id=CMake-Build></a>
 
 E.g. build in /tmp
 
@@ -271,9 +274,8 @@ To uninstall (e.g. some time later)
 
 	* TODO - FAQ
 
-	* Comments and questions via [Email](mailto://peridetic@stellacore.com).
-
-	* TODO - Feature requests (ref email)
+	* Comments/requests and questions
+		via [Email](mailto://peridetic@stellacore.com).
 
 
 
@@ -385,7 +387,8 @@ Peridetic header files include definitions for two shapes, the WGS84
 and GRS80 ellipsoids, which are commonly encountered with GNSS data
 and modern geographic data uses. Other standard and/or entirely custom
 ellipsoids are easily created and can be used directly with the
-transformation functions (TODO - ref peri::model namespace).
+transformation functions (Ref peri::model namespace classes in
+periDetail.h header).
 
 The transformations offer the WGS84 as a default ellipsoid so that
 transformations are out-of-box compatible with most modern GNSS data.
@@ -458,8 +461,16 @@ This project can be used in your own code in two ways:
 	implementation detail header file wherever you wish, then include
 	the "peridetic.h" file in your own source code, compile and go.
 
-* -or- TODO - Incorporate this project into another development effort
-	using the ["cmake" paradigms](https://cmake.org/documentation/)
+* -or- Incorporate this project into another development effort
+	using the ["cmake" paradigms](https://cmake.org/documentation/).
+	I.e. with CMakeLists.txt command something like this
+
+	# dependency for myTarget
+	target_link_libraries(
+		${myTarget}
+		PRIVATE
+			peridetic::peridetic
+		)
 
 #### Licensing
 
@@ -541,7 +552,12 @@ own data values, then everything should be fine. If you are uncomfortable
 with this level of responsibility, you might consider utilizing a few
 utility functions from the project test environment:
 
-	* TODO- periLocal.h dev/test package function access
+	* Ref the
+	[periLocal.h](https://github.com/Stellacore/peridetic/blob/main/tests/periLocal.h)
+	header file in "/tests" subdirectory. This is a header file used
+	in development/testing programs. It includes various functions that
+	may be generally useful in the context of gedetic data value
+	interpretations (e.g. isValid(), infoString(), principalAngle(), etc).
 
 
 
@@ -589,7 +605,7 @@ Peridetic provides two common Earth model specifications:
 
 * Other standard as well as custom ellipsoids may be
 	created easily via peri::Shape and peri::EarthModel data
-	structures. Ref advanced documentation - TODO.
+	structures. Ref doxygen-comment documentation in periDetail.h file.
 
 #### LPA <a id=LPA-Coordinates></a>
 
@@ -899,10 +915,24 @@ provides assurance on the quality. However...
 
 ### Transformation Quality and Testing
 
-TODO
+The quality metrics described above are checked by the unit and verification
+test programs contained in the project "/tests" directory and may be
+compiled and run using the CMake/CTest paradigm.
 
-* Unit tests in ./test module (TODO integrate with project)
+* Test programs in
+	[/tests](https://github.com/Stellacore/peridetic/tree/main/tests)
+	projects directory.
 
-* Verification in ./verify module (TODO integrate with project)
+* Each test is an independent program.
+	Diagnostic and error messages are sent to std::cout and std::cerr
+	respectively.
 
+* Tests may be built as described in
+	[CMake Build](#CMake-Build)
+	section
+
+* The full test suite may run using CTest as described in
+	[CMake Build](#CMake-Build)
+	Individual tests may be run independently (e.g. from command line
+	or desktop).
 
