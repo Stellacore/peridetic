@@ -218,7 +218,9 @@ E.g. build in /tmp
 	$ git clone https://github.com/Stellacore/peridetic.git
 	$ mkdir tmpBuild  # i.e. /tmp/perideticWorkArea/tmpBuild
 	$ cd tmpBuild
-	$ cmake ../peridetic
+	$ cmake ../peridetic  # for other than default behavior
+		# optionally add command line specifications
+		# or edit CMakeCache file (e.g. cmake-gui) as you like
 	$ make  # builds documentation with doxygen, peridetic{Targets,Config}.cmake
 	$ ctest # run package test programs
 	$ cpack # creates install packages
@@ -228,12 +230,27 @@ Then continue with platform/package specific below
 
 #### For Debian packages (e.g. on Ubuntu/Debian linux)
 
-To install debian package continue with e.g.
+By default (i.e. unless you provide cmake command options or changed
+content of the CMakeCache.txt file), installation will include:
+
+* /usr/local/include/peridetic/ -- containing the core header files
+	(i.e. all that is needed for use in your application)
+
+* /usr/local/share/doc/peridetic/ -- containing package documentation
+	(i.e. API and software reference documentation). E.g. point brower
+	to local html index:
+	* /usr/local/share/doc/peridetic/html/index.html
+
+* /usr/local/lib/cmake/peridetic/ -- containing cmake project files
+	(e.g. to intergrate with other development work using cmake)
+
+On any system that supports Debian formatted packages, continue with e.g.
 
 	$ sudo apt-get install ./peridetic-*-Linux.deb  # or version for '*'
 
 Cleanup
 
+	$ cd /tmp  # e.g. in you prefer to avoid deleting tree containing 'pwd'
 	$ rm -rf /tmp/perideticWorkArea
 
 To uninstall (e.g. some time later)
@@ -274,9 +291,9 @@ In succinct terms, the core usage is:
 	{
 	using namespace peri;
 	LPA const gotLPA
-		{ lpaFromXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
+		{ lpaForXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
 	XYZ const gotXYZ
-		{ xyzFromLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
+		{ xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 	}
 
 With a bit more explanation:
@@ -291,18 +308,27 @@ With a bit more explanation:
 
 	// Start using the transformations (angle *Radians*, linear *meters*)
 	LPA const gotLPA
-		{ lpaFromXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
+		{ lpaForXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
 	XYZ const gotXYZ
-		{ xyzFromLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
+		{ xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 
 ### Detailed Example Code
 
-A complete collection of demonstration examples may be found here
+A collection of demonstration examples may be found here
 
-	* TODO - [here](http://example.com).
+* [lpaForXyz.cpp](https://github.com/Stellacore/peridetic/blob/b_docs/examples/lpaForXyz.cpp)
+	-- Report equivalent Geodetic coordinate values for three command line
+	Cartesian XYZ coordinate values expressed in meters.
 
-	* TODO - link to doxygen generated outputs
+* [xyzForLpaRadians.cpp](https://github.com/Stellacore/peridetic/blob/b_docs/examples/xyzForLpaRadians.cpp)
+	-- Report equivalent Cartesian coordinates for three command line
+	geodetic coordinate values with longitude/parallel(latitude)
+	expressed in radians and altitude expressed in meters.
 
+* [xyzForLpaDegrees.cpp](https://github.com/Stellacore/peridetic/blob/b_docs/examples/xyzForLpaDegrees.cpp)
+	-- Report equivalent Cartesian coordinates for three command line
+	geodetic coordinate values with longitude/parallel(latitude)
+	expressed in (non-standard)*degrees* and altitude expressed in meters.
 
 
 ## Peridetic - Technical Detail <a id=Technical-Detail></a>
