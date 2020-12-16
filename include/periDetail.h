@@ -391,9 +391,8 @@ namespace peri
 	 *
 	 * Employed notation includes:
 	 * \arg xVec - an arbitrary point in space ('orig' physical units)
-	 * \arg sVec - a point on surface of ellipsoid ('orig' physical units)
 	 * \arg qVec - normalized expression for xVec ('norm' units near 1)
-	 * \arg rVec - normalized expression for sVec ('norm' units near 1)
+	 * \arg zVec - a point on surface of ellipsoid ('norm' units near 1)
 	 */
 	struct Ellipsoid
 	{
@@ -460,14 +459,14 @@ namespace peri
 		inline
 		XYZ
 		gradientAt
-			( XYZ const & rVec
-				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(rVec))
+			( XYZ const & zVec
+				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(zVec))
 			) const
 		{
 			return
-				{ 2. * rVec[0] / theShapeNorm.theMus[0]
-				, 2. * rVec[1] / theShapeNorm.theMus[1]
-				, 2. * rVec[2] / theShapeNorm.theMus[2]
+				{ 2. * zVec[0] / theShapeNorm.theMus[0]
+				, 2. * zVec[1] / theShapeNorm.theMus[1]
+				, 2. * zVec[2] / theShapeNorm.theMus[2]
 				};
 		}
 
@@ -521,14 +520,14 @@ namespace peri
 			) const
 		{
 			// find point on ellipsoid closest to world point at xVec
-			XYZ const rVec{ rVecFor(xVec) };
-			// extract LP(A=0.) for point on ellipsoid at rVec
-			LPA const surfLPA{ lpaForSurfacePoint(rVec) };
-			// compute altitude as directed distance from ellipsoid at rVec
-			XYZ const grad{ theEllip.gradientAt(rVec) };
+			XYZ const pVec{ perpFooterFor(xVec) };
+			// extract LP(A=0.) for point on ellipsoid at pVec
+			LPA const surfLPA{ lpaForSurfacePoint(pVec) };
+			// compute altitude as directed distance from ellipsoid at pVec
+			XYZ const grad{ theEllip.gradientAt(pVec) };
 			XYZ const up{ unit(grad) };
 			double const lambda{ theEllip.lambda() };
-			double const alt{ dot((xVec - lambda*rVec), up) };
+			double const alt{ dot((xVec - lambda*pVec), up) };
 			// return value as combo of LP and A computed results
 			return LPA{ surfLPA[0], surfLPA[1], alt };
 		}
@@ -619,10 +618,10 @@ namespace peri
 			return sigma;
 		}
 
-		//! Normalized point, rVec, on ellipsoid surface nearest original, xVec
+		//! Perpendicular projection (pVec) from xVec onto ellipsoid
 		inline
 		XYZ
-		rVecFor
+		perpFooterFor
 			( XYZ const & xVec
 			) const
 		{
@@ -640,10 +639,10 @@ namespace peri
 		inline
 		LPA
 		lpaForSurfacePoint
-			( XYZ const & rVec
+			( XYZ const & zVec
 			) const
 		{
-			XYZ const grad{ theEllip.gradientAt(rVec) };
+			XYZ const grad{ theEllip.gradientAt(zVec) };
 			// familiar notation
 			double const & xx = grad[0];
 			double const & yy = grad[1];
