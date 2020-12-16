@@ -136,6 +136,27 @@ namespace peri
 		*/
 	}
 
+	//! Squared magnitude of vec Sum of squared components
+	inline
+	double
+	magSq
+		( XYZ const & vec
+		)
+	{
+		return dot(vec, vec);
+	}
+
+
+	//! Magnitude of vec (square root of sum of squared components)
+	inline
+	double
+	magnitude
+		( XYZ const & vec
+		)
+	{
+		return std::sqrt(magSq(vec));
+	}
+
 	/*! \brief Unitary direction associated with non-zero orig
 	 *
 	 * \note Specialzied for non-zero orig vector. There is no check
@@ -148,8 +169,7 @@ namespace peri
 		( std::array<double, 3u> const & orig
 		)
 	{
-		double const mag{ std::sqrt(dot(orig, orig)) };
-		return { (1./mag) * orig };
+		return { (1./magnitude(orig)) * orig };
 	}
 
 
@@ -466,10 +486,10 @@ namespace peri
 	struct EarthModel
 	{
 
-	private:
-
 		//! Geometric representation of surface
 		Ellipsoid const theEllip{};
+
+	private:
 
 		//! Mathematical level condition associated with surface
 		ShapeClosure const theMeritFunc{};
