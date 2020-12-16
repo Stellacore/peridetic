@@ -321,21 +321,6 @@ namespace peri
 		ShapeClosure // ShapeClosure::
 			() = default;
 
-		//! Evaluate scalar function: psi = sum(q_k^2/mu_k)-1.
-		inline
-		double
-		misclosureAt // ShapeClosure::
-			( XYZ const & qVec
-			) const
-		{
-			return
-				{ sq(qVec[0]) / theShape.theMuSqs[0]
-				+ sq(qVec[1]) / theShape.theMuSqs[1]
-				+ sq(qVec[2]) / theShape.theMuSqs[2]
-				- 1.
-				};
-		}
-
 		/*! \brief Ellipsoid constraint function and derivative values.
 		 *
 		 * Elements are:
