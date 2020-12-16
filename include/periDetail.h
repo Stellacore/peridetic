@@ -284,6 +284,21 @@ namespace peri
 		Shape  // Shape::
 			() = default;
 
+		//! Algebraic (mis)closure relative to ellipsoid level surface
+		inline
+		XYZ
+		gradientAt  // Shape::
+			( XYZ const & pVec
+				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(pVec))
+			) const
+		{
+			return
+				{ 2. * pVec[0] / theMuSqs[0]
+				, 2. * pVec[1] / theMuSqs[1]
+				, 2. * pVec[2] / theMuSqs[2]
+				};
+		}
+
 		//! A shape conformal to this one but with unit characteristic length.
 		inline
 		Shape
@@ -455,21 +470,6 @@ namespace peri
 				};
 		}
 
-		//! Algebraic (mis)closure relative to ellipsoid level surface
-		inline
-		XYZ
-		gradientAt  // Ellipsoid::
-			( XYZ const & zVec
-				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(zVec))
-			) const
-		{
-			return
-				{ 2. * zVec[0] / theShapeNorm.theMuSqs[0]
-				, 2. * zVec[1] / theShapeNorm.theMuSqs[1]
-				, 2. * zVec[2] / theShapeNorm.theMuSqs[2]
-				};
-		}
-
 	}; // Ellipsoid
 
 
@@ -524,7 +524,7 @@ namespace peri
 			// extract LP(A=0.) for point on ellipsoid at pVec
 			LPA const surfLPA{ lpaForSurfacePoint(pVec) };
 			// compute altitude as directed distance from ellipsoid at pVec
-			XYZ const grad{ theEllip.gradientAt(pVec) };
+			XYZ const grad{ theEllip.theShapeNorm.gradientAt(pVec) };
 			XYZ const up{ unit(grad) };
 			double const lambda{ theEllip.lambda() };
 			double const alt{ dot((xVec - lambda*pVec), up) };
@@ -641,10 +641,11 @@ namespace peri
 		inline
 		LPA
 		lpaForSurfacePoint  // Ellipsoid::
-			( XYZ const & zVec
+			( XYZ const & pVec
+				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(pVec))
 			) const
 		{
-			XYZ const grad{ theEllip.gradientAt(zVec) };
+			XYZ const grad{ theEllip.theShapeNorm.gradientAt(pVec) };
 			// familiar notation
 			double const & xx = grad[0];
 			double const & yy = grad[1];
