@@ -225,7 +225,7 @@ namespace peri
 	 * \arg #theLambda - The geometric mean of the two radii
 	 *
 	 * Shape coefficients useful in math expressions (ref doc/PerideticMath):
-	 * \arg #theMus - The squared radii values by index
+	 * \arg #theMuSqs - The squared radii values by index
 	 *
 	 * Data normalization:
 	 * \arg normalizedShape() - Conforming shape with unit characteristic size
@@ -242,7 +242,7 @@ namespace peri
 		double const theLambda{ sNan };
 
 		//! Coefficients describing geometric shape (i.e. {a^2, a^2, b^2})
-		std::array<double, 3u> const theMus{ sNan, sNan, sNan };
+		std::array<double, 3u> const theMuSqs{ sNan, sNan, sNan };
 
 	private:
 
@@ -258,7 +258,7 @@ namespace peri
 			: theRadA{ radA }
 			, theRadB{ radB }
 			, theLambda{ std::sqrt(theRadA * theRadB) }
-			, theMus{ sq(theRadA), sq(theRadA), sq(theRadB) }
+			, theMuSqs{ sq(theRadA), sq(theRadA), sq(theRadB) }
 		{ }
 
 	public:
@@ -338,14 +338,14 @@ namespace peri
 		{
 			std::array<double, 2u> fdfs;
 			XYZ const invMuPlusSigmas
-				{ 1. / (theShape.theMus[0] + sigma)
-				, 1. / (theShape.theMus[1] + sigma)
-				, 1. / (theShape.theMus[2] + sigma)
+				{ 1. / (theShape.theMuSqs[0] + sigma)
+				, 1. / (theShape.theMuSqs[1] + sigma)
+				, 1. / (theShape.theMuSqs[2] + sigma)
 				};
 			XYZ const muqSqs
-				{ theShape.theMus[0] * sq(qVec[0])
-				, theShape.theMus[1] * sq(qVec[1])
-				, theShape.theMus[2] * sq(qVec[2])
+				{ theShape.theMuSqs[0] * sq(qVec[0])
+				, theShape.theMuSqs[1] * sq(qVec[1])
+				, theShape.theMuSqs[2] * sq(qVec[2])
 				};
 			// function value - for ellipsoid condition equation
 			XYZ terms
@@ -464,9 +464,9 @@ namespace peri
 			) const
 		{
 			return
-				{ 2. * zVec[0] / theShapeNorm.theMus[0]
-				, 2. * zVec[1] / theShapeNorm.theMus[1]
-				, 2. * zVec[2] / theShapeNorm.theMus[2]
+				{ 2. * zVec[0] / theShapeNorm.theMuSqs[0]
+				, 2. * zVec[1] / theShapeNorm.theMuSqs[1]
+				, 2. * zVec[2] / theShapeNorm.theMuSqs[2]
 				};
 		}
 
@@ -543,18 +543,19 @@ namespace peri
 			// determine vertical direction at LP location
 			XYZ const up{ upFromLpa(lpa) };
 			// compute scaling coefficient
-			std::array<double, 3u> const & mus = theEllip.theShapeNorm.theMus;
+			std::array<double, 3u> const & muSqs
+				= theEllip.theShapeNorm.theMuSqs;
 			double const sumMuUpSq // positive since all mu values are positive
-				{ mus[0]*sq(up[0])
-				+ mus[1]*sq(up[1])
-				+ mus[2]*sq(up[2])
+				{ muSqs[0]*sq(up[0])
+				+ muSqs[1]*sq(up[1])
+				+ muSqs[2]*sq(up[2])
 				};
 			double const scl{ theEllip.lambda() / std::sqrt(sumMuUpSq) };
 			// compute Cartesian location as displacement along normal dir
 			return
-				{ (scl*mus[0] + alt) * up[0]
-				, (scl*mus[1] + alt) * up[1]
-				, (scl*mus[2] + alt) * up[2]
+				{ (scl*muSqs[0] + alt) * up[0]
+				, (scl*muSqs[1] + alt) * up[1]
+				, (scl*muSqs[2] + alt) * up[2]
 				};
 		}
 
@@ -567,11 +568,12 @@ namespace peri
 		{
 			XYZ const qVec{ theEllip.xyzNormFrom(xVec) };
 			double const sigma{ sigmaFor(qVec) };
-			std::array<double, 3u> const & mus = theEllip.theShapeNorm.theMus;
+			std::array<double, 3u> const & muSqs
+				= theEllip.theShapeNorm.theMuSqs;
 			return
-				{ mus[0] * qVec[0] / (mus[0] + sigma)
-				, mus[1] * qVec[1] / (mus[1] + sigma)
-				, mus[2] * qVec[2] / (mus[2] + sigma)
+				{ muSqs[0] * qVec[0] / (muSqs[0] + sigma)
+				, muSqs[1] * qVec[1] / (muSqs[1] + sigma)
+				, muSqs[2] * qVec[2] / (muSqs[2] + sigma)
 				};
 		}
 
