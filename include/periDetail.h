@@ -520,7 +520,7 @@ namespace peri
 			) const
 		{
 			// find point on ellipsoid closest to world point at xVec
-			XYZ const pVec{ perpFooterFor(xVec) };
+			XYZ const pVec{ nearEllipsoidPointFor(xVec) };
 			// extract LP(A=0.) for point on ellipsoid at pVec
 			LPA const surfLPA{ lpaForSurfacePoint(pVec) };
 			// compute altitude as directed distance from ellipsoid at pVec
@@ -555,6 +555,23 @@ namespace peri
 				{ (scl*mus[0] + alt) * up[0]
 				, (scl*mus[1] + alt) * up[1]
 				, (scl*mus[2] + alt) * up[2]
+				};
+		}
+
+		//! Perpendicular projection (pVec) from xVec onto ellipsoid
+		inline
+		XYZ
+		nearEllipsoidPointFor
+			( XYZ const & xVec
+			) const
+		{
+			XYZ const qVec{ theEllip.xyzNormFrom(xVec) };
+			double const sigma{ sigmaFor(qVec) };
+			std::array<double, 3u> const & mus = theEllip.theShapeNorm.theMus;
+			return
+				{ mus[0] * qVec[0] / (mus[0] + sigma)
+				, mus[1] * qVec[1] / (mus[1] + sigma)
+				, mus[2] * qVec[2] / (mus[2] + sigma)
 				};
 		}
 
@@ -616,23 +633,6 @@ namespace peri
 				currTestVal = nextTestVal;
 			}
 			return sigma;
-		}
-
-		//! Perpendicular projection (pVec) from xVec onto ellipsoid
-		inline
-		XYZ
-		perpFooterFor
-			( XYZ const & xVec
-			) const
-		{
-			XYZ const qVec{ theEllip.xyzNormFrom(xVec) };
-			double const sigma{ sigmaFor(qVec) };
-			std::array<double, 3u> const & mus = theEllip.theShapeNorm.theMus;
-			return
-				{ mus[0] * qVec[0] / (mus[0] + sigma)
-				, mus[1] * qVec[1] / (mus[1] + sigma)
-				, mus[2] * qVec[2] / (mus[2] + sigma)
-				};
 		}
 
 		//! Geodetic (Lon/Par) angles for point on ellipsoid surface (0==Alt).
