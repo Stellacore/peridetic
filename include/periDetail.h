@@ -49,7 +49,7 @@ namespace peri
 	template <typename Type>
 	inline
 	Type
-	sq
+	sq  // peri::
 		( Type const & value
 		)
 	{
@@ -59,7 +59,7 @@ namespace peri
 	//! "Vector addition" for two std::array data types
 	inline
 	std::array<double, 3u>
-	operator+
+	operator+  // peri::
 		( std::array<double, 3u> const & valuesA
 		, std::array<double, 3u> const & valuesB
 		)
@@ -74,7 +74,7 @@ namespace peri
 	//! "Vector 'subtraction'" for two std::array data types
 	inline
 	std::array<double, 3u>
-	operator-
+	operator-  // peri::
 		( std::array<double, 3u> const & valuesA
 		, std::array<double, 3u> const & valuesB
 		)
@@ -89,7 +89,7 @@ namespace peri
 	//! Unitary negation
 	inline
 	std::array<double, 3u>
-	operator-
+	operator-  // peri::
 		( std::array<double, 3u> const & values
 		)
 	{
@@ -103,7 +103,7 @@ namespace peri
 	//! "scalar-Vector" multiplication for two std::array data types
 	inline
 	std::array<double, 3u>
-	operator*
+	operator*  // peri::
 		( double const & scale
 		, std::array<double, 3u> const & values
 		)
@@ -118,7 +118,7 @@ namespace peri
 	//! Vector dot product of two arrays
 	inline
 	double
-	dot
+	dot  // peri::
 		( std::array<double, 3u> const & vecA
 		, std::array<double, 3u> const & vecB
 		)
@@ -139,7 +139,7 @@ namespace peri
 	//! Squared magnitude of vec Sum of squared components
 	inline
 	double
-	magSq
+	magSq  // peri::
 		( XYZ const & vec
 		)
 	{
@@ -150,7 +150,7 @@ namespace peri
 	//! Magnitude of vec (square root of sum of squared components)
 	inline
 	double
-	magnitude
+	magnitude  // peri::
 		( XYZ const & vec
 		)
 	{
@@ -165,7 +165,7 @@ namespace peri
 	 */
 	inline
 	std::array<double, 3u>
-	unit
+	unit  // peri::
 		( std::array<double, 3u> const & orig
 		)
 	{
@@ -186,7 +186,7 @@ namespace peri
 	 */
 	inline
 	XYZ
-	upFromLpa
+	upFromLpa  // peri::
 		( LPA const & lpa //!< Only Lon,Par are used: Alt is ignored
 		)
 	{
@@ -249,7 +249,7 @@ namespace peri
 		//! Value construction
 		inline
 		explicit
-		Shape
+		Shape  // Shape::
 			( double const & radA
 				//!< Equatorial semi-axis magnitude
 			, double const & radB
@@ -267,7 +267,7 @@ namespace peri
 		static
 		inline
 		Shape
-		fromMajorInvFlat
+		fromMajorInvFlat  // Shape::
 			( double const & equatorialRadius
 				//!< Equatorial (semi-major) radius: for Earth~=6.378e6
 			, double const & invFlatFactor
@@ -281,13 +281,13 @@ namespace peri
 		}
 
 		//! A null instance (nan data member values)
-		Shape
+		Shape  // Shape::
 			() = default;
 
 		//! A shape conformal to this one but with unit characteristic length.
 		inline
 		Shape
-		normalizedShape
+		normalizedShape  // Shape::
 			() const
 		{
 			double const normPerOrig{ 1. / theLambda };
@@ -310,7 +310,7 @@ namespace peri
 		//! Value construction.
 		inline
 		explicit
-		ShapeClosure
+		ShapeClosure // ShapeClosure::
 			( Shape const & shape
 			)
 			: theShape{ shape }
@@ -318,8 +318,23 @@ namespace peri
 		}
 
 		//! Default creates a null instance (member values are NaN)
-		ShapeClosure
+		ShapeClosure // ShapeClosure::
 			() = default;
+
+		//! Evaluate scalar function: psi = sum(q_k^2/mu_k)-1.
+		inline
+		double
+		misclosureAt // ShapeClosure::
+			( XYZ const & qVec
+			) const
+		{
+			return
+				{ sq(qVec[0]) / theShape.theMuSqs[0]
+				+ sq(qVec[1]) / theShape.theMuSqs[1]
+				+ sq(qVec[2]) / theShape.theMuSqs[2]
+				- 1.
+				};
+		}
 
 		/*! \brief Ellipsoid constraint function and derivative values.
 		 *
@@ -331,7 +346,7 @@ namespace peri
 		 // * \arg [2]: Second derivative (with respect to sigma)
 		inline
 		std::array<double, 2u>
-		funcDerivs
+		funcDerivs // ShapeClosure::
 			( double const & sigma
 			, XYZ const & qVec
 			) const
@@ -409,7 +424,7 @@ namespace peri
 		//! Value construction
 		inline
 		explicit
-		Ellipsoid
+		Ellipsoid  // Ellipsoid::
 			( Shape const & shapeOrig
 			)
 			: theShapeOrig{ shapeOrig }
@@ -419,7 +434,7 @@ namespace peri
 		//! Characteristic size (geometric mean of original shape semi-axes)
 		inline
 		double
-		lambda
+		lambda  // Ellipsoid::
 			() const
 		{
 			return theShapeOrig.theLambda;
@@ -428,7 +443,7 @@ namespace peri
 		//! Cartesian vector normalized to working dimensions
 		inline
 		XYZ
-		xyzNormFrom
+		xyzNormFrom  // Ellipsoid::
 			( XYZ const & xVec
 			) const
 		{
@@ -443,7 +458,7 @@ namespace peri
 		//! Cartesian vector restored to original units
 		inline
 		XYZ
-		xyzOrigFrom
+		xyzOrigFrom  // Ellipsoid::
 			( XYZ const & xVec
 			) const
 		{
@@ -458,7 +473,7 @@ namespace peri
 		//! Algebraic (mis)closure relative to ellipsoid level surface
 		inline
 		XYZ
-		gradientAt
+		gradientAt  // Ellipsoid::
 			( XYZ const & zVec
 				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(zVec))
 			) const
@@ -505,7 +520,7 @@ namespace peri
 		//! Construct to match physical geometry description
 		inline
 		explicit
-		EarthModel
+		EarthModel  // Ellipsoid::
 			( Shape const & shape
 			)
 			: theEllip(shape)
@@ -515,7 +530,7 @@ namespace peri
 		//! Geodetic coordinates associated with Cartesian coordinates xVec
 		inline
 		LPA
-		lpaForXyz
+		lpaForXyz  // Ellipsoid::
 			( XYZ const & xVec
 			) const
 		{
@@ -535,7 +550,7 @@ namespace peri
 		//! Cartesian coordinates for geodetic location lpa
 		inline
 		XYZ
-		xyzForLpa
+		xyzForLpa  // Ellipsoid::
 			( LPA const & lpa
 			) const
 		{
@@ -562,7 +577,7 @@ namespace peri
 		//! Perpendicular projection (pVec) from xVec onto ellipsoid
 		inline
 		XYZ
-		nearEllipsoidPointFor
+		nearEllipsoidPointFor  // Ellipsoid::
 			( XYZ const & xVec
 			) const
 		{
@@ -582,7 +597,7 @@ namespace peri
 		//! A linearly refined improvement to altitude scale factor currSigma
 		inline
 		double
-		nextSigmaFor
+		nextSigmaFor  // Ellipsoid::
 			( double const & currSigma
 			, XYZ const & qVec
 			) const
@@ -601,7 +616,7 @@ namespace peri
 		//! Initial estimate for sigma factor (based on sphere approximation)
 		inline
 		double
-		sigmaSphericalApprox
+		sigmaSphericalApprox  // Ellipsoid::
 			( XYZ const & qVec
 			) const
 		{
@@ -612,7 +627,7 @@ namespace peri
 		//! Refined altitude scale factor at normalized point location qVec
 		inline
 		double
-		sigmaFor
+		sigmaFor  // Ellipsoid::
 			( XYZ const & qVec
 			) const
 		{
@@ -640,7 +655,7 @@ namespace peri
 		//! Geodetic (Lon/Par) angles for point on ellipsoid surface (0==Alt).
 		inline
 		LPA
-		lpaForSurfacePoint
+		lpaForSurfacePoint  // Ellipsoid::
 			( XYZ const & zVec
 			) const
 		{
