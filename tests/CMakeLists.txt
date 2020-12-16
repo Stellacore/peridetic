@@ -35,6 +35,7 @@ set(perideticTests
 	testXforms # check fundamental transformation syntax/calling
 	testCORS # check CORS data values parsing
 	testAccuracy # check transformation external accuracy (vs CORS data)
+	testMath # check various ellipsoid relationships
 
 	)
 
