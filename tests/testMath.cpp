@@ -113,7 +113,7 @@ namespace peri
 		explicit
 		Info
 			( LPA const & lpa
-			, Shape const & shape = shape::sWGS84 // .normalizedShape()
+			, Shape const & shape
 			)
 			: theShape{ shape }
 			, theEllip(theShape)
@@ -137,6 +137,14 @@ namespace peri
 			, theEta{ theLpa[2] }
 			, thePsi{ psiValueAt(theVecX, theShape) }
 		{
+		}
+
+		inline
+		double
+		nuAve
+			() const
+		{
+			return std::sqrt(theShape.theRadA * theShape.theRadB);
 		}
 
 		inline
@@ -168,7 +176,14 @@ namespace peri
 		sigmaValue
 			() const
 		{
-			return { 2.*theEta / magG() };
+			double sum{ 0. };
+			for (std::size_t kk{0u} ; kk < 3u ; ++kk)
+			{
+				double const mu4{ sq(theMuSqs[kk]) };
+				double const pSq{ sq(theVecP[kk]) };
+				sum += pSq/mu4;
+			}
+			return { theEta / std::sqrt(sum) };
 		}
 
 		//! Radial altitude
@@ -260,6 +275,8 @@ namespace peri
 			oss << std::endl;
 			oss << string::allDigits(sigmaValue(), "sigmaValue()");
 			oss << std::endl;
+			oss << string::allDigits(nuAve()*theEta, "nu*eta");
+			oss << std::endl;
 			oss << string::allDigits(sigmaMuSqs(), "sigmaMuSqs()");
 
 			return oss.str();
@@ -271,6 +288,110 @@ namespace peri
 
 namespace
 {
+	/*
+	//! Check TODO
+	int
+	checkQ
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		double const expFunc{ 0. };
+		double const gotFunc{ peri::sNan };
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::sameEnough(gotFunc, expFunc, tol))
+		{
+			std::cerr << "FAILURE checkFunc() error" << std::endl;
+			std::cerr << peri::string::allDigits(expFunc, "expFunc") << '\n';
+			std::cerr << peri::string::allDigits(gotFunc, "gotFunc") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkFunc()" << std::endl;
+			std::cerr << peri::string::fixedLinear(expFunc, "expFunc") << '\n';
+			std::cerr << peri::string::fixedLinear(gotFunc, "gotFunc") << '\n';
+		}
+
+		return errCount;
+	}
+	*/
+
+	//! Check that point, p, is on ellipsoid
+	int
+	checkOnEllip
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		double const expFunc{ 0. };
+
+		// eqn: DefEllipsoid
+		double sum{ 0. };
+		for (std::size_t kk{0u} ; kk < 3u ; ++kk)
+		{
+			sum += peri::sq(info.theVecP[kk]) / info.theMuSqs[kk];
+		}
+		double const gotFunc{ sum - 1. };
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::sameEnough(gotFunc, expFunc, tol))
+		{
+			std::cerr << "FAILURE checkFunc() error" << std::endl;
+			std::cerr << peri::string::allDigits(expFunc, "expFunc") << '\n';
+			std::cerr << peri::string::allDigits(gotFunc, "gotFunc") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkFunc()" << std::endl;
+			std::cerr << peri::string::fixedLinear(expFunc, "expFunc") << '\n';
+			std::cerr << peri::string::fixedLinear(gotFunc, "gotFunc") << '\n';
+		}
+
+		return errCount;
+	}
+
+	//! Check gradient computations
+	int
+	checkGrad
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		peri::XYZ const & expGrad = info.theVecG;
+		// eqn: DefGradient
+		peri::XYZ const gotGrad
+			{ 2. * info.theVecP[0] / info.theMuSqs[0]
+			, 2. * info.theVecP[1] / info.theMuSqs[1]
+			, 2. * info.theVecP[2] / info.theMuSqs[2]
+			};
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::xyz::sameEnough(gotGrad, expGrad, tol))
+		{
+			std::cerr << "FAILURE checkGrad() error" << std::endl;
+			std::cerr << peri::string::allDigits(expGrad, "expGrad") << '\n';
+			std::cerr << peri::string::allDigits(gotGrad, "gotGrad") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkGrad()" << std::endl;
+			std::cerr << peri::xyz::infoString(expGrad, "expGrad") << '\n';
+			std::cerr << peri::xyz::infoString(gotGrad, "gotGrad") << '\n';
+		}
+
+		return errCount;
+	}
+
 	//! Check formula for restoring physical altitude
 	int
 	checkEta
@@ -301,9 +422,46 @@ namespace
 		else
 		{
 			std::cout << "Success checkEta()" << std::endl;
-			std::cerr << peri::string::allDigits(expEta, "expEta") << '\n';
-			std::cerr << peri::string::allDigits(gotEta, "gotEta") << '\n';
+			std::cerr << peri::string::fixedLinear(expEta, "expEta") << '\n';
+			std::cerr << peri::string::fixedLinear(gotEta, "gotEta") << '\n';
 		}
+
+		return errCount;
+	}
+
+	//! Check formula sigma evaluation
+	int
+	checkSigma
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		double const expSig{ info.sigmaValue() };
+
+		double sum{ 0. };
+		for (std::size_t jj{0u} ; jj < 3u ; ++jj)
+		{
+			sum += peri::sq(info.theVecP[jj] / info.theMuSqs[jj]);
+		}
+		double const gotSig{ info.theEta / std::sqrt(sum) };
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::sameEnough(gotSig, expSig, tol))
+		{
+			std::cerr << "FAILURE checkSig() error" << std::endl;
+			std::cerr << peri::string::allDigits(expSig, "expSig") << '\n';
+			std::cerr << peri::string::allDigits(gotSig, "gotSig") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkSig()" << std::endl;
+			std::cerr << peri::string::fixedLinear(expSig, "expSig") << '\n';
+			std::cerr << peri::string::fixedLinear(gotSig, "gotSig") << '\n';
+		}
+
 		return errCount;
 	}
 
@@ -319,61 +477,106 @@ namespace
 
 		using peri::operator+;
 		using peri::operator*;
+		constexpr double tol{ 1.e-14 };
 
-		/* - okay
+		// - okay
+		// eqn: x = p + eta*up
 		double const & eta = info.theEta;
 		peri::XYZ const up{ info.upComputed() };
-		peri::XYZ const gotX{ info.theVecP + eta * up };
-		*/
+		peri::XYZ const gotXEta{ info.theVecP + eta * up };
 
-		/* - okay
-		*/
-		double const sigma = info.sigmaValue();
-		peri::XYZ const grad{ info.theShape.gradientAt(info.theVecP) };
-		peri::XYZ const gotX{ info.theVecP + .5 * sigma * grad };
-
-		constexpr double tol{ 1.e-14 };
-		if (! peri::xyz::sameEnough(gotX, expX, tol))
+		if (! peri::xyz::sameEnough(gotXEta, expX, tol))
 		{
 			std::cerr << "FAILURE checkX() error" << std::endl;
 			std::cerr << peri::string::allDigits(expX, "expX") << '\n';
-			std::cerr << peri::string::allDigits(gotX, "gotX") << '\n';
+			std::cerr << peri::string::allDigits(gotXEta, "gotXEta") << '\n';
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
 		else
 		{
 			std::cout << "Success checkX()" << std::endl;
-			std::cerr << peri::string::allDigits(expX, "expX") << '\n';
-			std::cerr << peri::string::allDigits(gotX, "gotX") << '\n';
+			std::cerr << peri::xyz::infoString(expX, "expX") << '\n';
+			std::cerr << peri::xyz::infoString(gotXEta, "gotXEta") << '\n';
 		}
+
+		/* - okay
+		*/
+		// eqn: xInTwoSteps_sg : x = p +.5*sigma*grad : checks sigma,grad
+		double const sigma{ info.sigmaValue() };
+		peri::XYZ const grad{ info.theShape.gradientAt(info.theVecP) };
+		peri::XYZ const gotXSig{ info.theVecP + .5 * sigma * grad };
+
+		if (! peri::xyz::sameEnough(gotXSig, expX, tol))
+		{
+			std::cerr << "FAILURE checkX() error" << std::endl;
+			std::cerr << peri::string::allDigits(expX, "expX") << '\n';
+			std::cerr << peri::string::allDigits(gotXSig, "gotXSig") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkX()" << std::endl;
+			std::cerr << peri::xyz::infoString(expX, "expX") << '\n';
+			std::cerr << peri::xyz::infoString(gotXSig, "gotXSig") << '\n';
+		}
+
 		return errCount;
 	}
 
-	/*
-	//! Check TODO
+	//! Check inverse reconstruction recipie
 	int
-	test1
-		()
+	checkLpa
+		( peri::Info const & info
+		)
 	{
 		int errCount{ 0 };
-		peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), .25 };
-		peri::Info const info(lpa);
 
-		// check if footer point matches 0-altitude point
+		// assuming this root solution is available
+		double const sigma{ info.sigmaValue() };
+		double const & x1 = info.theVecX[0];
+		double const & x2 = info.theVecX[1];
+		double const & x3 = info.theVecX[2];
+		double const & mu1 = info.theMus[0];
+		double const & mu2 = info.theMus[1];
+		double const & mu3 = info.theMus[2];
+		double const frac1{ x1 / (peri::sq(mu1) + sigma) };
+		double const frac2{ x2 / (peri::sq(mu2) + sigma) };
+		double const frac3{ x3 / (peri::sq(mu3) + sigma) };
 
-		std::cout << info.infoString("info") << std::endl;
-		std::cout << "====" << '\n';
+		double const fSq1{ peri::sq(frac1) };
+		double const fSq2{ peri::sq(frac2) };
+		double const fSq3{ peri::sq(frac3) };
+		double const fhSq{ fSq1 + fSq2 };
+		double const fxSq{ fhSq + fSq3 };
 
-		std::cout << "checkEta:\n";
-		errCount += checkEta(info);
+		double const lam{ std::atan2(frac2, frac1) };
+		double const phi{ std::atan2(frac3, std::sqrt(fhSq)) };
+		double const eta{ sigma * std::sqrt(fxSq) };
 
-		std::cout << "checkX:\n";
-		errCount += checkX(info);
+		peri::LPA const & expLpa = info.theLpa;
+		peri::LPA const gotLpa{ lam, phi, eta };
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::xyz::sameEnough(gotLpa, expLpa, tol))
+		{
+			std::cerr << "FAILURE checkLpa() error" << std::endl;
+			std::cerr << peri::string::allDigits(expLpa, "expLpa") << '\n';
+			std::cerr << peri::string::allDigits(gotLpa, "gotLpa") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkLpa()" << std::endl;
+			std::cerr << peri::lpa::infoString(expLpa, "expLpa") << '\n';
+			std::cerr << peri::lpa::infoString(gotLpa, "gotLpa") << '\n';
+		}
 
 		return errCount;
 	}
-	*/
+
 }
 
 
@@ -383,10 +586,19 @@ main
 	()
 {
 	int errCount{ 0 };
-	peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), .25 };
-	peri::Info const info(lpa);
+	peri::Shape const shape{ peri::shape::sWGS84/*.normalizedShape()*/ };
+	peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), 1000. };
+	peri::Info const info(lpa, shape);
+	std::cout << "------" << '\n';
+	std::cout << info.infoString("info") << '\n';
+	std::cout << "------" << '\n';
+
+	errCount += checkOnEllip(info);
+	errCount += checkGrad(info);
 	errCount += checkEta(info);
+	errCount += checkSigma(info);
 	errCount += checkX(info);
+	errCount += checkLpa(info);
 	return errCount;
 }
 
