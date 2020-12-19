@@ -100,6 +100,7 @@ namespace peri
 		Ellipsoid const theEllip;
 		EarthModel const theEarth;
 		std::array<double, 3u> const theMus;
+		std::array<double, 3u> const theMuSqs;
 		LPA const theLpa; // Location under consideration
 		XYZ const theVecX; // vector location for theLpa
 		XYZ const theVecP; // perpendicular footer point on ellipsoid
@@ -112,7 +113,7 @@ namespace peri
 		explicit
 		Info
 			( LPA const & lpa
-			, Shape const & shape = shape::sWGS84
+			, Shape const & shape = shape::sWGS84 // .normalizedShape()
 			)
 			: theShape{ shape }
 			, theEllip(theShape)
@@ -121,6 +122,11 @@ namespace peri
 				{ theShape.theRadA
 				, theShape.theRadA
 				, theShape.theRadB
+				}
+			, theMuSqs
+				{ sq(theMus[0])
+				, sq(theMus[1])
+				, sq(theMus[2])
 				}
 			, theLpa{ lpa }
 			, theVecX{ xyzForLpa(theLpa, theEarth) }
@@ -141,11 +147,11 @@ namespace peri
 			double sum{ 0. };
 			for (std::size_t kk{0u} ; kk < 3u ; ++kk)
 			{
-				double const mu4{ sq(sq(theMus[kk])) };
+				double const mu4{ sq(theMuSqs[kk]) };
 				double const pSq{ sq(theVecP[kk]) };
 				sum += pSq/mu4;
 			}
-			return std::sqrt(sum);
+			return std::sqrt(4. * sum);
 		}
 
 		inline
@@ -153,9 +159,8 @@ namespace peri
 		upComputed
 			() const
 		{
-			double const scale{ .5 / magG() };
 			XYZ const grad{ theShape.gradientAt(theVecP) };
-			return { scale * grad };
+			return { (1./magG()) * grad };
 		}
 
 		inline
@@ -200,9 +205,9 @@ namespace peri
 		{
 			double const sigma{ sigmaValue() };
 			return
-				{ sigma / sq(theMus[0])
-				, sigma / sq(theMus[1])
-				, sigma / sq(theMus[2])
+				{ sigma / theMuSqs[0]
+				, sigma / theMuSqs[1]
+				, sigma / theMuSqs[2]
 				};
 		}
 
@@ -221,15 +226,20 @@ namespace peri
 			oss << std::endl;
 			oss << lpa::infoString(theLpa, "theLpa");
 			oss << std::endl;
-			oss << xyz::infoString(theVecX, "theVecX");
+			oss << xyz::infoString(theVecX, "theVecX")
+				<< " " << string::fixedLinear(magnitude(theVecX), "magX");
 			oss << std::endl;
-			oss << string::fixedLinear(magnitude(theVecX), "magX");
+			oss << xyz::infoString(theVecR, "theVecR")
+				<< " " << string::fixedLinear(magnitude(theVecR), "magR");
 			oss << std::endl;
-			oss << xyz::infoString(theVecR, "theVecR");
+			oss << xyz::infoString(theVecP, "theVecP")
+				<< " " << string::fixedLinear(magnitude(theVecP), "magP");
 			oss << std::endl;
-			oss << xyz::infoString(theVecP, "theVecP");
+			oss << string::allDigits(theVecG, "theVecG")
+				<< " " << string::allDigits(magnitude(theVecG), "magG");
 			oss << std::endl;
-			oss << string::allDigits(theVecG, "theVecG");
+			oss << xyz::infoString(upComputed(), "upComputed()")
+				<< " " << string::allDigits(magnitude(upComputed()), "upMag");
 			oss << std::endl;
 			oss << xyz::infoString(unit(theVecG), "gHat");
 			oss << std::endl;
@@ -246,6 +256,8 @@ namespace peri
 			oss << std::endl;
 			oss << string::fixedLinear(theEta, "theEta");
 			oss << std::endl;
+			oss << string::allDigits(theMuSqs, "theMuSqs");
+			oss << std::endl;
 			oss << string::allDigits(sigmaValue(), "sigmaValue()");
 			oss << std::endl;
 			oss << string::allDigits(sigmaMuSqs(), "sigmaMuSqs()");
@@ -259,29 +271,109 @@ namespace peri
 
 namespace
 {
+	//! Check formula for restoring physical altitude
+	int
+	checkEta
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+		double const & expEta = info.theEta;
+
+		double const sigma{ info.sigmaValue() };
+
+		double sum{ 0. };
+		for (std::size_t kk{0u} ; kk < 3u ; ++kk)
+		{
+			sum += peri::sq(info.theVecX[kk] / (info.theMuSqs[kk] + sigma));
+		}
+		double const gotEta{ sigma * std::sqrt(sum) };
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::sameEnough(gotEta, expEta, tol))
+		{
+			std::cerr << "FAILURE checkEta() error" << std::endl;
+			std::cerr << peri::string::allDigits(expEta, "expEta") << '\n';
+			std::cerr << peri::string::allDigits(gotEta, "gotEta") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkEta()" << std::endl;
+			std::cerr << peri::string::allDigits(expEta, "expEta") << '\n';
+			std::cerr << peri::string::allDigits(gotEta, "gotEta") << '\n';
+		}
+		return errCount;
+	}
+
+	//! Check formula for restoring point of interest
+	int
+	checkX
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		peri::XYZ const & expX = info.theVecX;
+
+		using peri::operator+;
+		using peri::operator*;
+
+		/* - okay
+		double const & eta = info.theEta;
+		peri::XYZ const up{ info.upComputed() };
+		peri::XYZ const gotX{ info.theVecP + eta * up };
+		*/
+
+		/* - okay
+		*/
+		double const sigma = info.sigmaValue();
+		peri::XYZ const grad{ info.theShape.gradientAt(info.theVecP) };
+		peri::XYZ const gotX{ info.theVecP + .5 * sigma * grad };
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::xyz::sameEnough(gotX, expX, tol))
+		{
+			std::cerr << "FAILURE checkX() error" << std::endl;
+			std::cerr << peri::string::allDigits(expX, "expX") << '\n';
+			std::cerr << peri::string::allDigits(gotX, "gotX") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkX()" << std::endl;
+			std::cerr << peri::string::allDigits(expX, "expX") << '\n';
+			std::cerr << peri::string::allDigits(gotX, "gotX") << '\n';
+		}
+		return errCount;
+	}
+
+	/*
 	//! Check TODO
 	int
 	test1
 		()
 	{
 		int errCount{ 0 };
-		peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), 1000. };
+		peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), .25 };
 		peri::Info const info(lpa);
 
 		// check if footer point matches 0-altitude point
 
 		std::cout << info.infoString("info") << std::endl;
-++errCount;
+		std::cout << "====" << '\n';
 
-		/*
-		// normalize values
-		peri::XYZ const xyzNear
-			{ info.theEarth.nearEllipsoidPointFor(info.theVecX) };
-		std::cout << peri::xyz::infoString(xyzNear, "xyzNear") << std::endl;
-		*/
+		std::cout << "checkEta:\n";
+		errCount += checkEta(info);
+
+		std::cout << "checkX:\n";
+		errCount += checkX(info);
 
 		return errCount;
 	}
+	*/
 }
 
 
@@ -291,7 +383,10 @@ main
 	()
 {
 	int errCount{ 0 };
-	errCount += test1();
+	peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), .25 };
+	peri::Info const info(lpa);
+	errCount += checkEta(info);
+	errCount += checkX(info);
 	return errCount;
 }
 
