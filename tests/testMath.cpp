@@ -525,6 +525,43 @@ namespace
 		return errCount;
 	}
 
+	//! Check point, p, components computation
+	int
+	checkP
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		double const sigma{ info.sigmaValue() };
+
+		peri::XYZ const & expP = info.theVecP;
+		// eqn: pkFuncOfSigma
+		peri::XYZ const gotP
+			{ (info.theVecX[0] * info.theMuSqs[0]) / (info.theMuSqs[0] + sigma)
+			, (info.theVecX[1] * info.theMuSqs[1]) / (info.theMuSqs[1] + sigma)
+			, (info.theVecX[2] * info.theMuSqs[2]) / (info.theMuSqs[2] + sigma)
+			};
+
+		constexpr double tol{ 1.e-14 };
+		if (! peri::xyz::sameEnough(gotP, expP, tol))
+		{
+			std::cerr << "FAILURE checkP() error" << std::endl;
+			std::cerr << peri::string::allDigits(expP, "expP") << '\n';
+			std::cerr << peri::string::allDigits(gotP, "gotP") << '\n';
+			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			++errCount;
+		}
+		else
+		{
+			std::cout << "Success checkP()" << std::endl;
+			std::cerr << peri::xyz::infoString(expP, "expP") << '\n';
+			std::cerr << peri::xyz::infoString(gotP, "gotP") << '\n';
+		}
+
+		return errCount;
+	}
+
 	//! Check inverse reconstruction recipie
 	int
 	checkLpa
@@ -598,6 +635,7 @@ main
 	errCount += checkEta(info);
 	errCount += checkSigma(info);
 	errCount += checkX(info);
+	errCount += checkP(info);
 	errCount += checkLpa(info);
 	return errCount;
 }
