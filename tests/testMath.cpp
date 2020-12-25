@@ -31,6 +31,21 @@
 
 #include "periLocal.h"
 
+#include <algorithm>
+#include <vector>
+
+
+//! Test program local/config values
+namespace tst
+{
+	//! If true display (acceptable) error values for each test
+	constexpr bool sShowSuccess{ false };
+
+	//! If true, display maximum errors in approximation formulae
+	constexpr bool sShowApxErrors{ true };
+
+} // [tst]
+
 namespace peri
 {
 	//! Evaluate scalar function: psi = sum(q_k^2/mu_k)-1.
@@ -247,7 +262,7 @@ namespace peri
 namespace
 {
 	/*
-	//! Check TODO
+	//! Check TODO TEMPLATE
 	int
 	checkQ
 		( peri::Info const & info
@@ -305,7 +320,7 @@ namespace
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkFunc()" << std::endl;
 			std::cerr << peri::string::fixedLinear(expFunc, "expFunc") << '\n';
@@ -340,7 +355,7 @@ namespace
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkGrad()" << std::endl;
 			std::cerr << peri::xyz::infoString(expGrad, "expGrad") << '\n';
@@ -379,7 +394,7 @@ namespace
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkEta()" << std::endl;
 			std::cerr << peri::string::fixedLinear(expEta, "expEta") << '\n';
@@ -415,7 +430,7 @@ namespace
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkSig()" << std::endl;
 			std::cerr << peri::string::fixedLinear(expSig, "expSig") << '\n';
@@ -453,7 +468,7 @@ namespace
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkX()" << std::endl;
 			std::cerr << peri::xyz::infoString(expX, "expX") << '\n';
@@ -475,7 +490,7 @@ namespace
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkX()" << std::endl;
 			std::cerr << peri::xyz::infoString(expX, "expX") << '\n';
@@ -512,7 +527,7 @@ namespace
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkP()" << std::endl;
 			std::cerr << peri::xyz::infoString(expP, "expP") << '\n';
@@ -566,7 +581,7 @@ namespace
 			std::cerr << peri::string::allDigits(tolLin, "tolLin") << '\n';
 			++errCount;
 		}
-		else
+		else if (tst::sShowSuccess)
 		{
 			std::cout << "Success checkLpa()" << std::endl;
 			std::cerr << peri::lpa::infoString(expLpa, "expLpa") << '\n';
@@ -576,40 +591,40 @@ namespace
 		return errCount;
 	}
 
-	//! Check approximations to ellipsoid radius computation
+
+	//! Check approximations to ellipsoid radius computation toward xyzAny
 	int
 	checkEllipRad
-		( peri::Info const & info
+		( peri::Shape const & shape
+		, peri::XYZ const & xyzAny
+		, std::array<std::vector<double>, 3u> * const ptErrMags
 		)
 	{
 		int errCount{ 0 };
 
-		// expected value from exact formula
-		peri::XYZ const & xyz = info.theVecX;
-
 		// common terms
-		peri::ellip::SquaredParms const sqParms(xyz);
-		double const & beta = info.theShape.theRadB;
+		peri::ellip::SquaredParms const sqParms(xyzAny);
+		double const & beta = shape.theRadB;
 		double const & hoxSq = sqParms.the_hoxSq;
-		double const eSq{ peri::ellip::squaredEccentricity(info.theShape) };
+		double const eSq{ peri::ellip::squaredEccentricity(shape) };
 		double const ehoxSq{ eSq * hoxSq };
 
 		// use normalized value for comparison
-		double const expRad{ peri::ellip::radiusToward(xyz, info.theShape) };
+		double const expRad{ peri::ellip::radiusToward(xyzAny, shape) };
 		double const expApx{ (1./beta) * expRad };
 
 		// check second order approximation
 		double const got2nd{ 1 + .5*ehoxSq };
-		constexpr double tol2nd{ 5.e-6 };
+		constexpr double tol2nd{ 2.e-5 };
 
 		// check fourth order approximation
 		double const got4th{ 1 + .5*ehoxSq * (1 + (3./4.)*ehoxSq) };
-		constexpr double tol4th{ 5.e-8 };
+		constexpr double tol4th{ 1.e-7 };
 
 		// check sixth order approximation
 		double const got6th
 			{ 1 + .5*ehoxSq*(1. + (3./4.)*ehoxSq*(1 + (5./6.)*ehoxSq)) };
-		constexpr double tol6th{ 5.e-11};
+		constexpr double tol6th{ 6.e-10};
 
 		std::array<double, 3u> const gots{ got2nd, got4th, got6th };
 		constexpr std::array<double, 3u> tols{ tol2nd, tol4th, tol6th };
@@ -619,6 +634,7 @@ namespace
 			double const & gotApx = gots[nn];
 			double const & tolApx = tols[nn];
 			double const difApx{ gotApx - expApx };
+			(*ptErrMags)[nn].emplace_back(difApx); // for external analysis
 			if (! peri::sameEnough(gotApx, expApx, tolApx))
 			{
 				std::cerr << "FAILURE checkApx() error: order ="
@@ -629,11 +645,80 @@ namespace
 				std::cerr << peri::string::allDigits(tolApx, "tolApx") << '\n';
 				++errCount;
 			}
-			else
+		}
+
+		return errCount;
+	}
+
+	//! Check approximations to ellipsoid radius computation at multiple radii
+	int
+	checkEllipRads
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		// Number of (latitude levels to test)
+		// NOTE: the multiple of 4 assures test cases will
+		//       hit both poles, the equator and at +/-45(deg)!
+		constexpr std::size_t numP{ 1024u * 4u }; // >= 1u
+
+		// only use the shape information from 'info' since entire
+		// collection of locations are generated below
+		peri::Shape const & shape = info.theShape;
+
+		// delta longitude that arbitrarily drifts/wraps around full circle
+		double const dL{ 1. }; // incongruent  with pi
+		// parallels from pole to pole inclusive
+		constexpr double dNumP{ static_cast<double>(numP - 1u) };
+		double const dP{ (1./dNumP) * peri::pi() }; // congruent with pi
+
+		//! Track error magnitudes (by order of approximation) for analysis
+		std::array<std::vector<double>, 3u> apxErrsByOrder;
+
+		// expected value from exact formula
+		double lon{ 0. };
+		double const par0{ -.5*peri::pi() };
+		for (std::size_t nn{0u} ; nn < numP ; ++nn)
+		{
+			double const par{ par0 + static_cast<double>(nn)*dP };
+			lon += dL;
+			// unit radius is fine since only direction is important
+			peri::XYZ const xyzAny
+				{ std::cos(par)*std::cos(lon)
+				, std::cos(par)*std::sin(lon)
+				, std::sin(par)
+				};
+			errCount += checkEllipRad(shape, xyzAny, &apxErrsByOrder);
+		}
+
+		// (optionally) display approximation error values for each order
+		if (tst::sShowApxErrors)
+		{
+			std::ostringstream oss;
+			oss << "\n====" << '\n';
+			double const lambda{ info.theEllip.lambda() };
+			for (std::size_t nn{0u} ; nn < 3u ; ++nn)
 			{
-				std::cout << "Success checkApx() order = " << order << '\n';
-				std::cout << peri::string::allDigits(difApx, "difApx") << '\n';
+				if (! apxErrsByOrder[nn].empty())
+				{
+					std::sort
+						( apxErrsByOrder[nn].begin()
+						, apxErrsByOrder[nn].end()
+						, [] (double const & aa, double const & bb)
+							{ return std::abs(aa) < std::abs(bb); }
+						);
+					double const maxMagErr{ apxErrsByOrder[nn].back() };
+					oss
+						<< "Approx MaxMagError for order:"
+						<< " " << 2u*nn << " is"
+						<< " " << peri::string::allDigits(maxMagErr)
+						<< " " << peri::string::fixedLinear(maxMagErr*lambda)
+						<< '\n';
+				}
 			}
+			oss << "====" << '\n';
+			std::cout << oss.str() << std::endl;
 		}
 
 		return errCount;
@@ -652,9 +737,12 @@ main
 	peri::Shape const shape{ peri::shape::sWGS84/*.normalizedShape()*/ };
 	peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), 4.e8 };
 	peri::Info const info(lpa, shape);
-	std::cout << "------" << '\n';
-	std::cout << info.infoString("info") << '\n';
-	std::cout << "------" << '\n';
+	if (tst::sShowSuccess)
+	{
+		std::cout << "------" << '\n';
+		std::cout << info.infoString("info") << '\n';
+		std::cout << "------" << '\n';
+	}
 
 	errCount += checkOnEllip(info);
 	errCount += checkGrad(info);
@@ -663,7 +751,7 @@ main
 	errCount += checkX(info);
 	errCount += checkP(info);
 	errCount += checkLpa(info);
-	errCount += checkEllipRad(info);
+	errCount += checkEllipRads(info);
 
 	return errCount;
 }
