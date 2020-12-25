@@ -273,7 +273,7 @@ namespace peri
 			oss << std::endl;
 			oss << string::allDigits(theMuSqs, "theMuSqs");
 			oss << std::endl;
-			oss << string::allDigits(sigmaValue(), "sigmaValue()");
+			oss << string::allDigits(sigmaValue(), "sigma");
 			oss << std::endl;
 			oss << string::allDigits(nuAve()*theEta, "nu*eta");
 			oss << std::endl;
@@ -410,12 +410,14 @@ namespace
 		}
 		double const gotEta{ sigma * std::sqrt(sum) };
 
-		constexpr double tol{ 1.e-14 };
+		double const tol{ 1.e-14 * expEta };
 		if (! peri::sameEnough(gotEta, expEta, tol))
 		{
+			double const dif{ gotEta - expEta };
 			std::cerr << "FAILURE checkEta() error" << std::endl;
 			std::cerr << peri::string::allDigits(expEta, "expEta") << '\n';
 			std::cerr << peri::string::allDigits(gotEta, "gotEta") << '\n';
+			std::cerr << peri::string::allDigits(dif, "dif") << '\n';
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
 			++errCount;
 		}
@@ -477,7 +479,7 @@ namespace
 
 		using peri::operator+;
 		using peri::operator*;
-		constexpr double tol{ 1.e-14 };
+		double const tol{ 1.e-14 * peri::magnitude(expX) };
 
 		// - okay
 		// eqn: x = p + eta*up
@@ -487,7 +489,7 @@ namespace
 
 		if (! peri::xyz::sameEnough(gotXEta, expX, tol))
 		{
-			std::cerr << "FAILURE checkX() error" << std::endl;
+			std::cerr << "FAILURE checkX() error (eta*up)" << std::endl;
 			std::cerr << peri::string::allDigits(expX, "expX") << '\n';
 			std::cerr << peri::string::allDigits(gotXEta, "gotXEta") << '\n';
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
@@ -509,7 +511,7 @@ namespace
 
 		if (! peri::xyz::sameEnough(gotXSig, expX, tol))
 		{
-			std::cerr << "FAILURE checkX() error" << std::endl;
+			std::cerr << "FAILURE checkX() error (sigma*grad)" << std::endl;
 			std::cerr << peri::string::allDigits(expX, "expX") << '\n';
 			std::cerr << peri::string::allDigits(gotXSig, "gotXSig") << '\n';
 			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
@@ -595,13 +597,15 @@ namespace
 		peri::LPA const & expLpa = info.theLpa;
 		peri::LPA const gotLpa{ lam, phi, eta };
 
-		constexpr double tol{ 1.e-14 };
-		if (! peri::xyz::sameEnough(gotLpa, expLpa, tol))
+		constexpr double tolAng{ 1.e-14 };
+		double const tolLin{ 1.e-14 * expLpa[2] };
+		if (! peri::lpa::sameEnough(gotLpa, expLpa, tolAng, tolLin))
 		{
 			std::cerr << "FAILURE checkLpa() error" << std::endl;
 			std::cerr << peri::string::allDigits(expLpa, "expLpa") << '\n';
 			std::cerr << peri::string::allDigits(gotLpa, "gotLpa") << '\n';
-			std::cerr << peri::string::allDigits(tol, "tol") << '\n';
+			std::cerr << peri::string::allDigits(tolAng, "tolAng") << '\n';
+			std::cerr << peri::string::allDigits(tolLin, "tolLin") << '\n';
 			++errCount;
 		}
 		else
@@ -623,8 +627,9 @@ main
 	()
 {
 	int errCount{ 0 };
+	// Non-normalized data values to stress formulae
 	peri::Shape const shape{ peri::shape::sWGS84/*.normalizedShape()*/ };
-	peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), 1000. };
+	peri::LPA const lpa{ .5*peri::pi(), .25*peri::pi(), 4.e8 };
 	peri::Info const info(lpa, shape);
 	std::cout << "------" << '\n';
 	std::cout << info.infoString("info") << '\n';
@@ -637,6 +642,14 @@ main
 	errCount += checkX(info);
 	errCount += checkP(info);
 	errCount += checkLpa(info);
+
+	std::cout << "======" << '\n';
+	for (std::size_t jj{0u} ; jj < 3u ; ++jj)
+	{
+		double const radTerm{ peri::sq(info.theMuSqs[jj]) * info.theVecP[jj] };
+		std::cout << peri::string::allDigits(radTerm, "radTerm") << '\n';
+	}
+
 	return errCount;
 }
 
