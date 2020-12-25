@@ -409,4 +409,51 @@ namespace peri::lpa
 
 } // [peri::lpa]
 
+namespace peri::ellip
+{
+	/*! \brief Distance from center to surface of ellipsoid toward xyzAny.
+	 *
+	 * NOTE: xyzAny can be any \b non-zero arbitrary location.
+	 */
+	double
+	radiusToward
+		( XYZ const & xyzAny
+		, peri::Shape const & shape
+		)
+	{
+		// ellipsoid shape parameters
+		double const & alpha = shape.theRadA;
+		double const & beta = shape.theRadB;
+		double const boa{ beta / alpha };
+		double const eSq{ 1. - boa*boa };
+
+		// shorthand aliases
+		double const & x1 = xyzAny[0];
+		double const & x2 = xyzAny[1];
+		double const & x3 = xyzAny[2];
+
+		double const x3Sq{ x3*x3 }; // square of polar constituent
+		double const hSq{ x1*x1 + x2*x2 }; // square of equatorial constituent
+		double const xSq{ hSq + x3Sq }; // squared magnitude of xyzAny
+		double const cosPar{ hSq / xSq }; // cosine of elevation from equator
+		double const den{ 1. - eSq * cosPar };
+		double const frac{ std::sqrt(1. / den) }; // fraction of polar radius
+		double const rho{ beta * frac }; // radial magnitude
+		return rho;
+	}
+
+	//! \brief Centric vector to surface of ellipsoid in direction of xyzAny.
+	inline
+	XYZ
+	vectorToward
+		( XYZ const & xyzAny
+			//!< Any (non-zero) vector indicating direction
+		, peri::Shape const & shape
+		)
+	{
+		return ellip::radiusToward(xyzAny, shape) * unit(xyzAny);
+	}
+
+} // [peri::ellip]
+
 #endif // peri_Local_INCL_
