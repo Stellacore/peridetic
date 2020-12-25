@@ -411,10 +411,55 @@ namespace peri::lpa
 
 namespace peri::ellip
 {
+	//! Parameter combinations useful for computations
+	struct SquaredParms
+	{
+		double const the_x3Sq{}; //!< square of polar constituent
+		double const the_hSq{}; //!< square of equatorial constituent
+		double const the_xSq{}; //!< squared magnitude of full vector xyzAny
+		double const the_hoxSq{}; //!< hSq over xSq (a squared cosine value)
+
+	private:
+
+		SquaredParms
+			() = default;
+
+	public:
+
+		inline
+		explicit
+		SquaredParms
+			( XYZ const & xyzAny
+			)
+			: the_x3Sq{ sq(xyzAny[2]) }
+			, the_hSq{ sq(xyzAny[0]) + sq(xyzAny[1]) }
+			, the_xSq{ the_hSq + the_x3Sq }
+			, the_hoxSq{ the_hSq / the_xSq }
+		{
+		}
+
+	}; // SquaredParms
+
+
+	//! \b Squared first eccentricity of shape (1-(b/a)^2)
+	inline
+	double
+	squaredEccentricity
+		( peri::Shape const & shape
+		)
+	{
+		double const & alpha = shape.theRadA;
+		double const & beta = shape.theRadB;
+		double const boa{ beta / alpha };
+		double const eSq{ 1. - boa*boa };
+		return eSq;
+	}
+
 	/*! \brief Distance from center to surface of ellipsoid toward xyzAny.
 	 *
 	 * NOTE: xyzAny can be any \b non-zero arbitrary location.
 	 */
+	inline
 	double
 	radiusToward
 		( XYZ const & xyzAny
@@ -422,21 +467,11 @@ namespace peri::ellip
 		)
 	{
 		// ellipsoid shape parameters
-		double const & alpha = shape.theRadA;
+		double const eSq{ squaredEccentricity(shape) };
 		double const & beta = shape.theRadB;
-		double const boa{ beta / alpha };
-		double const eSq{ 1. - boa*boa };
-
-		// shorthand aliases
-		double const & x1 = xyzAny[0];
-		double const & x2 = xyzAny[1];
-		double const & x3 = xyzAny[2];
-
-		double const x3Sq{ x3*x3 }; // square of polar constituent
-		double const hSq{ x1*x1 + x2*x2 }; // square of equatorial constituent
-		double const xSq{ hSq + x3Sq }; // squared magnitude of xyzAny
-		double const cosPar{ hSq / xSq }; // cosine of elevation from equator
-		double const den{ 1. - eSq * cosPar };
+		// compute intermediate coordinate combinations
+		SquaredParms const parmSqs(xyzAny);
+		double const den{ 1. - eSq * parmSqs.the_hoxSq };
 		double const frac{ std::sqrt(1. / den) }; // fraction of polar radius
 		double const rho{ beta * frac }; // radial magnitude
 		return rho;

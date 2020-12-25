@@ -576,6 +576,69 @@ namespace
 		return errCount;
 	}
 
+	//! Check approximations to ellipsoid radius computation
+	int
+	checkEllipRad
+		( peri::Info const & info
+		)
+	{
+		int errCount{ 0 };
+
+		// expected value from exact formula
+		peri::XYZ const & xyz = info.theVecX;
+
+		// common terms
+		peri::ellip::SquaredParms const sqParms(xyz);
+		double const & beta = info.theShape.theRadB;
+		double const & hoxSq = sqParms.the_hoxSq;
+		double const eSq{ peri::ellip::squaredEccentricity(info.theShape) };
+		double const ehoxSq{ eSq * hoxSq };
+
+		// use normalized value for comparison
+		double const expRad{ peri::ellip::radiusToward(xyz, info.theShape) };
+		double const expApx{ (1./beta) * expRad };
+
+		// check second order approximation
+		double const got2nd{ 1 + .5*ehoxSq };
+		constexpr double tol2nd{ 5.e-6 };
+
+		// check fourth order approximation
+		double const got4th{ 1 + .5*ehoxSq * (1 + (3./4.)*ehoxSq) };
+		constexpr double tol4th{ 5.e-8 };
+
+		// check sixth order approximation
+		double const got6th
+			{ 1 + .5*ehoxSq*(1. + (3./4.)*ehoxSq*(1 + (5./6.)*ehoxSq)) };
+		constexpr double tol6th{ 5.e-11};
+
+		std::array<double, 3u> const gots{ got2nd, got4th, got6th };
+		constexpr std::array<double, 3u> tols{ tol2nd, tol4th, tol6th };
+		for (std::size_t nn{0u} ; nn < gots.size() ; ++nn)
+		{
+			std::size_t const order{ 2u * nn };
+			double const & gotApx = gots[nn];
+			double const & tolApx = tols[nn];
+			double const difApx{ gotApx - expApx };
+			if (! peri::sameEnough(gotApx, expApx, tolApx))
+			{
+				std::cerr << "FAILURE checkApx() error: order ="
+					<< " " << order << '\n';
+				std::cerr << peri::string::allDigits(expApx, "expApx") << '\n';
+				std::cerr << peri::string::allDigits(gotApx, "gotApx") << '\n';
+				std::cerr << peri::string::allDigits(difApx, "difApx") << '\n';
+				std::cerr << peri::string::allDigits(tolApx, "tolApx") << '\n';
+				++errCount;
+			}
+			else
+			{
+				std::cout << "Success checkApx() order = " << order << '\n';
+				std::cout << peri::string::allDigits(difApx, "difApx") << '\n';
+			}
+		}
+
+		return errCount;
+	}
+
 }
 
 
@@ -600,13 +663,7 @@ main
 	errCount += checkX(info);
 	errCount += checkP(info);
 	errCount += checkLpa(info);
-
-	std::cout << "======" << '\n';
-	for (std::size_t jj{0u} ; jj < 3u ; ++jj)
-	{
-		double const radTerm{ peri::sq(info.theMuSqs[jj]) * info.theVecP[jj] };
-		std::cout << peri::string::allDigits(radTerm, "radTerm") << '\n';
-	}
+	errCount += checkEllipRad(info);
 
 	return errCount;
 }
