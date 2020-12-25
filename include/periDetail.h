@@ -289,7 +289,7 @@ namespace peri
 		XYZ
 		gradientAt  // Shape::
 			( XYZ const & pVec
-				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(pVec))
+				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
 			) const
 		{
 			return
@@ -642,7 +642,7 @@ namespace peri
 		LPA
 		lpaForSurfacePoint  // Ellipsoid::
 			( XYZ const & pVec
-				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(pVec))
+				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
 			) const
 		{
 			XYZ const grad{ theEllip.theShapeNorm.gradientAt(pVec) };
