@@ -49,7 +49,7 @@ namespace peri
 	template <typename Type>
 	inline
 	Type
-	sq
+	sq  // peri::
 		( Type const & value
 		)
 	{
@@ -59,7 +59,7 @@ namespace peri
 	//! "Vector addition" for two std::array data types
 	inline
 	std::array<double, 3u>
-	operator+
+	operator+  // peri::
 		( std::array<double, 3u> const & valuesA
 		, std::array<double, 3u> const & valuesB
 		)
@@ -74,7 +74,7 @@ namespace peri
 	//! "Vector 'subtraction'" for two std::array data types
 	inline
 	std::array<double, 3u>
-	operator-
+	operator-  // peri::
 		( std::array<double, 3u> const & valuesA
 		, std::array<double, 3u> const & valuesB
 		)
@@ -89,7 +89,7 @@ namespace peri
 	//! Unitary negation
 	inline
 	std::array<double, 3u>
-	operator-
+	operator-  // peri::
 		( std::array<double, 3u> const & values
 		)
 	{
@@ -103,7 +103,7 @@ namespace peri
 	//! "scalar-Vector" multiplication for two std::array data types
 	inline
 	std::array<double, 3u>
-	operator*
+	operator*  // peri::
 		( double const & scale
 		, std::array<double, 3u> const & values
 		)
@@ -118,7 +118,7 @@ namespace peri
 	//! Vector dot product of two arrays
 	inline
 	double
-	dot
+	dot  // peri::
 		( std::array<double, 3u> const & vecA
 		, std::array<double, 3u> const & vecB
 		)
@@ -136,6 +136,27 @@ namespace peri
 		*/
 	}
 
+	//! Squared magnitude of vec Sum of squared components
+	inline
+	double
+	magSq  // peri::
+		( XYZ const & vec
+		)
+	{
+		return dot(vec, vec);
+	}
+
+
+	//! Magnitude of vec (square root of sum of squared components)
+	inline
+	double
+	magnitude  // peri::
+		( XYZ const & vec
+		)
+	{
+		return std::sqrt(magSq(vec));
+	}
+
 	/*! \brief Unitary direction associated with non-zero orig
 	 *
 	 * \note Specialzied for non-zero orig vector. There is no check
@@ -144,12 +165,11 @@ namespace peri
 	 */
 	inline
 	std::array<double, 3u>
-	unit
+	unit  // peri::
 		( std::array<double, 3u> const & orig
 		)
 	{
-		double const mag{ std::sqrt(dot(orig, orig)) };
-		return { (1./mag) * orig };
+		return { (1./magnitude(orig)) * orig };
 	}
 
 
@@ -166,7 +186,7 @@ namespace peri
 	 */
 	inline
 	XYZ
-	upFromLpa
+	upFromLpa  // peri::
 		( LPA const & lpa //!< Only Lon,Par are used: Alt is ignored
 		)
 	{
@@ -205,7 +225,7 @@ namespace peri
 	 * \arg #theLambda - The geometric mean of the two radii
 	 *
 	 * Shape coefficients useful in math expressions (ref doc/PerideticMath):
-	 * \arg #theMus - The squared radii values by index
+	 * \arg #theMuSqs - The squared radii values by index
 	 *
 	 * Data normalization:
 	 * \arg normalizedShape() - Conforming shape with unit characteristic size
@@ -222,14 +242,14 @@ namespace peri
 		double const theLambda{ sNan };
 
 		//! Coefficients describing geometric shape (i.e. {a^2, a^2, b^2})
-		std::array<double, 3u> const theMus{ sNan, sNan, sNan };
+		std::array<double, 3u> const theMuSqs{ sNan, sNan, sNan };
 
 	private:
 
 		//! Value construction
 		inline
 		explicit
-		Shape
+		Shape  // Shape::
 			( double const & radA
 				//!< Equatorial semi-axis magnitude
 			, double const & radB
@@ -238,7 +258,7 @@ namespace peri
 			: theRadA{ radA }
 			, theRadB{ radB }
 			, theLambda{ std::sqrt(theRadA * theRadB) }
-			, theMus{ sq(theRadA), sq(theRadA), sq(theRadB) }
+			, theMuSqs{ sq(theRadA), sq(theRadA), sq(theRadB) }
 		{ }
 
 	public:
@@ -247,7 +267,7 @@ namespace peri
 		static
 		inline
 		Shape
-		fromMajorInvFlat
+		fromMajorInvFlat  // Shape::
 			( double const & equatorialRadius
 				//!< Equatorial (semi-major) radius: for Earth~=6.378e6
 			, double const & invFlatFactor
@@ -261,13 +281,28 @@ namespace peri
 		}
 
 		//! A null instance (nan data member values)
-		Shape
+		Shape  // Shape::
 			() = default;
+
+		//! Algebraic (mis)closure relative to ellipsoid level surface
+		inline
+		XYZ
+		gradientAt  // Shape::
+			( XYZ const & pVec
+				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
+			) const
+		{
+			return
+				{ 2. * pVec[0] / theMuSqs[0]
+				, 2. * pVec[1] / theMuSqs[1]
+				, 2. * pVec[2] / theMuSqs[2]
+				};
+		}
 
 		//! A shape conformal to this one but with unit characteristic length.
 		inline
 		Shape
-		normalizedShape
+		normalizedShape  // Shape::
 			() const
 		{
 			double const normPerOrig{ 1. / theLambda };
@@ -290,7 +325,7 @@ namespace peri
 		//! Value construction.
 		inline
 		explicit
-		ShapeClosure
+		ShapeClosure // ShapeClosure::
 			( Shape const & shape
 			)
 			: theShape{ shape }
@@ -298,7 +333,7 @@ namespace peri
 		}
 
 		//! Default creates a null instance (member values are NaN)
-		ShapeClosure
+		ShapeClosure // ShapeClosure::
 			() = default;
 
 		/*! \brief Ellipsoid constraint function and derivative values.
@@ -311,21 +346,21 @@ namespace peri
 		 // * \arg [2]: Second derivative (with respect to sigma)
 		inline
 		std::array<double, 2u>
-		funcDerivs
+		funcDerivs // ShapeClosure::
 			( double const & sigma
 			, XYZ const & qVec
 			) const
 		{
 			std::array<double, 2u> fdfs;
 			XYZ const invMuPlusSigmas
-				{ 1. / (theShape.theMus[0] + sigma)
-				, 1. / (theShape.theMus[1] + sigma)
-				, 1. / (theShape.theMus[2] + sigma)
+				{ 1. / (theShape.theMuSqs[0] + sigma)
+				, 1. / (theShape.theMuSqs[1] + sigma)
+				, 1. / (theShape.theMuSqs[2] + sigma)
 				};
 			XYZ const muqSqs
-				{ theShape.theMus[0] * sq(qVec[0])
-				, theShape.theMus[1] * sq(qVec[1])
-				, theShape.theMus[2] * sq(qVec[2])
+				{ theShape.theMuSqs[0] * sq(qVec[0])
+				, theShape.theMuSqs[1] * sq(qVec[1])
+				, theShape.theMuSqs[2] * sq(qVec[2])
 				};
 			// function value - for ellipsoid condition equation
 			XYZ terms
@@ -371,9 +406,8 @@ namespace peri
 	 *
 	 * Employed notation includes:
 	 * \arg xVec - an arbitrary point in space ('orig' physical units)
-	 * \arg sVec - a point on surface of ellipsoid ('orig' physical units)
 	 * \arg qVec - normalized expression for xVec ('norm' units near 1)
-	 * \arg rVec - normalized expression for sVec ('norm' units near 1)
+	 * \arg zVec - a point on surface of ellipsoid ('norm' units near 1)
 	 */
 	struct Ellipsoid
 	{
@@ -390,7 +424,7 @@ namespace peri
 		//! Value construction
 		inline
 		explicit
-		Ellipsoid
+		Ellipsoid  // Ellipsoid::
 			( Shape const & shapeOrig
 			)
 			: theShapeOrig{ shapeOrig }
@@ -400,7 +434,7 @@ namespace peri
 		//! Characteristic size (geometric mean of original shape semi-axes)
 		inline
 		double
-		lambda
+		lambda  // Ellipsoid::
 			() const
 		{
 			return theShapeOrig.theLambda;
@@ -409,7 +443,7 @@ namespace peri
 		//! Cartesian vector normalized to working dimensions
 		inline
 		XYZ
-		xyzNormFrom
+		xyzNormFrom  // Ellipsoid::
 			( XYZ const & xVec
 			) const
 		{
@@ -424,7 +458,7 @@ namespace peri
 		//! Cartesian vector restored to original units
 		inline
 		XYZ
-		xyzOrigFrom
+		xyzOrigFrom  // Ellipsoid::
 			( XYZ const & xVec
 			) const
 		{
@@ -433,21 +467,6 @@ namespace peri
 				{ scl*xVec[0]
 				, scl*xVec[1]
 				, scl*xVec[2]
-				};
-		}
-
-		//! Algebraic (mis)closure relative to ellipsoid level surface
-		inline
-		XYZ
-		gradientAt
-			( XYZ const & rVec
-				//!< A point **ON** ellipse (i.e. assumes 0==funcValueAt(rVec))
-			) const
-		{
-			return
-				{ 2. * rVec[0] / theShapeNorm.theMus[0]
-				, 2. * rVec[1] / theShapeNorm.theMus[1]
-				, 2. * rVec[2] / theShapeNorm.theMus[2]
 				};
 		}
 
@@ -466,10 +485,10 @@ namespace peri
 	struct EarthModel
 	{
 
-	private:
-
 		//! Geometric representation of surface
 		Ellipsoid const theEllip{};
+
+	private:
 
 		//! Mathematical level condition associated with surface
 		ShapeClosure const theMeritFunc{};
@@ -486,7 +505,7 @@ namespace peri
 		//! Construct to match physical geometry description
 		inline
 		explicit
-		EarthModel
+		EarthModel  // Ellipsoid::
 			( Shape const & shape
 			)
 			: theEllip(shape)
@@ -496,19 +515,19 @@ namespace peri
 		//! Geodetic coordinates associated with Cartesian coordinates xVec
 		inline
 		LPA
-		lpaForXyz
+		lpaForXyz  // Ellipsoid::
 			( XYZ const & xVec
 			) const
 		{
 			// find point on ellipsoid closest to world point at xVec
-			XYZ const rVec{ rVecFor(xVec) };
-			// extract LP(A=0.) for point on ellipsoid at rVec
-			LPA const surfLPA{ lpaForSurfacePoint(rVec) };
-			// compute altitude as directed distance from ellipsoid at rVec
-			XYZ const grad{ theEllip.gradientAt(rVec) };
+			XYZ const pVec{ nearEllipsoidPointFor(xVec) };
+			// extract LP(A=0.) for point on ellipsoid at pVec
+			LPA const surfLPA{ lpaForSurfacePoint(pVec) };
+			// compute altitude as directed distance from ellipsoid at pVec
+			XYZ const grad{ theEllip.theShapeNorm.gradientAt(pVec) };
 			XYZ const up{ unit(grad) };
 			double const lambda{ theEllip.lambda() };
-			double const alt{ dot((xVec - lambda*rVec), up) };
+			double const alt{ dot((xVec - lambda*pVec), up) };
 			// return value as combo of LP and A computed results
 			return LPA{ surfLPA[0], surfLPA[1], alt };
 		}
@@ -516,7 +535,7 @@ namespace peri
 		//! Cartesian coordinates for geodetic location lpa
 		inline
 		XYZ
-		xyzForLpa
+		xyzForLpa  // Ellipsoid::
 			( LPA const & lpa
 			) const
 		{
@@ -524,18 +543,37 @@ namespace peri
 			// determine vertical direction at LP location
 			XYZ const up{ upFromLpa(lpa) };
 			// compute scaling coefficient
-			std::array<double, 3u> const & mus = theEllip.theShapeNorm.theMus;
+			std::array<double, 3u> const & muSqs
+				= theEllip.theShapeNorm.theMuSqs;
 			double const sumMuUpSq // positive since all mu values are positive
-				{ mus[0]*sq(up[0])
-				+ mus[1]*sq(up[1])
-				+ mus[2]*sq(up[2])
+				{ muSqs[0]*sq(up[0])
+				+ muSqs[1]*sq(up[1])
+				+ muSqs[2]*sq(up[2])
 				};
 			double const scl{ theEllip.lambda() / std::sqrt(sumMuUpSq) };
 			// compute Cartesian location as displacement along normal dir
 			return
-				{ (scl*mus[0] + alt) * up[0]
-				, (scl*mus[1] + alt) * up[1]
-				, (scl*mus[2] + alt) * up[2]
+				{ (scl*muSqs[0] + alt) * up[0]
+				, (scl*muSqs[1] + alt) * up[1]
+				, (scl*muSqs[2] + alt) * up[2]
+				};
+		}
+
+		//! Perpendicular projection (pVec) from xVec onto ellipsoid
+		inline
+		XYZ
+		nearEllipsoidPointFor  // Ellipsoid::
+			( XYZ const & xVec
+			) const
+		{
+			XYZ const qVec{ theEllip.xyzNormFrom(xVec) };
+			double const sigma{ sigmaFor(qVec) };
+			std::array<double, 3u> const & muSqs
+				= theEllip.theShapeNorm.theMuSqs;
+			return
+				{ muSqs[0] * qVec[0] / (muSqs[0] + sigma)
+				, muSqs[1] * qVec[1] / (muSqs[1] + sigma)
+				, muSqs[2] * qVec[2] / (muSqs[2] + sigma)
 				};
 		}
 
@@ -544,7 +582,7 @@ namespace peri
 		//! A linearly refined improvement to altitude scale factor currSigma
 		inline
 		double
-		nextSigmaFor
+		nextSigmaFor  // Ellipsoid::
 			( double const & currSigma
 			, XYZ const & qVec
 			) const
@@ -563,7 +601,7 @@ namespace peri
 		//! Initial estimate for sigma factor (based on sphere approximation)
 		inline
 		double
-		sigmaSphericalApprox
+		sigmaSphericalApprox  // Ellipsoid::
 			( XYZ const & qVec
 			) const
 		{
@@ -574,7 +612,7 @@ namespace peri
 		//! Refined altitude scale factor at normalized point location qVec
 		inline
 		double
-		sigmaFor
+		sigmaFor  // Ellipsoid::
 			( XYZ const & qVec
 			) const
 		{
@@ -599,31 +637,15 @@ namespace peri
 			return sigma;
 		}
 
-		//! Normalized point, rVec, on ellipsoid surface nearest original, xVec
-		inline
-		XYZ
-		rVecFor
-			( XYZ const & xVec
-			) const
-		{
-			XYZ const qVec{ theEllip.xyzNormFrom(xVec) };
-			double const sigma{ sigmaFor(qVec) };
-			std::array<double, 3u> const & mus = theEllip.theShapeNorm.theMus;
-			return
-				{ mus[0] * qVec[0] / (mus[0] + sigma)
-				, mus[1] * qVec[1] / (mus[1] + sigma)
-				, mus[2] * qVec[2] / (mus[2] + sigma)
-				};
-		}
-
 		//! Geodetic (Lon/Par) angles for point on ellipsoid surface (0==Alt).
 		inline
 		LPA
-		lpaForSurfacePoint
-			( XYZ const & rVec
+		lpaForSurfacePoint  // Ellipsoid::
+			( XYZ const & pVec
+				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
 			) const
 		{
-			XYZ const grad{ theEllip.gradientAt(rVec) };
+			XYZ const grad{ theEllip.theShapeNorm.gradientAt(pVec) };
 			// familiar notation
 			double const & xx = grad[0];
 			double const & yy = grad[1];

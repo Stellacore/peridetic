@@ -44,13 +44,12 @@ Simplicity, simplicity, simplicity, lightweight, small and easy.
 #### _Useful_:
 
 Provides the two most fundamental and ubiquitous geodetic/rectangular
-coordinate transformations which can be used to obtain:
+coordinate transformations (ref [examples](#Definitive-Example-Code))
+which can be used to obtain:
 
 * Longitude/Parallel(latitude)/(ellipsoidal)Altitude from Cartesian (XYZ)
 
 * Cartesian XYZ coordinates from Longitude/Parallel/Altitude
-
-For details ref [examples](#Definitive-Example-Code) section.
 
 #### _Applications_:
 
@@ -150,11 +149,13 @@ for locations "near" (within +/- 100[km]) of Earth's ellipsoidal surface.
 
 ### Project Name
 
-The project name, Peridetic, is a catenation of "PERI" and "geoDETIC"
-and is reflective of geodetic operations designed to be highly
-performant within the important practical domain of operation "near"
-(within approximately +/- 100[km]) Earth's surface (ref: [domain of
-validity](#domain-of-validity)).
+The project name, Peridetic, is a catenation of "PERI" and [geo]"DETIC".
+The components are associated with Greek words "peri", meaning near
+and around (to Earth's surface), and "daiesthai" meaning "to divide"
+(into measurable units). The name Peredetic is intended to be refelctive
+of geodetic operations that are highly performant within the important
+practical domain of operation within approximately +/- 100[km] Earth's
+surface (ref: [domain of validity](#domain-of-validity)).
 
 ### Project Contributions
 
