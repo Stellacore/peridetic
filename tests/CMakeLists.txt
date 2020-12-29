@@ -37,6 +37,8 @@ set(perideticTests
 	testAccuracy # check transformation external accuracy (vs CORS data)
 	testMath # check various ellipsoid relationships
 
+	demoExcess # evaluate elliptical excess over large range of values
+
 	)
 
 # build exectutables
