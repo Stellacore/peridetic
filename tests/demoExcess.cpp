@@ -149,7 +149,7 @@ namespace peri::sim
 
 	//! Samples covering meridian plane (spherically distributed)
 	std::vector<XYZ>
-	merdianPlaneSamples
+	meridianPlaneSamples
 		( SampleSpec const & radSpec
 		, SampleSpec const & parSpec
 		, double const & lonVal = .25*pi() 
@@ -186,30 +186,30 @@ namespace
 		( std::ostream & ostrm
 		, peri::sim::SampleSpec const & radSpec
 		, peri::sim::SampleSpec const & parSpec
+		, peri::EarthModel const & earth
 		, bool const & showSamples = false
 		)
 	{
 		int errCount{ 0u };
 
-		peri::EarthModel const earth{ peri::model::WGS84 };
 		peri::Shape const & shape = earth.theEllip.theShapeOrig;
 
 		using namespace  peri::sim;
 		std::vector<peri::XYZ> const xyzs
-			{ merdianPlaneSamples(radSpec, parSpec) };
+			{ meridianPlaneSamples(radSpec, parSpec) };
 
 		std::vector<double> extras{};
 		extras.reserve(xyzs.size());
 		for (peri::XYZ const & xyz : xyzs)
 		{
 			peri::XYZ const & xVec = xyz;
-			peri::LPA const xLpa{ peri::lpaForXyz(xVec) };
+			peri::LPA const xLpa{ peri::lpaForXyz(xVec, earth) };
 			double const & eta = xLpa[2];
 
 			peri::XYZ const xDir{ peri::unit(xVec) };
 
 			peri::LPA const pLpa{ xLpa[0], xLpa[1], 0. };
-			peri::XYZ const pVec{ peri::xyzForLpa(pLpa) };
+			peri::XYZ const pVec{ peri::xyzForLpa(pLpa, earth) };
 
 			double const rMag{ peri::ellip::radiusToward(xDir, shape) };
 			using peri::operator*;
@@ -229,14 +229,15 @@ namespace
 			peri::XYZ const gpVec{ shape.gradientAt(pVec) };
 			double const gpMag{ peri::magnitude(gpVec) };
 			peri::XYZ const grVec{ shape.gradientAt(rVec) };
-			//double const grMag{ peri::magnitude(grVec) };
-			//double const gRatio{ grMag / gpMag };
-			peri::XYZ const gDifVec{ grVec - gpVec };
-			double const gDifMag{ peri::magnitude(gDifVec) };
+			double const grMag{ peri::magnitude(grVec) };
+			double const gRatio{ grMag / gpMag };
+			double const rEps{ gRatio - 1. };
+		//	peri::XYZ const gDifVec{ grVec - gpVec };
+		//	double const gDifMag{ peri::magnitude(gDifVec) };
 
 			// compute deltaEta, deltaSigma
 			double const delEta{ xrMag - xpMag };
-			double const delSig{ (2./gpMag) * delEta };
+			double const dEtaPerR{ delEta / rMag };
 
 			if (showSamples)
 			{
@@ -249,9 +250,9 @@ namespace
 				//	<< " " << peri::string::fixedLinear(xrMag, "xrMag")
 				//	<< " " << peri::string::fixedLinear(xpMag, "xpMag")
 					<< " " << peri::string::fixedLinear(extra, "extra")
-					<< " " << peri::string::allDigits(gDifMag, "gDifMag")
+					<< " " << peri::string::allDigits(rEps, "rEps")
 					<< " " << peri::string::allDigits(delEta, "delEta")
-					<< " " << peri::string::allDigits(delSig, "delSig")
+					<< " " << peri::string::allDigits(dEtaPerR, "dEtaPerR")
 					<< std::endl;
 			}
 		}
@@ -280,14 +281,28 @@ main
 
 	std::ofstream ofs("/dev/stdout");
 
-	double const radEarth{ peri::Ellipsoid(peri::shape::sWGS84).lambda() };
-	double const radMin{ radEarth - 100.e+3 };
-	double const radMax{ radEarth + 100.e+3 };
+//#define UseNorm
+#if defined(UseNorm)
+	peri::Shape const shape(peri::shape::sWGS84.normalizedShape());
+	constexpr double altLo{ -(100./6370.) };
+	constexpr double altHi{  (100./6370.) };
+#else
+	peri::Shape const shape(peri::shape::sWGS84);
+	constexpr double altLo{ -100.e+3 };
+	constexpr double altHi{  100.e+3 };
+#endif
+
+	peri::EarthModel const earth(shape);
+	peri::Ellipsoid const & ellip = earth.theEllip;
+
+	double const radEarth{ ellip.lambda() };
+	double const radMin{ radEarth + altLo };
+	double const radMax{ radEarth + altHi };
 	using Range = std::pair<double, double>;
 	peri::sim::SampleSpec const radSpec{ 3u, Range{ radMin, radMax } };
 	peri::sim::SampleSpec const parSpec{ 5u, Range{ 0.,  .5*peri::pi()} };
 
-	errCount += test1(ofs, radSpec, parSpec, true);
+	errCount += test1(ofs, radSpec, parSpec, earth, true);
 	return errCount;
 }
 
