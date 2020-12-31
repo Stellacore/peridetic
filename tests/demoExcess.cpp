@@ -269,6 +269,187 @@ namespace
 		return errCount;
 	}
 
+	//! Evaluate math equations for ellipsoidal excess at this point
+	int
+	checkXYZ
+		( peri::XYZ const & xVecExp
+		, peri::EarthModel const & earth
+		)
+	{
+		using namespace peri;
+
+		Shape const & shape = earth.theEllip.theShapeOrig;
+
+		LPA const xLpaExp{ lpaForXyz(xVecExp, earth) };
+		double const & etaExp = xLpaExp[2];
+		XYZ const pLpaExp{ xLpaExp[0], xLpaExp[1], 0. };
+		XYZ const pVecExp{ xyzForLpa(pLpaExp, earth) };
+		XYZ const uVecExp{ upFromLpa(xLpaExp) };
+
+		double const rhoExp{ peri::ellip::radiusToward(xVecExp, shape) };
+		XYZ const rVecExp{ rhoExp * unit(xVecExp) };
+
+		XYZ const gpVecExp{ shape.gradientAt(pVecExp) };
+		XYZ const grVecExp{ shape.gradientAt(rVecExp) };
+		double const gpMagExp{ magnitude(gpVecExp) };
+		double const grMagExp{ magnitude(grVecExp) };
+		double const rEps{ (grMagExp / gpMagExp) - 1. };
+
+		/*
+		XYZ const xVecChk{ pVecExp + etaExp * uVecExp };
+		XYZ const xVecDif{ xVecChk - xVecExp };
+		double const xMagDif{ magnitude(xVecDif) };
+		*/
+
+		double const eta0{ magnitude(xVecExp - rVecExp) };
+		double const delta{ eta0 - etaExp };
+
+		double const zeta{ eta0*rEps - delta - delta*rEps };
+
+		using Array = std::array<double, 3u>;
+		Array const & muSqs = shape.theMuSqs;
+		Array const fgkFwds
+			{ (2./muSqs[0]) / grMagExp
+			, (2./muSqs[1]) / grMagExp
+			, (2./muSqs[2]) / grMagExp
+			};
+		Array const fgkInvs{ 1./fgkFwds[0], 1./fgkFwds[1], 1./fgkFwds[2] };
+		Array const s1ks
+			{ 1. / (fgkInvs[0] + eta0)
+			, 1. / (fgkInvs[1] + eta0)
+			, 1. / (fgkInvs[2] + eta0)
+			};
+		Array const b1ks
+			{ xVecExp[0] * fgkInvs[0]
+			, xVecExp[1] * fgkInvs[1]
+			, xVecExp[2] * fgkInvs[2]
+			};
+		Array const n1ks
+			{ s1ks[0] * b1ks[0]
+			, s1ks[1] * b1ks[1]
+			, s1ks[2] * b1ks[2]
+			};
+
+		Array const pkSqExps{ sq(pVecExp[0]), sq(pVecExp[1]), sq(pVecExp[2]) };
+		Array const pkSqGots
+			{ sq(n1ks[0]) / sq(1. + zeta*s1ks[0])
+			, sq(n1ks[1]) / sq(1. + zeta*s1ks[1])
+			, sq(n1ks[2]) / sq(1. + zeta*s1ks[2])
+			};
+		double const fConExp
+			{ pkSqExps[0] / muSqs[0]
+			+ pkSqExps[1] / muSqs[1]
+			+ pkSqExps[2] / muSqs[2]
+			- 1.
+			};
+		double const fConGot
+			{ pkSqGots[0] / muSqs[0]
+			+ pkSqGots[1] / muSqs[1]
+			+ pkSqGots[2] / muSqs[2]
+			- 1.
+			};
+
+		double coA{ 0. };
+		double coB{ 0. };
+		double coC{ 0. };
+		for (std::size_t kk{0u} ; kk < 3u ; ++kk)
+		{
+			double const nPerMuSq{ sq(n1ks[kk]) / muSqs[kk] };
+			coA += nPerMuSq * sq(s1ks[kk]);
+			coB += nPerMuSq * s1ks[kk];
+			coC += nPerMuSq;
+		}
+		coA *= 3.;
+		coC -= 1.;
+
+		double const quadExp{ 0. };
+		double const quadGot{ coA*zeta*zeta -2.*coB*zeta + coC };
+
+		double const & zetaExp = zeta;
+		double const radical{ std::sqrt(coB*coB - coA*coC) };
+		double const zetaGot{ (coB - radical) / coA };
+		double const zetaDif{ zetaGot - zetaExp };
+
+		double const egExp{ etaExp / grMagExp };
+		double const egGot{ (zeta + eta0) / grMagExp };
+		double const egDif{ egGot - egExp };
+		double const egFrac{ egDif / egExp };
+
+		XYZ const pVecGot
+			{ xVecExp[0] / (1. + 2. * (egGot/muSqs[0]))
+			, xVecExp[1] / (1. + 2. * (egGot/muSqs[1]))
+			, xVecExp[2] / (1. + 2. * (egGot/muSqs[2]))
+			};
+		XYZ const pVecDif{ pVecGot - pVecExp };
+		double const pMagDif{ magnitude(pVecDif) };
+
+		// peri::Shape const & shape = earth.theEllip.theShapeOrig;
+		/*
+		std::cout << std::endl;
+		std::cout << string::fixedLinear(etaExp, "etaExp") << std::endl;
+		std::cout << xyz::infoString(xVecExp, "xVecExp") << std::endl;
+		std::cout << lpa::infoString(xLpaExp, "xLpaExp") << std::endl;
+		std::cout << xyz::infoString(uVecExp, "uVecExp") << std::endl;
+		std::cout << string::allDigits(rEps, "rEps") << std::endl;
+		std::cout << string::allDigits(etaExp, "etaExp") << std::endl;
+		std::cout << string::allDigits(eta0, "eta0") << std::endl;
+		std::cout << string::allDigits(delta, "delta") << std::endl;
+		std::cout << string::allDigits(zeta, "zeta") << std::endl;
+		std::cout << xyz::infoString(pkSqExps, "pkSqExps") << std::endl;
+		std::cout << xyz::infoString(pkSqGots, "pkSqGots") << std::endl;
+		std::cout << xyz::infoString(s1ks, "s1ks") << std::endl;
+		std::cout << xyz::infoString(b1ks, "b1ks") << std::endl;
+		std::cout << xyz::infoString(n1ks, "n1ks") << std::endl;
+		std::cout << string::allDigits(fConExp, "fConExp") << std::endl;
+		std::cout << string::allDigits(fConGot, "fConGot") << std::endl;
+		std::cout << string::allDigits(quadExp, "quadExp") << std::endl;
+		std::cout << string::allDigits(quadGot, "quadGot") << std::endl;
+		std::cout << string::allDigits(zetaExp, "zetaExp") << std::endl;
+		std::cout << string::allDigits(zetaGot, "zetaGot") << std::endl;
+		std::cout << string::allDigits(zetaDif, "zetaDif") << std::endl;
+		std::cout << string::allDigits(egExp, "egExp") << std::endl;
+		std::cout << string::allDigits(egGot, "egGot") << std::endl;
+		std::cout << string::allDigits(egDif, "egDif") << std::endl;
+		std::cout << string::allDigits(egFrac, "egFrac") << std::endl;
+		std::cout << string::allDigits(pVecExp, "pVecExp") << std::endl;
+		std::cout << string::allDigits(pVecGot, "pVecGot") << std::endl;
+		std::cout << string::allDigits(pVecDif, "pVecDif") << std::endl;
+		*/
+
+		std::cout
+			<< lpa::infoString(xLpaExp, "xLpaExp")
+			<< " "
+			<< xyz::infoString(pVecDif, "pVecDif")
+			<< " "
+			<< string::allDigits(pMagDif, "pMagDif")
+			<< std::endl;
+		return 0;
+	}
+
+	//! Check equations on sampling of points
+	int
+	test2
+		( peri::sim::SampleSpec const & radSpec
+		, peri::sim::SampleSpec const & parSpec
+		, peri::EarthModel const & earth
+		)
+	{
+		int errCount{ 0u };
+
+		using namespace  peri::sim;
+		std::vector<peri::XYZ> const xyzs
+			{ meridianPlaneSamples(radSpec, parSpec) };
+//errCount += checkXYZ(xyzs[5], earth);
+		for (peri::XYZ const & xyz : xyzs)
+		{
+			errCount += checkXYZ(xyz, earth);
+		}
+		/*
+		*/
+		return errCount;
+
+	}
+
 } // [annon]
 
 
@@ -279,8 +460,11 @@ main
 {
 	int errCount{ 0 };
 
-	std::ofstream ofs("/dev/stdout");
+//	std::ofstream ofs("/dev/stdout");
+std::ofstream ofs("/dev/null");
 
+	constexpr std::size_t numRad{ 33u };
+	constexpr std::size_t numPar{ 33u };
 //#define UseNorm
 #if defined(UseNorm)
 	peri::Shape const shape(peri::shape::sWGS84.normalizedShape());
@@ -299,10 +483,14 @@ main
 	double const radMin{ radEarth + altLo };
 	double const radMax{ radEarth + altHi };
 	using Range = std::pair<double, double>;
-	peri::sim::SampleSpec const radSpec{ 3u, Range{ radMin, radMax } };
-	peri::sim::SampleSpec const parSpec{ 5u, Range{ 0.,  .5*peri::pi()} };
+	peri::sim::SampleSpec const radSpec{ numRad, Range{ radMin, radMax } };
+	peri::sim::SampleSpec const parSpec{ numPar, Range{ 0.,  .5*peri::pi()} };
 
 	errCount += test1(ofs, radSpec, parSpec, earth, true);
+	std::cout << '\n';
+	errCount += test2(radSpec, parSpec, earth);
+	std::cout << '\n';
+
 	return errCount;
 }
 
