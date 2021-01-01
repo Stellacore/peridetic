@@ -183,11 +183,10 @@ namespace
 {
 	int
 	test1
-		( std::ostream & ostrm
-		, peri::sim::SampleSpec const & radSpec
+		( peri::sim::SampleSpec const & radSpec
 		, peri::sim::SampleSpec const & parSpec
 		, peri::EarthModel const & earth
-		, bool const & showSamples = false
+		, std::ostream & ofsExcess
 		)
 	{
 		int errCount{ 0u };
@@ -239,33 +238,33 @@ namespace
 			double const delEta{ xrMag - xpMag };
 			double const dEtaPerR{ delEta / rMag };
 
-			if (showSamples)
-			{
-				ostrm
-				//	<< " xVec: " << peri::xyz::infoString(xVec)
-				//	<< " xLpa: " << peri::lpa::infoString(xLpa)
-			//		<< " Lon: " << peri::string::fixedAngular(xLpa[0])
-					<< " Par: " << peri::string::fixedAngular(xLpa[1])
-					<< " Alt: " << peri::string::allDigits(eta)
-				//	<< " " << peri::string::fixedLinear(xrMag, "xrMag")
-				//	<< " " << peri::string::fixedLinear(xpMag, "xpMag")
-					<< " " << peri::string::fixedLinear(extra, "extra")
-					<< " " << peri::string::allDigits(rEps, "rEps")
-					<< " " << peri::string::allDigits(delEta, "delEta")
-					<< " " << peri::string::allDigits(dEtaPerR, "dEtaPerR")
-					<< std::endl;
-			}
+			// info for analysis
+			ofsExcess
+			//	<< " xVec: " << peri::xyz::infoString(xVec)
+			//	<< " xLpa: " << peri::lpa::infoString(xLpa)
+			//	<< " Lon: " << peri::string::fixedAngular(xLpa[0])
+				<< " Par: " << peri::string::fixedAngular(xLpa[1])
+				<< " Alt: " << peri::string::allDigits(eta)
+			//	<< " " << peri::string::fixedLinear(xrMag, "xrMag")
+			//	<< " " << peri::string::fixedLinear(xpMag, "xpMag")
+				<< " " << peri::string::fixedLinear(extra, "extra")
+				<< " " << peri::string::allDigits(rEps, "rEps")
+				<< " " << peri::string::allDigits(delEta, "delEta")
+				<< " " << peri::string::allDigits(dEtaPerR, "dEtaPerR")
+				<< std::endl;
 		}
 
 		if (! extras.empty())
 		{
 			std::sort(extras.begin(), extras.end());
 			using peri::string::fixedLinear;
-			ostrm << "# minExcess: " << fixedLinear(extras.front()) << '\n';
-			ostrm << "# maxExcess: " << fixedLinear(extras.back()) << '\n';
+			ofsExcess << "# minExcess: " << fixedLinear(extras.front()) << '\n';
+			ofsExcess << "# maxExcess: " << fixedLinear(extras.back()) << '\n';
 		}
 
-++errCount;
+		// needs work to define what is a reasonable test
+		// ++errCount;
+
 		return errCount;
 	}
 
@@ -313,11 +312,11 @@ namespace
 		enum Method
 		{
 			  Exact   // exact root to (approximating) quadratic
-			, Approx1 // first order approximation
-			, Approx2 // second order approximation
-			, Approx3 // third order approximation
+			, Approx1
+			, Approx2
+			, Approx3
 		};
-		Method const method{ Approx2 };
+		Method const method{ Approx2 }; // 2nd is at numeric limits
 
 		// shorthand notation
 		double const & coA = coABCs[0];
@@ -340,6 +339,8 @@ namespace
 				break;
 			// approx roots to (approximating) quadratic - of various orders
 			case Approx1:
+				// first order approximation
+				// precise to about 1.e-7 [m] (between +/- 1000[km])
 				{
 				double const zetaApx1
 					{ (.5 * fracCoB) };
@@ -347,6 +348,8 @@ namespace
 				}
 				break;
 			case Approx2:
+				// second order approximation
+				// precise to about 1.e-8 [m] (between +/- 1000[km])
 				{
 				double const zetaApx2
 					{ (.5 * fracCoB) * (1 + (1./4.)*xArg) };
@@ -354,6 +357,9 @@ namespace
 				}
 				break;
 			case Approx3:
+				// third order approximation
+				// precision UNmeasureable
+				// second order approx is already in computation noise
 				{
 				double const zetaApx3
 					{ (.5 * fracCoB) * (1. + ((1./4.) + (1./8.)*xArg)*xArg) };
@@ -406,7 +412,6 @@ namespace
 		return pVec;
 	}
 
-
 	//! Evaluate math equations for ellipsoidal excess at this point
 	int
 	checkXYZ
@@ -415,6 +420,7 @@ namespace
 		, std::ofstream & ostrm
 		)
 	{
+		int errCount{ 0u };
 		using namespace peri;
 
 		// compute pLocation based on perturbation expansion
@@ -427,7 +433,22 @@ namespace
 
 		// error amount
 		XYZ const pVecDif{ pVecGot - pVecExp };
+
 		double const pMagDif{ magnitude(pVecDif) };
+
+		// check that precision of computation
+		double const pMagExp{ magnitude(pVecExp) };
+		double const pMagTol{ pMagExp * 1.e-15 };
+		if (! (pMagDif < pMagTol))
+		{
+			std::cerr << "FAILURE of precision test on pMagDif" << '\n';
+			std::cerr << xyz::infoString(pVecExp, "pVecExp") << '\n';
+			std::cerr << xyz::infoString(pVecGot, "pVecGot") << '\n';
+			std::cerr << string::allDigits(pVecDif, "pVecDif") << '\n';
+			std::cerr << string::allDigits(pMagDif, "pMagDif") << '\n';
+			std::cerr << string::allDigits(pMagTol, "pMagTol") << '\n';
+			++errCount;
+		}
 
 		// save evaluation data
 		ostrm
@@ -436,8 +457,9 @@ namespace
 			<< xyz::infoString(pVecDif, "pVecDif")
 			<< " "
 			<< string::allDigits(pMagDif, "pMagDif")
-			<< std::endl;
-		return 0;
+			<< '\n';
+
+		return errCount;
 	}
 
 	//! Check equations on sampling of points
@@ -446,6 +468,7 @@ namespace
 		( peri::sim::SampleSpec const & radSpec
 		, peri::sim::SampleSpec const & parSpec
 		, peri::EarthModel const & earth
+		, std::ofstream & ofsDifPVec
 		)
 	{
 		int errCount{ 0u };
@@ -453,7 +476,6 @@ namespace
 		using namespace  peri::sim;
 		std::vector<peri::XYZ> const xyzs
 			{ meridianPlaneSamples(radSpec, parSpec) };
-		std::ofstream ofsDifPVec("pvecDiff.dat");
 		for (peri::XYZ const & xyz : xyzs)
 		{
 			errCount += checkXYZ(xyz, earth, ofsDifPVec);
@@ -472,11 +494,20 @@ main
 {
 	int errCount{ 0 };
 
-//	std::ofstream ofs("/dev/stdout");
-std::ofstream ofs("/dev/null");
+	// optionally save data to files for analysis
+	std::ofstream ofsExcess
+		(
+		"/dev/null"
+	//	"/dev/stdout"
+		);
+	std::ofstream ofsDifPVec
+		(
+		"/dev/null"
+	//	"pvecDiff.dat"
+		);
 
-	constexpr std::size_t numRad{ 33u };
-	constexpr std::size_t numPar{ 333u };
+	constexpr std::size_t numRad{  32u + 1u };
+	constexpr std::size_t numPar{ 256u + 1u }; // odd number hits at 45-deg Lat
 //#define UseNorm
 #if defined(UseNorm)
 	peri::Shape const shape(peri::shape::sWGS84.normalizedShape());
@@ -484,8 +515,8 @@ std::ofstream ofs("/dev/null");
 	constexpr double altHi{  (100./6370.) };
 #else
 	peri::Shape const shape(peri::shape::sWGS84);
-	constexpr double altLo{ -100.e+3 };
-	constexpr double altHi{  100.e+3 };
+	constexpr double altLo{ -100. * 1.e+3 };
+	constexpr double altHi{  100. * 1.e+3 };
 #endif
 
 	peri::EarthModel const earth(shape);
@@ -498,10 +529,8 @@ std::ofstream ofs("/dev/null");
 	peri::sim::SampleSpec const radSpec{ numRad, Range{ radMin, radMax } };
 	peri::sim::SampleSpec const parSpec{ numPar, Range{ 0.,  .5*peri::pi()} };
 
-	errCount += test1(ofs, radSpec, parSpec, earth, true);
-	std::cout << '\n';
-	errCount += test2(radSpec, parSpec, earth);
-	std::cout << '\n';
+	errCount += test1(radSpec, parSpec, earth, ofsExcess);
+	errCount += test2(radSpec, parSpec, earth, ofsDifPVec);
 
 	return errCount;
 }
