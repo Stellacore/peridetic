@@ -301,6 +301,69 @@ namespace
 		return coABCs;
 	}
 
+	//! Evaluate (relevant) root for the 'zeta' quadratic function.
+	inline
+	double
+	zetaRootFor
+		( std::array<double, 3u> const & coABCs
+		)
+	{
+		double zeta{ peri::sNan };
+
+		enum Method
+		{
+			  Exact   // exact root to (approximating) quadratic
+			, Approx1 // first order approximation
+			, Approx2 // second order approximation
+			, Approx3 // third order approximation
+		};
+		Method const method{ Approx2 };
+
+		// shorthand notation
+		double const & coA = coABCs[0];
+		double const & coB = coABCs[1];
+		double const & coC = coABCs[2];
+
+		// xArg is a relatively small quantity (used in series expansion)
+		double const fracCoB{ coC / coB };
+		double const xArg{ fracCoB * (coA / coB) };
+
+		switch (method)
+		{
+			// exact root to quadratic (which only approximates ellipsoid)
+			case Exact:
+				{
+				double const radical{ std::sqrt(1. - xArg) };
+				double const zetaExact{ (coB / coA) * (1. - radical) };
+				zeta = zetaExact;
+				}
+				break;
+			// approximate roots to approximation quadratic
+			case Approx1:
+				{
+				double const zetaApx1
+					{ (.5 * fracCoB) };
+				zeta = zetaApx1;
+				}
+				break;
+			case Approx2:
+				{
+				double const zetaApx2
+					{ (.5 * fracCoB) * (1 + (1./4.)*xArg) };
+				zeta = zetaApx2;
+				}
+				break;
+			case Approx3:
+				{
+				double const zetaApx3
+					{ (.5 * fracCoB) * (1. + ((1./4.) + (1./8.)*xArg)*xArg) };
+				zeta = zetaApx3;
+				}
+				break;
+		}
+		return zeta;
+	}
+
 	//! Compute point on ellipsoid, p, using perturbation expansion
 	peri::XYZ
 	pVecViaExcess
@@ -322,33 +385,16 @@ namespace
 		// radial pseudo-altitude
 		double const eta0{ magnitude(xVec - rVec) };
 
-		// TODO(name?) fraction components
-		std::array<double, 3u> const & muSqs = shape.theMuSqs;
-
+		// form and solve 'zeta' quadratic
 		std::array<double, 3u> const coABCs
 			{ zetaCoefficients(xVec, eta0, grMag, shape) };
-		double const & coA = coABCs[0];
-		double const & coB = coABCs[1];
-		double const & coC = coABCs[2];
+		double const zeta{ zetaRootFor(coABCs) };
 
-		double const xArg{ (coA * coC) / sq(coB) };
-	//	double const radical{ std::sqrt(1. - xArg) };
-	//	double const zetaExact{ (coB / coA) * (1. - radical) };
-
-		// approximations
-		double const fracCoB{ coC / coB };
-		// first order approximation
-	//	double const zetaApx1
-	//		{ fracCoB * (1./2.) };
-		// second order approximation
-		double const zetaApx2
-			{ fracCoB * (1./2. + (1./8.)*xArg) };
-	//	double const zetaApx3
-	//		{ (.5 * fracCoB) * (1. + ((1./4.) + (1./8.)*xArg)*xArg) };
-
-		double const & zeta = zetaApx2;
+		// compute correction factor for adjusting location coordinates
 		double const correction{ 2. * (zeta + eta0) / grMag };
 
+		// compute point on ellipse
+		std::array<double, 3u> const & muSqs = shape.theMuSqs;
 		XYZ const pVec
 			{ xVec[0] / (1. + (correction/muSqs[0]))
 			, xVec[1] / (1. + (correction/muSqs[1]))
@@ -372,15 +418,16 @@ namespace
 		// compute pLocation based on perturbation expansion
 		XYZ const pVecGot{ pVecViaExcess(xVecExp, earth) };
 
-		// Quantities for checking values
+		// quantities for checking values
 		LPA const xLpaExp{ lpaForXyz(xVecExp, earth) };
 		XYZ const pLpaExp{ xLpaExp[0], xLpaExp[1], 0. };
 		XYZ const pVecExp{ xyzForLpa(pLpaExp, earth) };
 
-		// Error amount
+		// error amount
 		XYZ const pVecDif{ pVecGot - pVecExp };
 		double const pMagDif{ magnitude(pVecDif) };
 
+		// save evaluation data
 		ostrm
 			<< lpa::infoString(xLpaExp, "xLpaExp")
 			<< " "
@@ -427,7 +474,7 @@ main
 std::ofstream ofs("/dev/null");
 
 	constexpr std::size_t numRad{ 33u };
-	constexpr std::size_t numPar{ 33u };
+	constexpr std::size_t numPar{ 333u };
 //#define UseNorm
 #if defined(UseNorm)
 	peri::Shape const shape(peri::shape::sWGS84.normalizedShape());
