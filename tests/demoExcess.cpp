@@ -269,69 +269,67 @@ namespace
 		return errCount;
 	}
 
-/*
-std::ofstream sOfsExact("zetaExact.dat");
-std::ofstream sOfsApprox1("zetaApprox1.dat");
-std::ofstream sOfsApprox2("zetaApprox2.dat");
-std::ofstream sOfsApprox3("zetaApprox3.dat");
-*/
-std::ofstream ofsDifPVec("pvecDiff.dat");
+	//! Coefficients for quadratic function in 'zeta' (corrections to alt)
+	std::array<double, 3u>
+	zetaCoefficients
+		( peri::XYZ const & xVec
+		, double const & eta0
+		, double const & grMag
+		, peri::Shape const & shape
+		)
+	{
+		std::array<double, 3u> coABCs{ 0., 0., 0. };
+		std::array<double, 3u> const & muSqs = shape.theMuSqs;
+		double & coA = coABCs[0];
+		double & coB = coABCs[1];
+		double & coC = coABCs[2];
+		for (std::size_t kk{0u} ; kk < 3u ; ++kk)
+		{
+			// compute common factor (and contributing element s1k)
+			double const fgkInv{ .5 * grMag * muSqs[kk] };
+			double const s1k{ 1. / (fgkInv + eta0) };
+			double const n1k{ s1k * fgkInv * xVec[kk] };
+			double const nPerMuSq{ peri::sq(n1k) / muSqs[kk] };
+			// update coefficients
+			coA += nPerMuSq * s1k * s1k;
+			coB += nPerMuSq * s1k;
+			coC += nPerMuSq;
+		}
+		// adjust coefficients with mulpliers and offsets
+		coA *= 3.;
+		coC -= 1.;
+		return coABCs;
+	}
 
-	//! Evaluate math equations for ellipsoidal excess at this point
-	int
-	checkXYZ
-		( peri::XYZ const & xVecExp
+	//! Compute point on ellipsoid, p, using perturbation expansion
+	peri::XYZ
+	pVecViaExcess
+		( peri::XYZ const & xVec
 		, peri::EarthModel const & earth
 		)
 	{
 		using namespace peri;
-
 		Shape const & shape = earth.theEllip.theShapeOrig;
 
 		// radial point on ellipsoid
-		double const rhoExp{ peri::ellip::radiusToward(xVecExp, shape) };
-		XYZ const rVecExp{ rhoExp * unit(xVecExp) };
+		double const rho{ peri::ellip::radiusToward(xVec, shape) };
+		XYZ const rVec{ rho * unit(xVec) };
 
 		// gradient at radial point
-		XYZ const grVecExp{ shape.gradientAt(rVecExp) };
-		double const grMagExp{ magnitude(grVecExp) };
-
-		// TODO(name?) fraction components
-		using Array = std::array<double, 3u>;
-		Array const & muSqs = shape.theMuSqs;
-		Array const fgkFwds
-			{ (2./muSqs[0]) / grMagExp
-			, (2./muSqs[1]) / grMagExp
-			, (2./muSqs[2]) / grMagExp
-			};
-		Array const fgkInvs{ 1./fgkFwds[0], 1./fgkFwds[1], 1./fgkFwds[2] };
+		XYZ const grVec{ shape.gradientAt(rVec) };
+		double const grMag{ magnitude(grVec) };
 
 		// radial pseudo-altitude
-		double const eta0{ magnitude(xVecExp - rVecExp) };
+		double const eta0{ magnitude(xVec - rVec) };
 
-		Array const s1ks
-			{ 1. / (fgkInvs[0] + eta0)
-			, 1. / (fgkInvs[1] + eta0)
-			, 1. / (fgkInvs[2] + eta0)
-			};
-		Array const n1ks
-			{ s1ks[0] * xVecExp[0] * fgkInvs[0]
-			, s1ks[1] * xVecExp[1] * fgkInvs[1]
-			, s1ks[2] * xVecExp[2] * fgkInvs[2]
-			};
+		// TODO(name?) fraction components
+		std::array<double, 3u> const & muSqs = shape.theMuSqs;
 
-		double coA{ 0. };
-		double coB{ 0. };
-		double coC{ 0. };
-		for (std::size_t kk{0u} ; kk < 3u ; ++kk)
-		{
-			double const nPerMuSq{ sq(n1ks[kk]) / muSqs[kk] };
-			coA += nPerMuSq * sq(s1ks[kk]);
-			coB += nPerMuSq * s1ks[kk];
-			coC += nPerMuSq;
-		}
-		coA *= 3.;
-		coC -= 1.;
+		std::array<double, 3u> const coABCs
+			{ zetaCoefficients(xVec, eta0, grMag, shape) };
+		double const & coA = coABCs[0];
+		double const & coB = coABCs[1];
+		double const & coC = coABCs[2];
 
 		double const xArg{ (coA * coC) / sq(coB) };
 	//	double const radical{ std::sqrt(1. - xArg) };
@@ -348,114 +346,42 @@ std::ofstream ofsDifPVec("pvecDiff.dat");
 	//	double const zetaApx3
 	//		{ (.5 * fracCoB) * (1. + ((1./4.) + (1./8.)*xArg)*xArg) };
 
-		double const & zetaGot = zetaApx2;
+		double const & zeta = zetaApx2;
+		double const correction{ 2. * (zeta + eta0) / grMag };
 
-		/*
-		sOfsExact << string::allDigits(zetaExact, "zetaExact") << '\n';
-		sOfsApprox1 << string::allDigits(zetaApx1, "zetaApx1") << '\n';
-		sOfsApprox2 << string::allDigits(zetaApx2, "zetaApx2") << '\n';
-		sOfsApprox3 << string::allDigits(zetaApx3, "zetaApx3") << '\n';
-
-		std::cout
-			<< string::allDigits(coA, "coA")
-			<< " "
-			<< string::allDigits(coB, "coB")
-			<< " "
-			<< string::allDigits(coC, "coC")
-			<< " "
-			<< string::allDigits(coA*coC, "A*C")
-			<< std::endl;
-		std::cout
-			<< string::allDigits(zetaExact, "zetaExact")
-			<< " "
-			<< string::allDigits(zetaApx1, "zetaApx1")
-			<< " "
-			<< string::allDigits(zetaApx2, "zetaApx2")
-			<< std::endl;
-		*/
-
-		Array const pkSqGots
-			{ sq(n1ks[0]) / sq(1. + zetaGot*s1ks[0])
-			, sq(n1ks[1]) / sq(1. + zetaGot*s1ks[1])
-			, sq(n1ks[2]) / sq(1. + zetaGot*s1ks[2])
-			};
-		double const fConGot
-			{ pkSqGots[0] / muSqs[0]
-			+ pkSqGots[1] / muSqs[1]
-			+ pkSqGots[2] / muSqs[2]
-			- 1.
+		XYZ const pVec
+			{ xVec[0] / (1. + (correction/muSqs[0]))
+			, xVec[1] / (1. + (correction/muSqs[1]))
+			, xVec[2] / (1. + (correction/muSqs[2]))
 			};
 
-		double const quadExp{ 0. };
-		double const quadGot{ coA*zetaGot*zetaGot -2.*coB*zetaGot + coC };
+		return pVec;
+	}
 
-		double const egGot{ (zetaGot + eta0) / grMagExp };
 
-		XYZ const pVecGot
-			{ xVecExp[0] / (1. + 2. * (egGot/muSqs[0]))
-			, xVecExp[1] / (1. + 2. * (egGot/muSqs[1]))
-			, xVecExp[2] / (1. + 2. * (egGot/muSqs[2]))
-			};
+	//! Evaluate math equations for ellipsoidal excess at this point
+	int
+	checkXYZ
+		( peri::XYZ const & xVecExp
+		, peri::EarthModel const & earth
+		, std::ofstream & ostrm
+		)
+	{
+		using namespace peri;
 
+		// compute pLocation based on perturbation expansion
+		XYZ const pVecGot{ pVecViaExcess(xVecExp, earth) };
 
 		// Quantities for checking values
 		LPA const xLpaExp{ lpaForXyz(xVecExp, earth) };
-		double const & etaExp = xLpaExp[2];
 		XYZ const pLpaExp{ xLpaExp[0], xLpaExp[1], 0. };
 		XYZ const pVecExp{ xyzForLpa(pLpaExp, earth) };
-		XYZ const uVecExp{ upFromLpa(xLpaExp) };
-		Array const pkSqExps{ sq(pVecExp[0]), sq(pVecExp[1]), sq(pVecExp[2]) };
 
-		XYZ const gpVecExp{ shape.gradientAt(pVecExp) };
-		double const gpMagExp{ magnitude(gpVecExp) };
-		double const rEps{ (grMagExp / gpMagExp) - 1. };
-
-		double const deltaExp{ eta0 - etaExp };
-
+		// Error amount
 		XYZ const pVecDif{ pVecGot - pVecExp };
-		double const zetaExp{ eta0*rEps - deltaExp - deltaExp*rEps };
-		double const zetaDif{ zetaGot - zetaExp };
-		double const egExp{ etaExp / grMagExp };
-		double const egDif{ egGot - egExp };
-		double const egFrac{ egDif / egExp };
 		double const pMagDif{ magnitude(pVecDif) };
 
-		double const fConExp
-			{ pkSqExps[0] / muSqs[0]
-			+ pkSqExps[1] / muSqs[1]
-			+ pkSqExps[2] / muSqs[2]
-			- 1.
-			};
-
-		// peri::Shape const & shape = earth.theEllip.theShapeOrig;
-		std::cout << std::endl;
-		std::cout << string::fixedLinear(etaExp, "etaExp") << std::endl;
-		std::cout << xyz::infoString(xVecExp, "xVecExp") << std::endl;
-		std::cout << lpa::infoString(xLpaExp, "xLpaExp") << std::endl;
-		std::cout << xyz::infoString(uVecExp, "uVecExp") << std::endl;
-		std::cout << string::allDigits(rEps, "rEps") << std::endl;
-		std::cout << string::allDigits(etaExp, "etaExp") << std::endl;
-		std::cout << string::allDigits(eta0, "eta0") << std::endl;
-		std::cout << string::allDigits(deltaExp, "deltaExp") << std::endl;
-		std::cout << xyz::infoString(pkSqExps, "pkSqExps") << std::endl;
-		std::cout << xyz::infoString(pkSqGots, "pkSqGots") << std::endl;
-		std::cout << xyz::infoString(s1ks, "s1ks") << std::endl;
-		std::cout << xyz::infoString(n1ks, "n1ks") << std::endl;
-		std::cout << string::allDigits(fConExp, "fConExp") << std::endl;
-		std::cout << string::allDigits(fConGot, "fConGot") << std::endl;
-		std::cout << string::allDigits(quadExp, "quadExp") << std::endl;
-		std::cout << string::allDigits(quadGot, "quadGot") << std::endl;
-		std::cout << string::allDigits(zetaExp, "zetaExp") << std::endl;
-		std::cout << string::allDigits(zetaGot, "zetaGot") << std::endl;
-		std::cout << string::allDigits(zetaDif, "zetaDif") << std::endl;
-		std::cout << string::allDigits(egExp, "egExp") << std::endl;
-		std::cout << string::allDigits(egGot, "egGot") << std::endl;
-		std::cout << string::allDigits(egDif, "egDif") << std::endl;
-		std::cout << string::allDigits(egFrac, "egFrac") << std::endl;
-		std::cout << string::allDigits(pVecExp, "pVecExp") << std::endl;
-		std::cout << string::allDigits(pVecGot, "pVecGot") << std::endl;
-		std::cout << string::allDigits(pVecDif, "pVecDif") << std::endl;
-		ofsDifPVec
+		ostrm
 			<< lpa::infoString(xLpaExp, "xLpaExp")
 			<< " "
 			<< xyz::infoString(pVecDif, "pVecDif")
@@ -478,13 +404,11 @@ std::ofstream ofsDifPVec("pvecDiff.dat");
 		using namespace  peri::sim;
 		std::vector<peri::XYZ> const xyzs
 			{ meridianPlaneSamples(radSpec, parSpec) };
-//errCount += checkXYZ(xyzs[5], earth);
+		std::ofstream ofsDifPVec("pvecDiff.dat");
 		for (peri::XYZ const & xyz : xyzs)
 		{
-			errCount += checkXYZ(xyz, earth);
+			errCount += checkXYZ(xyz, earth, ofsDifPVec);
 		}
-		/*
-		*/
 		return errCount;
 
 	}
