@@ -338,7 +338,7 @@ namespace
 				zeta = zetaExact;
 				}
 				break;
-			// approximate roots to approximation quadratic
+			// approx roots to (approximating) quadratic - of various orders
 			case Approx1:
 				{
 				double const zetaApx1
@@ -383,7 +383,9 @@ namespace
 		double const grMag{ magnitude(grVec) };
 
 		// radial pseudo-altitude
-		double const eta0{ magnitude(xVec - rVec) };
+		double const xMag{ magnitude(xVec) };
+		double const rMag{ magnitude(rVec) };
+		double const eta0{ xMag - rMag };
 
 		// form and solve 'zeta' quadratic
 		std::array<double, 3u> const coABCs
