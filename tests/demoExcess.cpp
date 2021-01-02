@@ -184,7 +184,7 @@ namespace
 		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
 		inline
 		std::array<double, 2u>
-		coBCs
+		coCBs
 			() const
 		{
 			return std::array<double, 2u>
@@ -197,12 +197,12 @@ namespace
 		inline
 		double
 		rootExact
-			( std::array<double, 2u> const & coBCs
+			( std::array<double, 2u> const & coCBs
 			) const
 		{
 			// shorthand notation
-			double const & coC = coBCs[0];
-			double const & coB = coBCs[1];
+			double const & coC = coCBs[0];
+			double const & coB = coCBs[1];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const zetaExact
@@ -229,7 +229,7 @@ namespace
 		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
 		inline
 		std::array<double, 3u>
-		coABCs
+		coCBAs
 			() const
 		{
 			return std::array<double, 3u>
@@ -243,13 +243,13 @@ namespace
 		inline
 		double
 		rootExact
-			( std::array<double, 3u> const & coABCs
+			( std::array<double, 3u> const & coCBAs
 			) const
 		{
 			// shorthand notation
-			double const & coC = coABCs[0];
-			double const & coB = coABCs[1];
-			double const & coA = coABCs[2];
+			double const & coC = coCBAs[0];
+			double const & coB = coCBAs[1];
+			double const & coA = coCBAs[2];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const xArg{ fracCoB * (coA / coB) };
@@ -263,12 +263,12 @@ namespace
 		inline
 		double
 		rootApprox1st // Note: same as ZetaPolyLinear::rootExact()
-			( std::array<double, 3u> const & coABCs
+			( std::array<double, 3u> const & coCBAs
 			) const
 		{
 			// shorthand notation
-			double const & coC = coABCs[0];
-			double const & coB = coABCs[1];
+			double const & coC = coCBAs[0];
+			double const & coB = coCBAs[1];
 			double const fracCoB{ coC / coB };
 			// first order approximation
 			// precise to about 1.e-7 [m] (between +/- 1000[km])
@@ -281,13 +281,13 @@ namespace
 		inline
 		double
 		rootApprox2nd
-			( std::array<double, 3u> const & coABCs
+			( std::array<double, 3u> const & coCBAs
 			) const
 		{
 			// shorthand notation
-			double const & coC = coABCs[0];
-			double const & coB = coABCs[1];
-			double const & coA = coABCs[2];
+			double const & coC = coCBAs[0];
+			double const & coB = coCBAs[1];
+			double const & coA = coCBAs[2];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const xArg{ fracCoB * (coA / coB) };
@@ -302,13 +302,13 @@ namespace
 		inline
 		double
 		rootApprox3rd // NOTE: results insignificantly different from 2nd order
-			( std::array<double, 3u> const & coABCs
+			( std::array<double, 3u> const & coCBAs
 			) const
 		{
 			// shorthand notation
-			double const & coC = coABCs[0];
-			double const & coB = coABCs[1];
-			double const & coA = coABCs[2];
+			double const & coC = coCBAs[0];
+			double const & coB = coCBAs[1];
+			double const & coA = coCBAs[2];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const xArg{ fracCoB * (coA / coB) };
@@ -435,16 +435,16 @@ namespace
 
 		// form and solve 'zeta' linear
 		ZetaPolyLinear const zpoly1{ xVec, eta0, grMag, shape.theMuSqs };
-		std::array<double, 2u> const coBCs{ zpoly1.coBCs() };
-		double const zetaLineExact{ zpoly1.rootExact(coBCs) };
+		std::array<double, 2u> const coCBs{ zpoly1.coCBs() };
+		double const zetaLineExact{ zpoly1.rootExact(coCBs) };
 
 		// form and solve 'zeta' quadratic
 		ZetaPolyQuad const zpoly2{ xVec, eta0, grMag, shape.theMuSqs };
-		std::array<double, 3u> const coABCs{ zpoly2.coABCs() };
-		// double const zetaQuadExact{ zpoly2.rootExact(coABCs) };
-		double const zetaQuadApx1{ zpoly2.rootApprox1st(coABCs) };
-		double const zetaQuadApx2{ zpoly2.rootApprox2nd(coABCs) };
-		// double const zetaQuadApx3{ zpoly2.rootApprox3rd(coABCs) };
+		std::array<double, 3u> const coCBAs{ zpoly2.coCBAs() };
+		// double const zetaQuadExact{ zpoly2.rootExact(coCBAs) };
+		double const zetaQuadApx1{ zpoly2.rootApprox1st(coCBAs) };
+		double const zetaQuadApx2{ zpoly2.rootApprox2nd(coCBAs) };
+		// double const zetaQuadApx3{ zpoly2.rootApprox3rd(coCBAs) };
 		double const zeta{ zetaQuadApx2 };
 
 		// 1st order approx to quadratic poly == exact soln to linear poly
