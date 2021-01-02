@@ -70,7 +70,7 @@ namespace
 		//! Increment associated with coefficient 'Ak'
 		inline
 		double
-		dA
+		kN1MuS2
 			() const
 		{
 			return { theN1SqPerMuSq * theS1k * theS1k };
@@ -79,7 +79,7 @@ namespace
 		//! Increment associated with coefficient 'Bk'
 		inline
 		double
-		dB
+		kN1MuS1
 			() const
 		{
 			return { theN1SqPerMuSq * theS1k };
@@ -88,7 +88,7 @@ namespace
 		//! Increment associated with coefficient 'Ck'
 		inline
 		double
-		dC
+		kN1MuS0
 			() const
 		{
 			return { theN1SqPerMuSq };
@@ -123,6 +123,49 @@ namespace
 				}
 		{ }
 
+// Alpha-zeta
+		//! Sum of (n1k/muk)^2*s1k*s1k
+		inline
+		double
+		sumN1MuS2
+			() const
+		{
+			return
+				( theFSNs[0].kN1MuS2()
+				+ theFSNs[1].kN1MuS2()
+				+ theFSNs[2].kN1MuS2()
+				);
+		}
+
+// Beta-zeta
+		//! Sum of (n1k/muk)^2*s1k
+		inline
+		double
+		sumN1MuS1
+			() const
+		{
+			return
+				( theFSNs[0].kN1MuS1()
+				+ theFSNs[1].kN1MuS1()
+				+ theFSNs[2].kN1MuS1()
+				);
+		}
+
+// Gamma-zeta
+		//! Sum of (n1k/muk)^2
+		inline
+		double
+		sumN1MuS0
+			() const
+		{
+			return
+				( theFSNs[0].kN1MuS0()
+				+ theFSNs[1].kN1MuS0()
+				+ theFSNs[2].kN1MuS0()
+				);
+		}
+
+
 	}; // ZetaPoly
 
 	//! Perturbation 'zeta'-polynomial expanded to only 1st order (~10^-8)
@@ -145,12 +188,9 @@ namespace
 		coBCs
 			() const
 		{
-			ZetaFSN const & fsn0 = theFSNs[0];
-			ZetaFSN const & fsn1 = theFSNs[1];
-			ZetaFSN const & fsn2 = theFSNs[2];
 			return std::array<double, 2u>
-				{ fsn0.dB() + fsn1.dB() + fsn2.dB()
-				, (fsn0.dC() + fsn1.dC() + fsn2.dC()) - 1.
+				{ sumN1MuS1()
+				, (sumN1MuS0() - 1.)
 				};
 		}
 
@@ -193,13 +233,10 @@ namespace
 		coABCs
 			() const
 		{
-			ZetaFSN const & fsn0 = theFSNs[0];
-			ZetaFSN const & fsn1 = theFSNs[1];
-			ZetaFSN const & fsn2 = theFSNs[2];
 			return std::array<double, 3u>
-				{ 3. * (fsn0.dA() + fsn1.dA() + fsn2.dA())
-				, fsn0.dB() + fsn1.dB() + fsn2.dB()
-				, (fsn0.dC() + fsn1.dC() + fsn2.dC()) - 1.
+				{ 3.*sumN1MuS2()
+				, sumN1MuS1()
+				, (sumN1MuS0() - 1.)
 				};
 		}
 
@@ -415,9 +452,10 @@ namespace
 		double const difOrder1{ zetaLineExact - zetaQuadApx1 };
 		if (! (0. == difOrder1))
 		{
-			std::cerr << "Implementation error (LineExact != QuadApprox1st)
-			std::cerr
-				<< peri::string::allDigits(difOrder1, "difOrder1") << '\n';
+			std::cerr << "Implementation error (LineExact != QuadApprox1st)"
+				<< std::endl;
+			std::cerr << peri::string::allDigits(difOrder1, "difOrder1")
+				<< std::endl;
 			exit(8);
 		}
 
