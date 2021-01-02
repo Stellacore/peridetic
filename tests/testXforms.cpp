@@ -30,6 +30,7 @@
 #include "peridetic.h"
 
 #include "periLocal.h"
+#include "periSim.h"
 
 #include <iostream>
 #include <vector>
@@ -37,6 +38,17 @@
 
 namespace sim
 {
+	//! Closed interval of values (first/last both included)
+	using Range = std::pair<double, double>;
+
+	static double const sEndFrac{ 1. - std::numeric_limits<double>::epsilon() };
+
+	//! Longitude range - approximate the half open interval [-pi,pi)
+	static Range const sRangeLon{ -peri::pi(), sEndFrac*peri::pi() };
+
+	//! Parallels (latitude) range - treat as closed interval [-pi/2,pi/2]
+	static Range const sRangePar{ -.5*peri::pi(), .5*peri::pi() };
+
 	//! Collection of longitude angle values
 	std::vector<double>
 	lonSamples
@@ -45,20 +57,15 @@ namespace sim
 	{
 		std::vector<double> samps{};
 		samps.reserve(numBulk + 3u);
-		double const pi{ peri::pi() };
-		double const eps{ std::numeric_limits<double>::epsilon() };
-		// be sure to include several key values
-		samps.emplace_back(-pi);
+		// include several key values
+		peri::sim::SampleSpec const lonSpec{ numBulk, sRangeLon };
+		samps.emplace_back(lonSpec.first());
 		samps.emplace_back(0.);
-		samps.emplace_back(pi*(1.-eps));
+		samps.emplace_back(lonSpec.last());
 		// fill bulk points
-		double const ang0{ -1. }; // arbitrary, let wrap around inside loop
-		double const angDelta{ (2.*pi) / static_cast<double>(numBulk) };
-		for (std::size_t nn{0u} ; nn < numBulk ; ++nn)
+		for (std::size_t nn{0u} ; nn < lonSpec.size() ; ++nn)
 		{
-			double const anAngle{ ang0 + static_cast<double>(nn)*angDelta };
-			double const lon{ peri::principalAngle(anAngle) };
-			samps.emplace_back(lon);
+			samps.emplace_back(lonSpec.valueAtIndex(nn));
 		}
 		return samps;
 	}
@@ -79,14 +86,10 @@ namespace sim
 		samps.emplace_back(.25*pi);
 		samps.emplace_back(.5*pi);
 		// fill bulk points
-		double const ang0{ -1. }; // arbitrary, let wrap around inside loop
-		double const angDelta{ (2.*pi) / static_cast<double>(numBulk) };
+		peri::sim::SampleSpec const parSpec{ numBulk, sRangePar };
 		for (std::size_t nn{0u} ; nn < numBulk ; ++nn)
 		{
-			double const anAngle{ ang0 + static_cast<double>(nn)*angDelta };
-			// principal value misses open end (pi/2) but that caught by keyvals
-			double const par{ .5 * peri::principalAngle(anAngle) };
-			samps.emplace_back(par);
+			samps.emplace_back(parSpec.valueAtIndex(nn));
 		}
 		return samps;
 	}
@@ -468,7 +471,10 @@ namespace
 			errCount += rtGNSS.errCountAt(expLPA);
 		}
 
-		std::cout << "testLimits: errCount: " << errCount << std::endl;
+		if (0 < errCount)
+		{
+			std::cout << "testLimits: errCount: " << errCount << std::endl;
+		}
 	}
 }
 
