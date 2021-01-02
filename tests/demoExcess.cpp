@@ -41,6 +41,184 @@
 
 namespace
 {
+
+	//! Perturbation 'zeta'-polynomial function
+	struct ZetaPolyQuad
+	{
+		double const theEta0{};
+		double const theGrMag{};
+		std::array<double, 3u> const theMuSqs{};
+
+		ZetaPolyQuad
+			() = default;
+
+		//! Compute constants associated with 'zeta' perturbation polynomials
+		struct FSN
+		{
+			double const theFgkInv{ peri::sNan };
+			double const theS1k{ peri::sNan };
+			double const theN1k{ peri::sNan };
+			double const theN1SqPerMuSq{ peri::sNan };
+
+			inline
+			explicit
+			FSN
+				( double const & xk
+				, double const & grMag
+				, double const & muSqk
+				, double const & eta0
+				)
+				: theFgkInv{ .5 * grMag * muSqk }
+				, theS1k{ 1. / (theFgkInv + eta0) }
+				, theN1k{ theS1k * theFgkInv * xk }
+				, theN1SqPerMuSq{ peri::sq(theN1k) / muSqk }
+			{
+			}
+
+			//! Increment associated with coefficient 'Ak'
+			inline
+			double
+			dA
+				() const
+			{
+				return { theN1SqPerMuSq * theS1k * theS1k };
+			}
+
+			//! Increment associated with coefficient 'Bk'
+			inline
+			double
+			dB
+				() const
+			{
+				return { theN1SqPerMuSq * theS1k };
+			}
+
+			//! Increment associated with coefficient 'Ck'
+			inline
+			double
+			dC
+				() const
+			{
+				return { theN1SqPerMuSq };
+			}
+
+		}; // ZetaPolyQuad::FSN
+
+		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
+		inline
+		static
+		std::array<double, 3u>
+		coABCs
+			( peri::XYZ const & xVec
+			, double const & eta0
+			, double const & grMag
+			, std::array<double, 3u> const & muSqs
+			)
+		{
+			FSN const fsn0(xVec[0], grMag, muSqs[0], eta0);
+			FSN const fsn1(xVec[1], grMag, muSqs[1], eta0);
+			FSN const fsn2(xVec[2], grMag, muSqs[2], eta0);
+			return std::array<double, 3u>
+				{ 3. * (fsn0.dA() + fsn1.dA() + fsn2.dA())
+				, fsn0.dB() + fsn1.dB() + fsn2.dB()
+				, (fsn0.dC() + fsn1.dC() + fsn2.dC()) - 1.
+				};
+		}
+
+		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
+		inline
+		std::array<double, 3u>
+		coABCs
+			( peri::XYZ const & xVec
+			) const
+		{
+			return coABCs(xVec, theEta0, theGrMag, theMuSqs);
+		}
+
+		//! Root computed exactly (with square root function)
+		inline
+		double
+		rootExact
+			( std::array<double, 3u> const & coABCs
+			) const
+		{
+			// shorthand notation
+			double const & coA = coABCs[0];
+			double const & coB = coABCs[1];
+			double const & coC = coABCs[2];
+			// xArg is a relatively small quantity (used in series expansion)
+			double const fracCoB{ coC / coB };
+			double const xArg{ fracCoB * (coA / coB) };
+			double const radical{ std::sqrt(1. - xArg) };
+			double const zetaExact
+				{ (coB / coA) * (1. - radical) };
+			return zetaExact;
+		}
+
+		//! Root computed using linear expansion of sqrt()
+		inline
+		double
+		rootApprox1st
+			( std::array<double, 3u> const & coABCs
+			) const
+		{
+			// shorthand notation
+			double const & coB = coABCs[1];
+			double const & coC = coABCs[2];
+			double const fracCoB{ coC / coB };
+			// first order approximation
+			// precise to about 1.e-7 [m] (between +/- 1000[km])
+			double const zetaApx1
+				{ (.5 * fracCoB) };
+			return zetaApx1;
+		}
+
+		//! Root computed using quadratic expansion of sqrt()
+		inline
+		double
+		rootApprox2nd
+			( std::array<double, 3u> const & coABCs
+			) const
+		{
+			// shorthand notation
+			double const & coA = coABCs[0];
+			double const & coB = coABCs[1];
+			double const & coC = coABCs[2];
+			// xArg is a relatively small quantity (used in series expansion)
+			double const fracCoB{ coC / coB };
+			double const xArg{ fracCoB * (coA / coB) };
+			// second order approximation
+			// precise to about 1.e-8 [m] (between +/- 1000[km])
+			double const zetaApx2
+				{ (.5 * fracCoB) * (1 + (1./4.)*xArg) };
+			return zetaApx2;
+		}
+
+		//! Root computed using cubic expansion of sqrt()
+		inline
+		double
+		rootApprox3rd // NOTE: results insignificantly different from 2nd order
+			( std::array<double, 3u> const & coABCs
+			) const
+		{
+			// shorthand notation
+			double const & coA = coABCs[0];
+			double const & coB = coABCs[1];
+			double const & coC = coABCs[2];
+			// xArg is a relatively small quantity (used in series expansion)
+			double const fracCoB{ coC / coB };
+			double const xArg{ fracCoB * (coA / coB) };
+			// third order approximation
+			// precision UNmeasureable
+			// second order approx is already in computation noise
+			double const zetaApx3
+				{ (.5 * fracCoB) * (1. + ((1./4.) + (1./8.)*xArg)*xArg) };
+			return zetaApx3;
+		}
+
+	}; // ZetaPolyQuad
+
+
 	int
 	test1
 		( peri::sim::SampleSpec const & radSpec
@@ -128,108 +306,6 @@ namespace
 		return errCount;
 	}
 
-	//! Coefficients for quadratic function in 'zeta' (corrections to alt)
-	std::array<double, 3u>
-	zetaCoefficients
-		( peri::XYZ const & xVec
-		, double const & eta0
-		, double const & grMag
-		, peri::Shape const & shape
-		)
-	{
-		std::array<double, 3u> coABCs{ 0., 0., 0. };
-		std::array<double, 3u> const & muSqs = shape.theMuSqs;
-		double & coA = coABCs[0];
-		double & coB = coABCs[1];
-		double & coC = coABCs[2];
-		for (std::size_t kk{0u} ; kk < 3u ; ++kk)
-		{
-			// compute common factor (and contributing element s1k)
-			double const fgkInv{ .5 * grMag * muSqs[kk] };
-			double const s1k{ 1. / (fgkInv + eta0) };
-			double const n1k{ s1k * fgkInv * xVec[kk] };
-			double const nPerMuSq{ peri::sq(n1k) / muSqs[kk] };
-			// update coefficients
-			coA += nPerMuSq * s1k * s1k;
-			coB += nPerMuSq * s1k;
-			coC += nPerMuSq;
-		}
-		// adjust coefficients with mulpliers and offsets
-		coA *= 3.;
-		coC -= 1.;
-		return coABCs;
-	}
-
-	//! Evaluate (relevant) root for the 'zeta' quadratic function.
-	inline
-	double
-	zetaRootFor
-		( std::array<double, 3u> const & coABCs
-		)
-	{
-		double zeta{ peri::sNan };
-
-		enum Method
-		{
-			  Exact   // exact root to (approximating) quadratic
-			, Approx1
-			, Approx2
-			, Approx3
-		};
-		Method const method{ Approx2 }; // 2nd is at numeric limits
-
-		// shorthand notation
-		double const & coA = coABCs[0];
-		double const & coB = coABCs[1];
-		double const & coC = coABCs[2];
-
-		// xArg is a relatively small quantity (used in series expansion)
-		double const fracCoB{ coC / coB };
-		double const xArg{ fracCoB * (coA / coB) };
-
-		switch (method)
-		{
-			// exact root to quadratic (which only approximates ellipsoid)
-			case Exact:
-				{
-				double const radical{ std::sqrt(1. - xArg) };
-				double const zetaExact{ (coB / coA) * (1. - radical) };
-				zeta = zetaExact;
-				}
-				break;
-			// approx roots to (approximating) quadratic - of various orders
-			case Approx1:
-				// first order approximation
-				// precise to about 1.e-7 [m] (between +/- 1000[km])
-				{
-				double const zetaApx1
-					{ (.5 * fracCoB) };
-				zeta = zetaApx1;
-				}
-				break;
-			case Approx2:
-				// second order approximation
-				// precise to about 1.e-8 [m] (between +/- 1000[km])
-				{
-				double const zetaApx2
-					{ (.5 * fracCoB) * (1 + (1./4.)*xArg) };
-				zeta = zetaApx2;
-				}
-				break;
-			case Approx3:
-				// third order approximation
-				// precision UNmeasureable
-				// second order approx is already in computation noise
-				{
-				double const zetaApx3
-					{ (.5 * fracCoB) * (1. + ((1./4.) + (1./8.)*xArg)*xArg) };
-				zeta = zetaApx3;
-				}
-				break;
-		}
-		return zeta;
-	}
-
 	//! Compute point on ellipsoid, p, using perturbation expansion
 	peri::XYZ
 	pVecViaExcess
@@ -254,9 +330,12 @@ namespace
 		double const eta0{ xMag - rMag };
 
 		// form and solve 'zeta' quadratic
-		std::array<double, 3u> const coABCs
-			{ zetaCoefficients(xVec, eta0, grMag, shape) };
-		double const zeta{ zetaRootFor(coABCs) };
+		ZetaPolyQuad const zpoly{ eta0, grMag, shape.theMuSqs };
+		std::array<double, 3u> const coABCs{ zpoly.coABCs(xVec) };
+		// double const zeta{ zpoly.rootExact(coABCs) };
+		// double const zeta{ zpoly.rootApprox1st(coABCs) };
+		double const zeta{ zpoly.rootApprox2nd(coABCs) };
+		// double const zeta{ zpoly.rootApprox3rd(coABCs) };
 
 		// compute correction factor for adjusting location coordinates
 		double const correction{ 2. * (zeta + eta0) / grMag };
