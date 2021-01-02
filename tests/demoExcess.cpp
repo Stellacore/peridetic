@@ -41,98 +41,166 @@
 
 namespace
 {
-
-	//! Perturbation 'zeta'-polynomial function
-	struct ZetaPolyQuad
+	//! Compute constants associated with 'zeta' perturbation polynomials
+	struct ZetaFSN
 	{
+		double const theFgkInv{ peri::sNan };
+		double const theS1k{ peri::sNan };
+		double const theN1k{ peri::sNan };
+		double const theN1SqPerMuSq{ peri::sNan };
+
+		ZetaFSN
+			() = default;
+
+		inline
+		explicit
+		ZetaFSN
+			( double const & xk
+			, double const & grMag
+			, double const & muSqk
+			, double const & eta0
+			)
+			: theFgkInv{ .5 * grMag * muSqk }
+			, theS1k{ 1. / (theFgkInv + eta0) }
+			, theN1k{ theS1k * theFgkInv * xk }
+			, theN1SqPerMuSq{ peri::sq(theN1k) / muSqk }
+		{
+		}
+
+		//! Increment associated with coefficient 'Ak'
+		inline
+		double
+		dA
+			() const
+		{
+			return { theN1SqPerMuSq * theS1k * theS1k };
+		}
+
+		//! Increment associated with coefficient 'Bk'
+		inline
+		double
+		dB
+			() const
+		{
+			return { theN1SqPerMuSq * theS1k };
+		}
+
+		//! Increment associated with coefficient 'Ck'
+		inline
+		double
+		dC
+			() const
+		{
+			return { theN1SqPerMuSq };
+		}
+
+	}; // ZetaPolyQuad::ZetaFSN
+
+	//! Perturbation 'zeta'-polynomial (for testing: is NOT performant)
+	struct ZetaPoly
+	{
+		peri::XYZ const theVecX{};
 		double const theEta0{};
 		double const theGrMag{};
 		std::array<double, 3u> const theMuSqs{};
+		std::array<ZetaFSN, 3u> const theFSNs{};
 
-		ZetaPolyQuad
-			() = default;
-
-		//! Compute constants associated with 'zeta' perturbation polynomials
-		struct FSN
-		{
-			double const theFgkInv{ peri::sNan };
-			double const theS1k{ peri::sNan };
-			double const theN1k{ peri::sNan };
-			double const theN1SqPerMuSq{ peri::sNan };
-
-			inline
-			explicit
-			FSN
-				( double const & xk
-				, double const & grMag
-				, double const & muSqk
-				, double const & eta0
-				)
-				: theFgkInv{ .5 * grMag * muSqk }
-				, theS1k{ 1. / (theFgkInv + eta0) }
-				, theN1k{ theS1k * theFgkInv * xk }
-				, theN1SqPerMuSq{ peri::sq(theN1k) / muSqk }
-			{
-			}
-
-			//! Increment associated with coefficient 'Ak'
-			inline
-			double
-			dA
-				() const
-			{
-				return { theN1SqPerMuSq * theS1k * theS1k };
-			}
-
-			//! Increment associated with coefficient 'Bk'
-			inline
-			double
-			dB
-				() const
-			{
-				return { theN1SqPerMuSq * theS1k };
-			}
-
-			//! Increment associated with coefficient 'Ck'
-			inline
-			double
-			dC
-				() const
-			{
-				return { theN1SqPerMuSq };
-			}
-
-		}; // ZetaPolyQuad::FSN
-
-		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
-		inline
-		static
-		std::array<double, 3u>
-		coABCs
+		explicit
+		ZetaPoly
 			( peri::XYZ const & xVec
 			, double const & eta0
 			, double const & grMag
 			, std::array<double, 3u> const & muSqs
 			)
+			: theVecX{ xVec }
+			, theEta0{ eta0 }
+			, theGrMag{ grMag }
+			, theMuSqs{ muSqs }
+			, theFSNs
+				{ ZetaFSN(xVec[0], theGrMag, theMuSqs[0], theEta0)
+				, ZetaFSN(xVec[1], theGrMag, theMuSqs[1], theEta0)
+				, ZetaFSN(xVec[2], theGrMag, theMuSqs[2], theEta0)
+				}
+		{ }
+
+	}; // ZetaPoly
+
+	//! Perturbation 'zeta'-polynomial expanded to only 1st order (~10^-8)
+	struct ZetaPolyLinear : public ZetaPoly
+	{
+		//! Value construction (for underlying class)
+		explicit
+		ZetaPolyLinear
+			( peri::XYZ const & xVec
+			, double const & eta0
+			, double const & grMag
+			, std::array<double, 3u> const & muSqs
+			)
+			: ZetaPoly(xVec, eta0, grMag, muSqs)
+		{ }
+
+		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
+		inline
+		std::array<double, 2u>
+		coBCs
+			() const
 		{
-			FSN const fsn0(xVec[0], grMag, muSqs[0], eta0);
-			FSN const fsn1(xVec[1], grMag, muSqs[1], eta0);
-			FSN const fsn2(xVec[2], grMag, muSqs[2], eta0);
-			return std::array<double, 3u>
-				{ 3. * (fsn0.dA() + fsn1.dA() + fsn2.dA())
-				, fsn0.dB() + fsn1.dB() + fsn2.dB()
+			ZetaFSN const & fsn0 = theFSNs[0];
+			ZetaFSN const & fsn1 = theFSNs[1];
+			ZetaFSN const & fsn2 = theFSNs[2];
+			return std::array<double, 2u>
+				{ fsn0.dB() + fsn1.dB() + fsn2.dB()
 				, (fsn0.dC() + fsn1.dC() + fsn2.dC()) - 1.
 				};
 		}
+
+		//! Root computed exactly (linear transform)
+		inline
+		double
+		rootExact
+			( std::array<double, 2u> const & coBCs
+			) const
+		{
+			// shorthand notation
+			double const & coB = coBCs[0];
+			double const & coC = coBCs[1];
+			// xArg is a relatively small quantity (used in series expansion)
+			double const fracCoB{ coC / coB };
+			double const zetaExact
+				{ .5 * fracCoB };
+			return zetaExact;
+		}
+
+	}; // ZetaPolyLinear
+
+	//! Perturbation 'zeta'-polynomial function to quadratic order (~10^-16)
+	struct ZetaPolyQuad : public ZetaPoly
+	{
+		//! Value construction (for underlying class)
+		explicit
+		ZetaPolyQuad
+			( peri::XYZ const & xVec
+			, double const & eta0
+			, double const & grMag
+			, std::array<double, 3u> const & muSqs
+			)
+			: ZetaPoly(xVec, eta0, grMag, muSqs)
+		{ }
 
 		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
 		inline
 		std::array<double, 3u>
 		coABCs
-			( peri::XYZ const & xVec
-			) const
+			() const
 		{
-			return coABCs(xVec, theEta0, theGrMag, theMuSqs);
+			ZetaFSN const & fsn0 = theFSNs[0];
+			ZetaFSN const & fsn1 = theFSNs[1];
+			ZetaFSN const & fsn2 = theFSNs[2];
+			return std::array<double, 3u>
+				{ 3. * (fsn0.dA() + fsn1.dA() + fsn2.dA())
+				, fsn0.dB() + fsn1.dB() + fsn2.dB()
+				, (fsn0.dC() + fsn1.dC() + fsn2.dC()) - 1.
+				};
 		}
 
 		//! Root computed exactly (with square root function)
@@ -158,7 +226,7 @@ namespace
 		//! Root computed using linear expansion of sqrt()
 		inline
 		double
-		rootApprox1st
+		rootApprox1st // Note: same as ZetaPolyLinear::rootExact()
 			( std::array<double, 3u> const & coABCs
 			) const
 		{
@@ -329,19 +397,33 @@ namespace
 		double const rMag{ magnitude(rVec) };
 		double const eta0{ xMag - rMag };
 
-		// form and solve 'zeta' quadratic
-		ZetaPolyQuad const zpoly{ eta0, grMag, shape.theMuSqs };
-		std::array<double, 3u> const coABCs{ zpoly.coABCs(xVec) };
-		// double const zeta{ zpoly.rootExact(coABCs) };
-		// double const zeta{ zpoly.rootApprox1st(coABCs) };
-		double const zeta{ zpoly.rootApprox2nd(coABCs) };
-		// double const zeta{ zpoly.rootApprox3rd(coABCs) };
+		// form and solve 'zeta' linear
+		ZetaPolyLinear const zpoly1{ xVec, eta0, grMag, shape.theMuSqs };
+		std::array<double, 2u> const coBCs{ zpoly1.coBCs() };
+		double const zetaLineExact{ zpoly1.rootExact(coBCs) };
 
-		// compute correction factor for adjusting location coordinates
-		double const correction{ 2. * (zeta + eta0) / grMag };
+		// form and solve 'zeta' quadratic
+		ZetaPolyQuad const zpoly2{ xVec, eta0, grMag, shape.theMuSqs };
+		std::array<double, 3u> const coABCs{ zpoly2.coABCs() };
+		// double const zetaQuadExact{ zpoly2.rootExact(coABCs) };
+		double const zetaQuadApx1{ zpoly2.rootApprox1st(coABCs) };
+		double const zetaQuadApx2{ zpoly2.rootApprox2nd(coABCs) };
+		// double const zetaQuadApx3{ zpoly2.rootApprox3rd(coABCs) };
+		double const zeta{ zetaQuadApx2 };
+
+		// 1st order approx to quadratic poly == exact soln to linear poly
+		double const difOrder1{ zetaLineExact - zetaQuadApx1 };
+		if (! (0. == difOrder1))
+		{
+			std::cerr << "Implementation error (LineExact != QuadApprox1st)
+			std::cerr
+				<< peri::string::allDigits(difOrder1, "difOrder1") << '\n';
+			exit(8);
+		}
 
 		// compute point on ellipse
 		std::array<double, 3u> const & muSqs = shape.theMuSqs;
+		double const correction{ 2. * (zeta + eta0) / grMag };
 		XYZ const pVec
 			{ xVec[0] / (1. + (correction/muSqs[0]))
 			, xVec[1] / (1. + (correction/muSqs[1]))
