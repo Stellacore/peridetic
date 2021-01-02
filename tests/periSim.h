@@ -41,6 +41,19 @@
 
 namespace peri::sim
 {
+	//! Closed interval of values (first/last both included)
+	using Range = std::pair<double, double>;
+
+	//! Multiplier to approximation "just inside of" open interval end point
+	static double const sEndFrac{ 1. - std::numeric_limits<double>::epsilon() };
+
+	//! Longitude range - approximate the half open interval [-pi,pi)
+	static Range const sRangeLon{ -peri::pi(), sEndFrac*peri::pi() };
+
+	//! Parallels (latitude) range - treat as closed interval [-pi/2,pi/2]
+	static Range const sRangePar{ -.5*peri::pi(), .5*peri::pi() };
+
+
 	//! Geometric sampling relationships for uniformly space sampling
 	struct SampleSpec
 	{
@@ -129,7 +142,7 @@ namespace peri::sim
 	inline
 	static
 	std::vector<double>
-	samplesPer
+	samplesAccordingTo
 		( SampleSpec const & spec
 		)
 	{
@@ -143,7 +156,7 @@ namespace peri::sim
 		return samps;
 	}
 
-	//! Samples covering meridian plane (spherically distributed)
+	//! Samples in meridian plane (distributed circularly (not geodetically))
 	std::vector<XYZ>
 	meridianPlaneSamples
 		( SampleSpec const & radSpec
@@ -153,8 +166,8 @@ namespace peri::sim
 		)
 	{
 		std::vector<XYZ> xyzs{};
-		std::vector<double> const parVals{ samplesPer(parSpec) };
-		std::vector<double> const radVals{ samplesPer(radSpec) };
+		std::vector<double> const parVals{ samplesAccordingTo(parSpec) };
+		std::vector<double> const radVals{ samplesAccordingTo(radSpec) };
 		xyzs.reserve(parVals.size() * radVals.size());
 		for (double const & parVal : parVals)
 		{
@@ -170,6 +183,111 @@ namespace peri::sim
 			}
 		}
 		return xyzs;
+	}
+
+	//! Collection of longitude angle values
+	std::vector<double>
+	bulkSamplesLon
+		( std::size_t const numBulk = 8u
+		)
+	{
+		std::vector<double> samps{};
+		samps.reserve(numBulk + 3u);
+		// include several key values
+		peri::sim::SampleSpec const lonSpec{ numBulk, sRangeLon };
+		samps.emplace_back(lonSpec.first());
+		samps.emplace_back(0.);
+		samps.emplace_back(lonSpec.last());
+		// fill bulk points
+		for (std::size_t nn{0u} ; nn < lonSpec.size() ; ++nn)
+		{
+			samps.emplace_back(lonSpec.valueAtIndex(nn));
+		}
+		return samps;
+	}
+
+	//! Collection of parallel(latitude) angle values
+	std::vector<double>
+	bulkSamplesPar
+		( std::size_t const numBulk = 8u
+		)
+	{
+		std::vector<double> samps{};
+		samps.reserve(numBulk + 5u);
+		double const pi{ peri::pi() };
+		// be sure to include several key values
+		samps.emplace_back(-.5*pi);
+		samps.emplace_back(-.25*pi);
+		samps.emplace_back(0.);
+		samps.emplace_back(.25*pi);
+		samps.emplace_back(.5*pi);
+		// fill bulk points
+		peri::sim::SampleSpec const parSpec{ numBulk, sRangePar };
+		for (std::size_t nn{0u} ; nn < numBulk ; ++nn)
+		{
+			samps.emplace_back(parSpec.valueAtIndex(nn));
+		}
+		return samps;
+	}
+
+	//! Collection of altitude values
+	std::vector<double>
+	bulkSamplesAlt
+		( std::size_t const numBulk = 8u
+		)
+	{
+		std::vector<double> samps{};
+		samps.reserve(numBulk + 3u);
+		// be sure to include several key values
+		samps.emplace_back(-100000.);
+		samps.emplace_back(0.);
+		samps.emplace_back(100000.);
+		// fill bulk points
+		double const alt0{ -1.e+5 };
+		double const altDelta{ (2.e+5) / static_cast<double>(numBulk) };
+		for (std::size_t nn{0u} ; nn < numBulk ; ++nn)
+		{
+			double const alt{ alt0 + static_cast<double>(nn)*altDelta };
+			samps.emplace_back(alt);
+		}
+		return samps;
+	}
+
+	//! Collection of LPA locations (spanning domain of validity as defined)
+	std::vector<peri::LPA>
+	comboSamplesLpa
+		( std::vector<double> const & lonSamps
+		, std::vector<double> const & parSamps
+		, std::vector<double> const & altSamps
+		)
+	{
+		std::vector<peri::LPA> lpas;
+		lpas.reserve(lonSamps.size() * parSamps.size() * altSamps.size());
+		for (double const & lonSamp : lonSamps)
+		{
+			for (double const & parSamp : parSamps)
+			{
+				for (double const & altSamp : altSamps)
+				{
+					lpas.emplace_back(peri::LPA{ lonSamp, parSamp, altSamp });
+				}
+			}
+		}
+		return lpas;
+	}
+
+	//! Collection of LPA locations (spanning domain of validity as defined)
+	std::vector<peri::LPA>
+	bulkSamplesLpa
+		( std::size_t const lonBulk = 8u
+		, std::size_t const parBulk = 8u
+		, std::size_t const altBulk = 8u
+		)
+	{
+		std::vector<double> const lonSamps{ bulkSamplesLon(lonBulk) };
+		std::vector<double> const parSamps{ bulkSamplesPar(parBulk) };
+		std::vector<double> const altSamps{ bulkSamplesAlt(altBulk) };
+		return comboSamplesLpa(lonSamps, parSamps, altSamps);
 	}
 
 } // [peri::sim]
