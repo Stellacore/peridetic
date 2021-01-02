@@ -67,13 +67,13 @@ namespace
 		{
 		}
 
-		//! Increment associated with coefficient 'Ak'
+		//! Increment associated with coefficient 'Ck'
 		inline
 		double
-		kN1MuS2
+		kN1MuS0
 			() const
 		{
-			return { theN1SqPerMuSq * theS1k * theS1k };
+			return { theN1SqPerMuSq };
 		}
 
 		//! Increment associated with coefficient 'Bk'
@@ -85,13 +85,13 @@ namespace
 			return { theN1SqPerMuSq * theS1k };
 		}
 
-		//! Increment associated with coefficient 'Ck'
+		//! Increment associated with coefficient 'Ak'
 		inline
 		double
-		kN1MuS0
+		kN1MuS2
 			() const
 		{
-			return { theN1SqPerMuSq };
+			return { theN1SqPerMuSq * theS1k * theS1k };
 		}
 
 	}; // ZetaPolyQuad::ZetaFSN
@@ -123,35 +123,7 @@ namespace
 				}
 		{ }
 
-// Alpha-zeta
-		//! Sum of (n1k/muk)^2*s1k*s1k
-		inline
-		double
-		sumN1MuS2
-			() const
-		{
-			return
-				( theFSNs[0].kN1MuS2()
-				+ theFSNs[1].kN1MuS2()
-				+ theFSNs[2].kN1MuS2()
-				);
-		}
-
-// Beta-zeta
-		//! Sum of (n1k/muk)^2*s1k
-		inline
-		double
-		sumN1MuS1
-			() const
-		{
-			return
-				( theFSNs[0].kN1MuS1()
-				+ theFSNs[1].kN1MuS1()
-				+ theFSNs[2].kN1MuS1()
-				);
-		}
-
-// Gamma-zeta
+		// Constant Term
 		//! Sum of (n1k/muk)^2
 		inline
 		double
@@ -165,6 +137,33 @@ namespace
 				);
 		}
 
+		// Linear Term
+		//! Sum of (n1k/muk)^2*s1k
+		inline
+		double
+		sumN1MuS1
+			() const
+		{
+			return
+				( theFSNs[0].kN1MuS1()
+				+ theFSNs[1].kN1MuS1()
+				+ theFSNs[2].kN1MuS1()
+				);
+		}
+
+		// Quadratic Term
+		//! Sum of (n1k/muk)^2*s1k*s1k
+		inline
+		double
+		sumN1MuS2
+			() const
+		{
+			return
+				( theFSNs[0].kN1MuS2()
+				+ theFSNs[1].kN1MuS2()
+				+ theFSNs[2].kN1MuS2()
+				);
+		}
 
 	}; // ZetaPoly
 
@@ -189,8 +188,8 @@ namespace
 			() const
 		{
 			return std::array<double, 2u>
-				{ sumN1MuS1()
-				, (sumN1MuS0() - 1.)
+				{ (sumN1MuS0() - 1.) // constant
+				, sumN1MuS1() // linear
 				};
 		}
 
@@ -202,8 +201,8 @@ namespace
 			) const
 		{
 			// shorthand notation
-			double const & coB = coBCs[0];
-			double const & coC = coBCs[1];
+			double const & coC = coBCs[0];
+			double const & coB = coBCs[1];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const zetaExact
@@ -234,9 +233,9 @@ namespace
 			() const
 		{
 			return std::array<double, 3u>
-				{ 3.*sumN1MuS2()
-				, sumN1MuS1()
-				, (sumN1MuS0() - 1.)
+				{ (sumN1MuS0() - 1.) // constant
+				, sumN1MuS1() // linear
+				, 3.*sumN1MuS2() // quadratic
 				};
 		}
 
@@ -248,9 +247,9 @@ namespace
 			) const
 		{
 			// shorthand notation
-			double const & coA = coABCs[0];
+			double const & coC = coABCs[0];
 			double const & coB = coABCs[1];
-			double const & coC = coABCs[2];
+			double const & coA = coABCs[2];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const xArg{ fracCoB * (coA / coB) };
@@ -268,8 +267,8 @@ namespace
 			) const
 		{
 			// shorthand notation
+			double const & coC = coABCs[0];
 			double const & coB = coABCs[1];
-			double const & coC = coABCs[2];
 			double const fracCoB{ coC / coB };
 			// first order approximation
 			// precise to about 1.e-7 [m] (between +/- 1000[km])
@@ -286,9 +285,9 @@ namespace
 			) const
 		{
 			// shorthand notation
-			double const & coA = coABCs[0];
+			double const & coC = coABCs[0];
 			double const & coB = coABCs[1];
-			double const & coC = coABCs[2];
+			double const & coA = coABCs[2];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const xArg{ fracCoB * (coA / coB) };
@@ -307,9 +306,9 @@ namespace
 			) const
 		{
 			// shorthand notation
-			double const & coA = coABCs[0];
+			double const & coC = coABCs[0];
 			double const & coB = coABCs[1];
-			double const & coC = coABCs[2];
+			double const & coA = coABCs[2];
 			// xArg is a relatively small quantity (used in series expansion)
 			double const fracCoB{ coC / coB };
 			double const xArg{ fracCoB * (coA / coB) };
