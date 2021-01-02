@@ -5,10 +5,10 @@
 
 # Peridetic - Easy and Effective Geodetic Transformations
 
-Peridetic is an extremely lightweight, easy-to-use, simple C++ header
-implementation providing precise, accurate and fast transformations
-between Geodetic (lon/lat/alt) and Cartesian (x/y/z) coordinate
-expressions.
+Peridetic is an extremely lightweight, easy-to-use, simple C++
+header file implementation providing precise, accurate and fast
+transformations between Geodetic (lon/lat/alt) and Cartesian (x/y/z)
+coordinate expressions.
 
 Quick Links:
 
@@ -207,10 +207,18 @@ Documentation sources include:
 
 * Top-level README.md (this file)
 
-* API/Reference pages are available at (via doxygen): - TODO needs hosting
 
 * Project documentation (doxygen pages) can be generated from a cloned
-	repository copy (ref [CMake Build](#CMake-Build) section.
+	repository copy (ref [CMake Build](#CMake-Build) section. E.g. to
+	only generate documentation pages:
+
+	$ cd /tmp
+	$ git clone https://github.com/Stellacore/peridetic.git
+	$ mkdir /tmp/perideticBuild
+	$ cd /tmp/perideticBuild
+	$ cmake /tmp/peridetic
+	$ make docs
+	$ <favoriteBrowser> /tmp/perideticBuild/doc/html/index.html
 
 ### Installation
 
