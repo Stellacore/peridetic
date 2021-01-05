@@ -697,7 +697,7 @@ namespace
 		{
 			std::ostringstream oss;
 			oss << "\n====" << '\n';
-			double const lambda{ info.theEllip.lambda() };
+			double const lambda{ info.theEllip.lambdaOrig() };
 			for (std::size_t nn{0u} ; nn < 3u ; ++nn)
 			{
 				if (! apxErrsByOrder[nn].empty())
