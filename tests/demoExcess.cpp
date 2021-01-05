@@ -410,6 +410,27 @@ namespace
 		return errCount;
 	}
 
+	//! Formula to evaluate vector, p, from 'zeta' root
+	peri::XYZ
+	pVecFor
+		( peri::XYZ const & xVec
+		, double const & zeta
+		, double const & eta0
+		, double const & grMag
+		, peri::Shape const & shape
+		)
+	{
+		std::array<double, 3u> const & muSqs = shape.theMuSqs;
+		// compute point on ellipse
+		double const correction{ 2. * (zeta + eta0) / grMag };
+		peri::XYZ const pVec
+			{ xVec[0] / (1. + (correction/muSqs[0]))
+			, xVec[1] / (1. + (correction/muSqs[1]))
+			, xVec[2] / (1. + (correction/muSqs[2]))
+			};
+		return pVec;
+	}
+
 	//! Compute point on ellipsoid, p, using perturbation expansion
 	peri::XYZ
 	pVecViaExcess
@@ -459,13 +480,7 @@ namespace
 		}
 
 		// compute point on ellipse
-		std::array<double, 3u> const & muSqs = shape.theMuSqs;
-		double const correction{ 2. * (zeta + eta0) / grMag };
-		XYZ const pVec
-			{ xVec[0] / (1. + (correction/muSqs[0]))
-			, xVec[1] / (1. + (correction/muSqs[1]))
-			, xVec[2] / (1. + (correction/muSqs[2]))
-			};
+		peri::XYZ const pVec{ pVecFor(xVec, zeta, eta0, grMag, shape) };
 
 		return pVec;
 	}
@@ -542,6 +557,107 @@ namespace
 
 	}
 
+	peri::XYZ
+	rVecFor
+		( peri::XYZ const & xVec
+		, peri::Shape const & shape
+		)
+	{
+		// radial point on ellipsoid
+		double const rho{ peri::ellip::radiusToward(xVec, shape) };
+		using peri::operator*;
+		peri::XYZ const rVec{ rho * peri::unit(xVec) };
+		return rVec;
+	}
+
+	double
+	grMagFor
+		( peri::XYZ const & xVec
+		, peri::Shape const & shape
+		)
+	{
+		// gradient at radial point
+		peri::XYZ const grVec{ shape.gradientAt(rVecFor(xVec, shape)) };
+		double const grMag{ peri::magnitude(grVec) };
+		return grMag;
+	}
+
+	double
+	eta0For
+		( peri::XYZ const & xVec
+		, peri::Shape const & shape
+		)
+	{
+		// radial point on ellipsoid
+		peri::XYZ const rVec{ rVecFor(xVec, shape) };
+		// radial pseudo-altitude
+		double const xMag{ peri::magnitude(xVec) };
+		double const rMag{ peri::magnitude(rVec) };
+		double const eta0{ xMag - rMag };
+		return eta0;
+	}
+
+	void
+	saveZetaDiffs
+		( peri::sim::SampleSpec const & radSpec
+		, peri::sim::SampleSpec const & parSpec
+		, peri::EarthModel const & earth
+		, std::ostream & ofsZetaDiff
+		)
+	{
+		peri::Shape const & shape = earth.theEllip.theShapeOrig;
+
+		std::vector<peri::XYZ> const xyzs
+			{ peri::sim::meridianPlaneSamples(radSpec, parSpec) };
+		for (peri::XYZ const & xyz : xyzs)
+		{
+			peri::XYZ const & xVec = xyz;
+
+			// gradient at radial point
+			double const grMag{ grMagFor(xVec, shape) };
+
+			// radial pseudo-altitude
+			double const eta0{ eta0For(xVec, shape) };
+
+			// form and solve 'zeta' quadratic
+			ZetaPolyQuad const zpoly2{ xVec, eta0, grMag, shape.theMuSqs };
+			std::array<double, 3u> const coCBAs{ zpoly2.coCBAs() };
+			double const zetaQuadApx1{ zpoly2.rootApprox1st(coCBAs) };
+			double const zetaQuadApx2{ zpoly2.rootApprox2nd(coCBAs) };
+
+			// expected POE
+			peri::XYZ const pVecExp{ earth.nearEllipsoidPointFor(xVec) };
+
+			// computed POE with different approximation orders
+			peri::XYZ const pVecApx1
+				{ pVecFor(xVec, zetaQuadApx1, eta0, grMag, shape) };
+			peri::XYZ const pVecApx2
+				{ pVecFor(xVec, zetaQuadApx2, eta0, grMag, shape) };
+
+			using peri::operator-;
+			double const difMagApx1{ peri::magnitude(pVecApx1 - pVecExp) };
+			double const difMagApx2{ peri::magnitude(pVecApx2 - pVecExp) };
+
+			double const xMag{ peri::magnitude(xVec) };
+			double const & zVal = xVec[2];
+			double const hSq{ peri::sq(xVec[0]) + peri::sq(xVec[1]) };
+			double const hVal{ std::sqrt(hSq) };
+			double const theta{ std::atan2(zVal, hVal) };
+			ofsZetaDiff
+				<< peri::string::allDigits(theta, "theta")
+				<< " "
+				<< peri::string::allDigits(xMag, "xMag")
+				<< " "
+				<< peri::string::allDigits(difMagApx1, "difMagApx1")
+				<< " "
+				<< peri::string::allDigits(difMagApx2, "difMagApx2")
+			//	<< " "
+			//	<< peri::string::allDigits(xVec, "xVec")
+				<< '\n';
+		}
+
+	}
+
 } // [annon]
 
 
@@ -563,10 +679,15 @@ main
 		"/dev/null"
 	//	"pvecDiff.dat"
 		);
+	std::ofstream ofsZeta
+		(
+	//	"/dev/null"
+		"zetaDiff.dat"
+		);
 
 	constexpr std::size_t numRad{  32u + 1u };
 	constexpr std::size_t numPar{ 256u + 1u }; // odd number hits at 45-deg Lat
-//#define UseNorm
+#define UseNorm
 #if defined(UseNorm)
 	peri::Shape const shape(peri::shape::sWGS84.normalizedShape());
 	constexpr double altLo{ -(100./6370.) };
@@ -584,11 +705,14 @@ main
 	double const radMin{ radEarth + altLo };
 	double const radMax{ radEarth + altHi };
 	using Range = std::pair<double, double>;
+	double const halfPi{ .5 * peri::pi() };
 	peri::sim::SampleSpec const radSpec{ numRad, Range{ radMin, radMax } };
-	peri::sim::SampleSpec const parSpec{ numPar, Range{ 0.,  .5*peri::pi()} };
+	peri::sim::SampleSpec const parSpec{ numPar, Range{ -halfPi, halfPi } };
 
 	errCount += test1(radSpec, parSpec, earth, ofsExcess);
 	errCount += test2(radSpec, parSpec, earth, ofsDifPVec);
+
+	saveZetaDiffs(radSpec, parSpec, earth, ofsZeta);
 
 	return errCount;
 }
