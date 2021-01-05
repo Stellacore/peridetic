@@ -505,7 +505,7 @@ namespace peri
 		//! Construct to match physical geometry description
 		inline
 		explicit
-		EarthModel  // Ellipsoid::
+		EarthModel  // EarthModel::
 			( Shape const & shape
 			)
 			: theEllip(shape)
@@ -515,7 +515,7 @@ namespace peri
 		//! Geodetic coordinates associated with Cartesian coordinates xVec
 		inline
 		LPA
-		lpaForXyz  // Ellipsoid::
+		lpaForXyz  // EarthModel::
 			( XYZ const & xVec
 			) const
 		{
@@ -535,7 +535,7 @@ namespace peri
 		//! Cartesian coordinates for geodetic location lpa
 		inline
 		XYZ
-		xyzForLpa  // Ellipsoid::
+		xyzForLpa  // EarthModel::
 			( LPA const & lpa
 			) const
 		{
@@ -562,7 +562,7 @@ namespace peri
 		//! Perpendicular projection (pVec) from xVec onto ellipsoid
 		inline
 		XYZ
-		nearEllipsoidPointFor  // Ellipsoid::
+		nearEllipsoidPointFor  // EarthModel::
 			( XYZ const & xVec
 			) const
 		{
@@ -582,7 +582,7 @@ namespace peri
 		//! A linearly refined improvement to altitude scale factor currSigma
 		inline
 		double
-		nextSigmaFor  // Ellipsoid::
+		nextSigmaFor  // EarthModel::
 			( double const & currSigma
 			, XYZ const & qVec
 			) const
@@ -601,7 +601,7 @@ namespace peri
 		//! Initial estimate for sigma factor (based on sphere approximation)
 		inline
 		double
-		sigmaSphericalApprox  // Ellipsoid::
+		sigmaSphericalApprox  // EarthModel::
 			( XYZ const & qVec
 			) const
 		{
@@ -612,7 +612,7 @@ namespace peri
 		//! Refined altitude scale factor at normalized point location qVec
 		inline
 		double
-		sigmaFor  // Ellipsoid::
+		sigmaFor  // EarthModel::
 			( XYZ const & qVec
 			) const
 		{
@@ -640,7 +640,7 @@ namespace peri
 		//! Geodetic (Lon/Par) angles for point on ellipsoid surface (0==Alt).
 		inline
 		LPA
-		lpaForSurfacePoint  // Ellipsoid::
+		lpaForSurfacePoint  // EarthModel::
 			( XYZ const & pVec
 				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
 			) const
