@@ -186,7 +186,7 @@ namespace peri
 	 */
 	inline
 	XYZ
-	upFromLpa  // peri::
+	upDirAtLpa  // peri::
 		( LPA const & lpa //!< Only Lon,Par are used: Alt is ignored
 		)
 	{
@@ -503,9 +503,9 @@ namespace peri
 	private:
 
 		//! Mathematical level condition associated with surface
-		ShapeClosure const theMeritFuncNorm{};
+		ShapeClosure const theMeritFuncNorm{}; // normalized units for stability
 
-	public:
+	public: // Note: public functions interface with physical units
 
 		//! A null instance
 		EarthModel
@@ -514,7 +514,7 @@ namespace peri
 		//! Construct to match physical geometry description
 		inline
 		explicit
-		EarthModel  // Ellipsoid::
+		EarthModel  // EarthModel::
 			( Shape const & shape
 				//!< Figure of Earth ellipsoid shape: physical units (e.g. [m])
 			)
@@ -526,33 +526,46 @@ namespace peri
 		//! Geodetic coordinates associated with Cartesian coordinates xVec
 		inline
 		LPA
-		lpaForXyz  // Ellipsoid::
+		lpaForXyz  // EarthModel::
 			( XYZ const & xLocXyz
 			) const
 		{
-			// find point on ellipsoid closest to world point at xLocXyz
-			XYZ const pVec{ nearEllipsoidPointFor(xLocXyz) };
-			// extract LP(A=0.) for point on ellipsoid at pVec
-			LPA const surfLPA{ lpaForSurfacePoint(pVec) };
+			XYZ const & xVecOrig = xLocXyz;
+			// normalize data values to facilitate stable computation
+			XYZ const xVecNorm{ theEllip.xyzNormFrom(xVecOrig) };
+			//
+			// find point, pVec, on ellipsoid closest to world point, xVec
+			XYZ const pVecNorm{ poeNormFor(xVecNorm) };
+			// extract LP (at A=0.) from vertical direction at pVec
+			std::pair<double, double> const pairLonPar
+				{ anglesLonParAt(pVecNorm, theEllip.theShapeNorm) };
+			// angles are invariant to scale (unaffected by normalization)
+			double const & pLonOrig = pairLonPar.first;
+			double const & pParOrig = pairLonPar.second;
+			//
 			// compute altitude as directed distance from ellipsoid at pVec
-			XYZ const pGrad{ theEllip.theShapeNorm.gradientAt(pVec) };
+			XYZ const pGrad{ theEllip.theShapeNorm.gradientAt(pVecNorm) };
 			XYZ const pUp{ unit(pGrad) };
+			double const altNorm
+				{ dot((xVecNorm - pVecNorm), pUp) };
+			// rescale altitude to original units
 			double const lambdaOrig{ theEllip.lambdaOrig() };
-			double const alt{ dot((xLocXyz - lambdaOrig*pVec), pUp) };
+			double const altOrig{ lambdaOrig * altNorm };
+			//
 			// return value as combo of LP and A computed results
-			return LPA{ surfLPA[0], surfLPA[1], alt };
+			return LPA{ pLonOrig, pParOrig, altOrig };
 		}
 
 		//! Cartesian coordinates for geodetic location lpa
 		inline
 		XYZ
-		xyzForLpa  // Ellipsoid::
+		xyzForLpa  // EarthModel::
 			( LPA const & xLocLpa
 			) const
 		{
 			double const & alt = xLocLpa[2];
 			// determine vertical direction at LP location
-			XYZ const up{ upFromLpa(xLocLpa) };
+			XYZ const up{ upDirAtLpa(xLocLpa) };
 			// compute scaling coefficient
 			std::array<double, 3u> const & muSqs
 				= theEllip.theShapeNorm.theMuSqs;
@@ -573,27 +586,22 @@ namespace peri
 		//! Perpendicular projection (pVec) from xVec onto ellipsoid
 		inline
 		XYZ
-		nearEllipsoidPointFor  // Ellipsoid::
-			( XYZ const & xVecTODO
+		nearEllipsoidPointFor  // EarthModel::
+			( XYZ const & xVecOrig
 			) const
 		{
-			XYZ const xVecNorm{ theEllip.xyzNormFrom(xVecTODO) };
-			double const sigma{ sigmaNormFor(xVecNorm) };
-			std::array<double, 3u> const & muSqs
-				= theEllip.theShapeNorm.theMuSqs;
-			return
-				{ muSqs[0] * xVecNorm[0] / (muSqs[0] + sigma)
-				, muSqs[1] * xVecNorm[1] / (muSqs[1] + sigma)
-				, muSqs[2] * xVecNorm[2] / (muSqs[2] + sigma)
-				};
+			XYZ const xVecNorm{ theEllip.xyzNormFrom(xVecOrig) };
+			XYZ const pVecNorm{ poeNormFor(xVecNorm) };
+			XYZ const pVecOrig{ theEllip.xyzOrigFrom(pVecNorm) };
+			return pVecOrig;
 		}
 
-	private:
+	private: // Note: private functions operate with normalized data units
 
 		//! A linearly refined improvement to altitude scale factor currSigma
 		inline
 		double
-		nextSigmaFor  // Ellipsoid::
+		nextSigmaNormFor  // EarthModel::
 			( double const & currSigmaNorm
 			, XYZ const & xVecNorm
 			) const
@@ -611,7 +619,7 @@ namespace peri
 		//! Initial estimate for sigma factor (based on sphere approximation)
 		inline
 		double
-		sigmaNormWrtSphere  // Ellipsoid::
+		sigmaNormWrtSphere  // EarthModel::
 			( XYZ const & xVecNorm
 			) const
 		{
@@ -622,7 +630,7 @@ namespace peri
 		//! Refined altitude scale factor at normalized point location xVecNorm
 		inline
 		double
-		sigmaNormFor  // Ellipsoid::
+		sigmaNormFor  // EarthModel::
 			( XYZ const & xVecNorm
 			) const
 		{
@@ -634,7 +642,7 @@ namespace peri
 			constexpr std::size_t nnMax{ 8u };
 			for (std::size_t nn{0u} ; nn < nnMax ; ++nn)
 			{
-				sigmaNorm = nextSigmaFor(sigmaNorm, xVecNorm);
+				sigmaNorm = nextSigmaNormFor(sigmaNorm, xVecNorm);
 				double const nextTestVal{ 1. + sigmaNorm };
 				// Tolerance suitable for 64-bit double type
 				constexpr double tolDiff{ 1.e-15 };
@@ -647,19 +655,66 @@ namespace peri
 			return sigmaNorm;
 		}
 
+		//! Point-on-ellipsoid: pVec = perp projection onto ellipsoid from xVec
+		inline
+		XYZ
+		poeNormFor  // EarthModel::
+			( XYZ const & xVecNorm
+				//!< Point of interest in normalized coordinates
+			) const
+		{
+			double const sigmaNorm{ sigmaNormFor(xVecNorm) };
+			std::array<double, 3u> const & muSqNorms
+				= theEllip.theShapeNorm.theMuSqs;
+			XYZ const pVecNorm
+				{ muSqNorms[0] * xVecNorm[0] / (muSqNorms[0] + sigmaNorm)
+				, muSqNorms[1] * xVecNorm[1] / (muSqNorms[1] + sigmaNorm)
+				, muSqNorms[2] * xVecNorm[2] / (muSqNorms[2] + sigmaNorm)
+				};
+			return pVecNorm;
+		}
+
 		//! Geodetic (Lon/Par) angles for point on ellipsoid surface (0==Alt).
+		std::pair<double, double>
+		anglesLonParAt
+			( XYZ const & pVec
+				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
+			, Shape const & shape
+				//!< Shape with respect to which Lon/Par angles are defined
+			) const
+		{
+			XYZ const pGrad{ shape.gradientAt(pVec) };
+			// simple notation
+			// note computations are ratios and are independent of units
+			double const & xx = pGrad[0];
+			double const & yy = pGrad[1];
+			double const & zz = pGrad[2];
+			// radius of parallel circle
+			double const hh{ std::sqrt(sq(xx) + sq(yy)) };
+			// compute conventional lon/par angles
+			double lon{ 0. };
+			if (! (0. == hh)) // if small hh, somewhat random longitude
+			{
+				lon = std::atan2(yy, xx);
+			}
+			double const par{ std::atan2(zz, hh) };
+			return { lon, par };
+		}
+
 		inline
 		LPA
-		lpaForSurfacePoint  // Ellipsoid::
-			( XYZ const & pVec
+		lpaForSurfacePoint  // EarthModel::
+			( XYZ const & pVecNormOnSurf
 				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
 			) const
 		{
-			XYZ const grad{ theEllip.theShapeNorm.gradientAt(pVec) };
-			// familiar notation
-			double const & xx = grad[0];
-			double const & yy = grad[1];
-			double const & zz = grad[2];
+			XYZ const pGradNorm
+				{ theEllip.theShapeNorm.gradientAt(pVecNormOnSurf) };
+			// simple notation
+			// note computations are ratios and are independent of units
+			double const & xx = pGradNorm[0];
+			double const & yy = pGradNorm[1];
+			double const & zz = pGradNorm[2];
 			// radius of parallel circle
 			double const hh{ std::sqrt(sq(xx) + sq(yy)) };
 			// compute conventional lon/par angles
@@ -670,9 +725,11 @@ namespace peri
 			}
 			double const par{ std::atan2(zz, hh) };
 			// on surface, alt is identically 0
-			constexpr double alt{ 0. };
-			return LPA{ lon, par, alt };
+			constexpr double altNorm{ 0. };
+			return LPA{ lon, par, altNorm };
 		}
+		/*
+		*/
 
 	}; // EarthModel
 
