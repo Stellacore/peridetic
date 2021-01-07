@@ -533,25 +533,22 @@ namespace peri
 			XYZ const & xVecOrig = xLocXyz;
 			// normalize data values to facilitate stable computation
 			XYZ const xVecNorm{ theEllip.xyzNormFrom(xVecOrig) };
-			//
 			// find point, pVec, on ellipsoid closest to world point, xVec
 			XYZ const pVecNorm{ poeNormFor(xVecNorm) };
-			// extract LP (at A=0.) from vertical direction at pVec
-			std::pair<double, double> const pairLonPar
-				{ anglesLonParAt(pVecNorm, theEllip.theShapeNorm) };
-			// angles are invariant to scale (unaffected by normalization)
-			double const & pLonOrig = pairLonPar.first;
-			double const & pParOrig = pairLonPar.second;
-			//
-			// compute altitude as directed distance from ellipsoid at pVec
+			// compute local vertical direction from gradient
 			XYZ const pGrad{ theEllip.theShapeNorm.gradientAt(pVecNorm) };
 			XYZ const pUp{ unit(pGrad) };
-			double const altNorm
-				{ dot((xVecNorm - pVecNorm), pUp) };
+			// compute altitude as directed distance from ellipsoid at pVec
+			double const altNorm{ dot((xVecNorm - pVecNorm), pUp) };
 			// rescale altitude to original units
 			double const lambdaOrig{ theEllip.lambdaOrig() };
 			double const altOrig{ lambdaOrig * altNorm };
-			//
+			// find point, pVec, on ellipsoid closest to world point, xVec
+			// extract LP (at A=0.) from vertical direction at pVec
+			std::pair<double, double> const pairLonPar{ anglesLonParAt(pGrad) };
+			// angles are invariant to scale (unaffected by normalization)
+			double const & pLonOrig = pairLonPar.first;
+			double const & pParOrig = pairLonPar.second;
 			// return value as combo of LP and A computed results
 			return LPA{ pLonOrig, pParOrig, altOrig };
 		}
@@ -674,17 +671,13 @@ namespace peri
 			return pVecNorm;
 		}
 
-		//! Geodetic (Lon/Par) angles for point on ellipsoid surface (0==Alt).
+		//! Geodetic (Lon/Par) angles for local ellipsoid gradient (or up dir)
 		std::pair<double, double>
-		anglesLonParAt
-			( XYZ const & pVec
-				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
-			, Shape const & shape
-				//!< Shape with respect to which Lon/Par angles are defined
+		anglesLonParAt // Note: units are unimportant since angles are ratios
+			( XYZ const & pGrad
+				//!< Gradient vector (or local ellipsoid normal - aka 'up')
 			) const
 		{
-			XYZ const pGrad{ shape.gradientAt(pVec) };
-			// simple notation
 			// note computations are ratios and are independent of units
 			double const & xx = pGrad[0];
 			double const & yy = pGrad[1];
