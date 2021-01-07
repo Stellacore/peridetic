@@ -701,36 +701,6 @@ namespace peri
 			return { lon, par };
 		}
 
-		inline
-		LPA
-		lpaForSurfacePoint  // EarthModel::
-			( XYZ const & pVecNormOnSurf
-				//!< A point **ON** surface (i.e. assumes 0==funcValueAt(pVec))
-			) const
-		{
-			XYZ const pGradNorm
-				{ theEllip.theShapeNorm.gradientAt(pVecNormOnSurf) };
-			// simple notation
-			// note computations are ratios and are independent of units
-			double const & xx = pGradNorm[0];
-			double const & yy = pGradNorm[1];
-			double const & zz = pGradNorm[2];
-			// radius of parallel circle
-			double const hh{ std::sqrt(sq(xx) + sq(yy)) };
-			// compute conventional lon/par angles
-			double lon{ 0. };
-			if (! (0. == hh)) // if small hh, somewhat random longitude
-			{
-				lon = std::atan2(yy, xx);
-			}
-			double const par{ std::atan2(zz, hh) };
-			// on surface, alt is identically 0
-			constexpr double altNorm{ 0. };
-			return LPA{ lon, par, altNorm };
-		}
-		/*
-		*/
-
 	}; // EarthModel
 
 
