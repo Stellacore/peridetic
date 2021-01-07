@@ -701,7 +701,7 @@ main
 	peri::EarthModel const earth(shape);
 	peri::Ellipsoid const & ellip = earth.theEllip;
 
-	double const radEarth{ ellip.lambda() };
+	double const radEarth{ ellip.lambdaOrig() };
 	double const radMin{ radEarth + altLo };
 	double const radMax{ radEarth + altHi };
 	using Range = std::pair<double, double>;
