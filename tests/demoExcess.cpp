@@ -626,25 +626,21 @@ namespace
 		using namespace peri;
 
 		Shape const & shapeOrig = earth.theEllip.theShapeOrig;
-		Shape const & shapeNorm = earth.theEllip.theShapeNorm;
 
 		double const etaP{ 100. };
 		LPA const lpa{ 0., .25*pi(), etaP };
 		XYZ const xVec{ earth.xyzForLpa(lpa) };
 		std::array<double, 3u> const & muSqsOrig = shapeOrig.theMuSqs;
-		std::array<double, 3u> const & muSqsNorm = shapeNorm.theMuSqs;
 
 		LPA const poeLpa{ lpa[0], lpa[1], 0. };
 		XYZ const poeXyz{ earth.xyzForLpa(poeLpa) };
 
-		XYZ const xVecNorm{ earth.theEllip.xyzNormFrom(xVec) };
-		XYZ const pVecNorm{ earth.nearEllipsoidPointFor(xVecNorm, muSqsNorm) };
-		XYZ const pVec{ earth.theEllip.xyzOrigFrom(pVecNorm) };
+		XYZ const pVec{ earth.nearEllipsoidPointFor(xVec) };
 
 		XYZ const gpVec{ shapeOrig.gradientAt(pVec) };
 		XYZ const up{ unit(gpVec) };
 
-		XYZ const ver_xpu{ xVec - pVec + etaP*up };
+		XYZ const ver_xpu{ xVec - (pVec + etaP*up) };
 
 		double const gpMag{ magnitude(gpVec) };
 
@@ -665,7 +661,7 @@ namespace
 		double const delta{ eta0 - etaP };
 
 		XYZ const ver_xpEtaG
-			{ xVec - pVec - etaP*(grMag/gpMag)*(1./grMag)*gpVec };
+			{ xVec - (pVec + etaP*(grMag/gpMag)*(1./grMag)*gpVec) };
 
 		double const zeta{ eta0*rEps - delta - delta*rEps };
 		double const tmpSum{ eta0 + zeta  };
@@ -771,8 +767,7 @@ namespace
 			double const zetaQuadApx2{ zpoly2.rootApprox2nd(coCBAs) };
 
 			// expected POE
-			std::array<double, 3u> const & muSqs = shape.theMuSqs;
-			peri::XYZ const pVecExp{ earth.nearEllipsoidPointFor(xVec, muSqs) };
+			peri::XYZ const pVecExp{ earth.nearEllipsoidPointFor(xVec) };
 
 			// computed POE with different approximation orders
 			peri::XYZ const pVecApx1
