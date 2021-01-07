@@ -232,6 +232,29 @@ namespace peri
 //! String encoding useful for geodetic data values
 namespace peri::string
 {
+	//! String representation of double with digits before and after decimal
+	std::string
+	fixedDigits
+		( double const & value
+		, std::string const & title = {}
+		, std::size_t const & digitsFirst = 7u
+		, std::size_t const & digitsLater = 6u
+		)
+	{
+		std::ostringstream oss;
+		// Size to: space + sign + digits + point + digits
+		std::size_t const numWide{ 1u + 1u + digitsFirst + 1u + digitsLater };
+		if (! title.empty())
+		{
+			oss << std::setw(16u) << title << " ";
+		}
+		oss << std::setw(numWide)
+			<< std::fixed
+			<< std::setprecision(digitsLater)
+			<< value;
+		return oss.str();
+	}
+
 
 	//! Value encoded as fixed format string suitable for Cartesian values
 	inline
@@ -242,15 +265,7 @@ namespace peri::string
 		)
 	{
 		constexpr std::size_t numDigits{ 3u }; //!< After decimal point
-		std::ostringstream oss;
-		if (! title.empty())
-		{
-			oss << std::setw(16u) << title << " ";
-		}
-		oss << std::fixed
-			<< std::setw(9u+numDigits) << std::setprecision(numDigits)
-			<< value;
-		return oss.str();
+		return fixedDigits(value, title, 7u, numDigits);
 	}
 
 	//! Value encoded as fixed format string suitable for Geodetic angle values
@@ -262,15 +277,7 @@ namespace peri::string
 		)
 	{
 		constexpr std::size_t numDigits{ 10u }; //!< After decimal point
-		std::ostringstream oss;
-		if (! title.empty())
-		{
-			oss << std::setw(16u) << title << " ";
-		}
-		oss << std::fixed
-			<< std::setw(3u+numDigits) << std::setprecision(numDigits)
-			<< value;
-		return oss.str();
+		return fixedDigits(value, title, 1u, numDigits);
 	}
 
 	//! Value encoded as maximum (8-byte) precision e-notation
