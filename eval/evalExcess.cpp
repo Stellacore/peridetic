@@ -39,6 +39,8 @@
 #include <vector>
 
 
+// NOTE: Concepts and variable names follow those of 'perideticMath' document.
+
 namespace
 {
 	//! Compute constants associated with 'zeta' perturbation polynomials
@@ -52,6 +54,7 @@ namespace
 		ZetaFSN
 			() = default;
 
+		//! Compute useful parameters involved in various equations
 		inline
 		explicit
 		ZetaFSN
@@ -70,7 +73,7 @@ namespace
 		//! Increment associated with coefficient 'Ck'
 		inline
 		double
-		kN1MuS0
+		kN1MuS0  // ZetaFSN::
 			() const
 		{
 			return { theN1SqPerMuSq };
@@ -79,7 +82,7 @@ namespace
 		//! Increment associated with coefficient 'Bk'
 		inline
 		double
-		kN1MuS1
+		kN1MuS1  // ZetaFSN::
 			() const
 		{
 			return { theN1SqPerMuSq * theS1k };
@@ -88,13 +91,14 @@ namespace
 		//! Increment associated with coefficient 'Ak'
 		inline
 		double
-		kN1MuS2
+		kN1MuS2  // ZetaFSN::
 			() const
 		{
 			return { theN1SqPerMuSq * theS1k * theS1k };
 		}
 
 	}; // ZetaPolyQuad::ZetaFSN
+
 
 	//! Perturbation 'zeta'-polynomial (for testing: is NOT performant)
 	struct ZetaPoly
@@ -127,7 +131,7 @@ namespace
 		//! Sum of (n1k/muk)^2
 		inline
 		double
-		sumN1MuS0
+		sumN1MuS0  // ZetaPoly::
 			() const
 		{
 			return
@@ -141,7 +145,7 @@ namespace
 		//! Sum of (n1k/muk)^2*s1k
 		inline
 		double
-		sumN1MuS1
+		sumN1MuS1  // ZetaPoly::
 			() const
 		{
 			return
@@ -155,7 +159,7 @@ namespace
 		//! Sum of (n1k/muk)^2*s1k*s1k
 		inline
 		double
-		sumN1MuS2
+		sumN1MuS2  // ZetaPoly::
 			() const
 		{
 			return
@@ -184,7 +188,7 @@ namespace
 		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
 		inline
 		std::array<double, 2u>
-		coCBs
+		coCBs  // ZetaPolyLinear::
 			() const
 		{
 			return std::array<double, 2u>
@@ -196,7 +200,7 @@ namespace
 		//! Root computed exactly (linear transform)
 		inline
 		double
-		rootExact
+		rootExact  // ZetaPolyLinear::
 			( std::array<double, 2u> const & coCBs
 			) const
 		{
@@ -229,7 +233,7 @@ namespace
 		//! Coefficients 'alpha,betat,gamma' for quadratic zeta polynomial
 		inline
 		std::array<double, 3u>
-		coCBAs
+		coCBAs  // ZetaPolyQuad::
 			() const
 		{
 			return std::array<double, 3u>
@@ -242,7 +246,7 @@ namespace
 		//! Root computed exactly (with square root function)
 		inline
 		double
-		rootExact
+		rootExact  // ZetaPolyQuad::
 			( std::array<double, 3u> const & coCBAs
 			) const
 		{
@@ -262,10 +266,14 @@ namespace
 		//! Root computed using linear expansion of sqrt()
 		inline
 		double
-		rootApprox1st // Note: same as ZetaPolyLinear::rootExact()
+		rootApprox1st // ZetaPolyQuad::
 			( std::array<double, 3u> const & coCBAs
 			) const
 		{
+			// Note: evaluation is same as ZetaPolyLinear::rootExact()
+			//       I.e. same computation steps in end result but
+			//       derived via different analytic process.
+			//       Repeated here to emphasize this point.
 			// shorthand notation
 			double const & coC = coCBAs[0];
 			double const & coB = coCBAs[1];
@@ -280,7 +288,7 @@ namespace
 		//! Root computed using quadratic expansion of sqrt()
 		inline
 		double
-		rootApprox2nd
+		rootApprox2nd  // ZetaPolyQuad::
 			( std::array<double, 3u> const & coCBAs
 			) const
 		{
@@ -301,10 +309,12 @@ namespace
 		//! Root computed using cubic expansion of sqrt()
 		inline
 		double
-		rootApprox3rd // NOTE: results insignificantly different from 2nd order
+		rootApprox3rd // ZetaPolyQuad::
 			( std::array<double, 3u> const & coCBAs
 			) const
 		{
+			// NOTE: results insignificantly different from 2nd order
+			//       I.e. last term, "falls off of" 64-bit double computation
 			// shorthand notation
 			double const & coC = coCBAs[0];
 			double const & coB = coCBAs[1];
@@ -324,7 +334,7 @@ namespace
 
 
 	int
-	test1
+	evalExcess
 		( peri::sim::SampleSpec const & radSpec
 		, peri::sim::SampleSpec const & parSpec
 		, peri::EarthModel const & earth
@@ -537,7 +547,7 @@ namespace
 
 	//! Check equations on sampling of points
 	int
-	test2
+	evalVecP
 		( peri::sim::SampleSpec const & radSpec
 		, peri::sim::SampleSpec const & parSpec
 		, peri::EarthModel const & earth
@@ -557,8 +567,9 @@ namespace
 
 	}
 
+	//! Point on surface of ellipsoid shape in direction of xVec
 	peri::XYZ
-	rVecFor
+	rVecToward
 		( peri::XYZ const & xVec
 		, peri::Shape const & shape
 		)
@@ -570,6 +581,7 @@ namespace
 		return rVec;
 	}
 
+	//! Gradient at point rVec (via rVecToward()) associated with xVec
 	double
 	grMagFor
 		( peri::XYZ const & xVec
@@ -577,11 +589,12 @@ namespace
 		)
 	{
 		// gradient at radial point
-		peri::XYZ const grVec{ shape.gradientAt(rVecFor(xVec, shape)) };
+		peri::XYZ const grVec{ shape.gradientAt(rVecToward(xVec, shape)) };
 		double const grMag{ peri::magnitude(grVec) };
 		return grMag;
 	}
 
+	//! Radial altitude (NOT geodetic) distance between rVec and xVec
 	double
 	eta0For
 		( peri::XYZ const & xVec
@@ -589,7 +602,7 @@ namespace
 		)
 	{
 		// radial point on ellipsoid
-		peri::XYZ const rVec{ rVecFor(xVec, shape) };
+		peri::XYZ const rVec{ rVecToward(xVec, shape) };
 		// radial pseudo-altitude
 		double const xMag{ peri::magnitude(xVec) };
 		double const rMag{ peri::magnitude(rVec) };
@@ -597,6 +610,7 @@ namespace
 		return eta0;
 	}
 
+// TODO - cleanup, split computations from output
 	void
 	saveZetaDiffs
 		( peri::sim::SampleSpec const & radSpec
@@ -681,13 +695,13 @@ main
 		);
 	std::ofstream ofsZeta
 		(
-	//	"/dev/null"
-		"zetaDiff.dat"
+		"/dev/null"
+	//	"zetaDiff.dat"
 		);
 
 	constexpr std::size_t numRad{  32u + 1u };
 	constexpr std::size_t numPar{ 256u + 1u }; // odd number hits at 45-deg Lat
-#define UseNorm
+#define UseNorm   // un-define to stress-test formulae (e.g. for debugging)
 #if defined(UseNorm)
 	peri::Shape const shape(peri::shape::sWGS84.normalizedShape());
 	constexpr double altLo{ -(100./6370.) };
@@ -709,8 +723,8 @@ main
 	peri::sim::SampleSpec const radSpec{ numRad, Range{ radMin, radMax } };
 	peri::sim::SampleSpec const parSpec{ numPar, Range{ -halfPi, halfPi } };
 
-	errCount += test1(radSpec, parSpec, earth, ofsExcess);
-	errCount += test2(radSpec, parSpec, earth, ofsDifPVec);
+	errCount += evalExcess(radSpec, parSpec, earth, ofsExcess);
+	errCount += evalVecP(radSpec, parSpec, earth, ofsDifPVec);
 
 	saveZetaDiffs(radSpec, parSpec, earth, ofsZeta);
 
