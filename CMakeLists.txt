@@ -90,17 +90,18 @@ include(GNUInstallDirs)  # creates "CMAKE_INSTALL_<dir>"
 
 
 # Project source code
-add_subdirectory(include)
+add_subdirectory(include)  # public interface (and entire implementation)
 
 # Specify documentation generation
-add_subdirectory(doc)
+add_subdirectory(doc)  # project documentation (via doxygen)
 
 # Project test programs - via CTest
 enable_testing()
-add_subdirectory(tests)
+add_subdirectory(eval)   # evaluation and experimentation programs
+add_subdirectory(tests)  # quality and verification tests
 
 # Example programs
-add_subdirectory(examples)
+add_subdirectory(examples)  # illustrative examples
 
 
 #

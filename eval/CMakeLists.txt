@@ -27,27 +27,22 @@
 #
 
 
-# Inventory of test programs
-set(perideticTests
+# Inventory of evaluation and experimentation programs
+set(perideticEvals
 	
-	testBuildHello # check build process
-	testLocal # check development and testing tools
-	testXforms # check fundamental transformation syntax/calling
-	testCORS # check CORS data values parsing
-	testAccuracy # check transformation external accuracy (vs CORS data)
-	testMath # check various ellipsoid relationships
+	evalExcess # evaluate elliptical excess over large range of values
 
 	)
 
 # build exectutables
-foreach (perideticTest ${perideticTests})
+foreach (perideticEval ${perideticEvals})
 
-	# each test is independent executable program
-	add_executable(${perideticTest} ${perideticTest}.cpp)
+	# each experiment is independent executable program
+	add_executable(${perideticEval} ${perideticEval}.cpp)
 
 	# use may project build options
 	target_compile_options(
-		${perideticTest}
+		${perideticEval}
 		PRIVATE
 			$<$<CXX_COMPILER_ID:Clang>:${BUILD_FLAGS_FOR_CLANG}>
 			$<$<CXX_COMPILER_ID:GNU>:${BUILD_FLAGS_FOR_GCC}>
@@ -56,29 +51,21 @@ foreach (perideticTest ${perideticTests})
 
 	# local and project include paths
 	target_include_directories(
-		${perideticTest}
+		${perideticEval}
 		PRIVATE
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>/
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>/../include/
-        	$<INSTALL_INTERFACE:include/>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>/../tests/
+			#        	$<INSTALL_INTERFACE:include/>
 		)
 
 	# dependency on project
 	target_link_libraries(
-		${perideticTest}
+		${perideticEval}
 		PRIVATE
 			peridetic::peridetic
 		)
 
 endforeach()
-
-# add to "CTest" suite
-foreach (perideticTest ${perideticTests})
-
-	add_test("${perideticTest}"
-		"${perideticTest}"
-		)
-
-endforeach ()
 
 
