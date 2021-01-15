@@ -173,6 +173,29 @@ namespace peri
 	}
 
 
+	//! Geodetic (Lon/Par) angles for local ellipsoid gradient (or up dir)
+	std::pair<double, double>
+	anglesLonParOf // Note: units are unimportant since angles are ratios
+		( XYZ const & anyVec
+			//!< Arbitrary: for geodetic lon/par use gradient at pVec
+		)
+	{
+		// note computations are ratios and are independent of units
+		double const & xx = anyVec[0];
+		double const & yy = anyVec[1];
+		double const & zz = anyVec[2];
+		// radius of parallel circle
+		double const hh{ std::sqrt(sq(xx) + sq(yy)) };
+		// compute conventional lon/par angles
+		double lon{ 0. };
+		if (! (0. == hh)) // if small hh, somewhat random longitude
+		{
+			lon = std::atan2(yy, xx);
+		}
+		double const par{ std::atan2(zz, hh) };
+		return { lon, par };
+	}
+
 } // [peri]
 
 namespace peri
@@ -545,7 +568,7 @@ namespace peri
 			double const altOrig{ lambdaOrig * altNorm };
 			// find point, pVec, on ellipsoid closest to world point, xVec
 			// extract LP (at A=0.) from vertical direction at pVec
-			std::pair<double, double> const pairLonPar{ anglesLonParAt(pGrad) };
+			std::pair<double, double> const pairLonPar{ anglesLonParOf(pGrad) };
 			// angles are invariant to scale (unaffected by normalization)
 			double const & pLonOrig = pairLonPar.first;
 			double const & pParOrig = pairLonPar.second;
@@ -669,29 +692,6 @@ namespace peri
 				, muSqNorms[2] * xVecNorm[2] / (muSqNorms[2] + sigmaNorm)
 				};
 			return pVecNorm;
-		}
-
-		//! Geodetic (Lon/Par) angles for local ellipsoid gradient (or up dir)
-		std::pair<double, double>
-		anglesLonParAt // Note: units are unimportant since angles are ratios
-			( XYZ const & pGrad
-				//!< Gradient vector (or local ellipsoid normal - aka 'up')
-			) const
-		{
-			// note computations are ratios and are independent of units
-			double const & xx = pGrad[0];
-			double const & yy = pGrad[1];
-			double const & zz = pGrad[2];
-			// radius of parallel circle
-			double const hh{ std::sqrt(sq(xx) + sq(yy)) };
-			// compute conventional lon/par angles
-			double lon{ 0. };
-			if (! (0. == hh)) // if small hh, somewhat random longitude
-			{
-				lon = std::atan2(yy, xx);
-			}
-			double const par{ std::atan2(zz, hh) };
-			return { lon, par };
 		}
 
 	}; // EarthModel
