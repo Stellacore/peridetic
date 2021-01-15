@@ -610,28 +610,24 @@ namespace
 		return eta0;
 	}
 
-// TODO - cleanup, split computations from output
-	void
-	saveZetaDiffs
-		( peri::sim::SampleSpec const & radSpec
-		, peri::sim::SampleSpec const & parSpec
-		, peri::EarthModel const & earth
-		, std::ostream & ofsZetaDiff
-		)
+	//! Values for pVec computed via various techniques
+	struct PVecSoln
 	{
-		peri::Shape const & shape = earth.theEllip.theShapeOrig;
+		peri::XYZ theExact{}; // "exact" solution (from periDetail)
+		peri::XYZ theApx1{};  // first order zetaQuadratic approximation
+		peri::XYZ theApx2{};  // second order zetaQuadratic approximation
 
-		std::vector<peri::XYZ> const xyzs
-			{ peri::sim::meridianPlaneSamples(radSpec, parSpec) };
-		for (peri::XYZ const & xyz : xyzs)
+		//! Compute pVec values from zeta polynomial
+		static
+		PVecSoln
+		from
+			( peri::XYZ const & xVec
+			, peri::XYZ const & pVecExp
+			, peri::Shape const & shape
+			)
 		{
-			peri::XYZ const & xVec = xyz;
-
-			// gradient at radial point
-			double const grMag{ grMagFor(xVec, shape) };
-
-			// radial pseudo-altitude
 			double const eta0{ eta0For(xVec, shape) };
+			double const grMag{ grMagFor(xVec, shape) };
 
 			// form and solve 'zeta' quadratic
 			ZetaPolyQuad const zpoly2{ xVec, eta0, grMag, shape.theMuSqs };
@@ -639,37 +635,144 @@ namespace
 			double const zetaQuadApx1{ zpoly2.rootApprox1st(coCBAs) };
 			double const zetaQuadApx2{ zpoly2.rootApprox2nd(coCBAs) };
 
-			// expected POE
-			peri::XYZ const pVecExp{ earth.nearEllipsoidPointFor(xVec) };
-
 			// computed POE with different approximation orders
 			peri::XYZ const pVecApx1
 				{ pVecFor(xVec, zetaQuadApx1, eta0, grMag, shape) };
 			peri::XYZ const pVecApx2
 				{ pVecFor(xVec, zetaQuadApx2, eta0, grMag, shape) };
 
-			using peri::operator-;
-			double const difMagApx1{ peri::magnitude(pVecApx1 - pVecExp) };
-			double const difMagApx2{ peri::magnitude(pVecApx2 - pVecExp) };
-
-			double const xMag{ peri::magnitude(xVec) };
-			double const & zVal = xVec[2];
-			double const hSq{ peri::sq(xVec[0]) + peri::sq(xVec[1]) };
-			double const hVal{ std::sqrt(hSq) };
-			double const theta{ std::atan2(zVal, hVal) };
-			ofsZetaDiff
-				<< peri::string::allDigits(theta, "theta")
-				<< " "
-				<< peri::string::allDigits(xMag, "xMag")
-				<< " "
-				<< peri::string::allDigits(difMagApx1, "difMagApx1")
-				<< " "
-				<< peri::string::allDigits(difMagApx2, "difMagApx2")
-			//	<< " "
-			//	<< peri::string::allDigits(xVec, "xVec")
-				<< '\n';
+			return { pVecExp, pVecApx1, pVecApx2 };
 		}
 
+		//! Error in 1st order approximation
+		double
+		diffApx1
+			() const
+		{
+			using peri::operator-;
+			return peri::magnitude(theApx1 - theExact);
+		}
+
+		//! Error in 2nd order approximation
+		double
+		diffApx2
+			() const
+		{
+			using peri::operator-;
+			return peri::magnitude(theApx2 - theExact);
+		}
+
+	}; // PVecSoln
+
+	//!  Evaluate pVec locations with various order zeta polynomial expressions
+	struct ZetaSoln
+	{
+		peri::XYZ const theXVec{};
+		PVecSoln const thePVecs{};
+
+		explicit
+		ZetaSoln
+			( peri::XYZ const & xVec
+			, peri::XYZ const & pVecExp
+			, peri::Shape const & shape
+			)
+			: theXVec{ xVec }
+			, thePVecs{ PVecSoln::from(theXVec, pVecExp, shape) }
+		{
+		}
+
+	}; // ZetaSoln
+
+	//! Location of evaluation sample with descriptive values
+	struct LocSamp
+	{
+		//! sample location as vector
+		peri::XYZ const theVecX{};
+		//! azimuth/elevation angles (geocentric)
+		std::pair<double, double> const theAzimElev{};
+		//! magnitude of xVec (geocentric)
+		double const theMag{};
+
+		explicit
+		LocSamp
+			( peri::XYZ const & xVec
+			)
+			: theVecX{ xVec }
+			, theAzimElev{ peri::anglesLonParOf(xVec) }
+			, theMag{ peri::magnitude(xVec) }
+		{
+		}
+
+		inline
+		double const &
+		azim
+			() const
+		{
+			return theAzimElev.first;
+		}
+
+		inline
+		double const &
+		elev
+			() const
+		{
+			return theAzimElev.second;
+		}
+
+	}; // LocSamp
+
+	//! Evaluate pVec errors at specified sampling locations
+	std::vector<std::pair<LocSamp, PVecSoln> >
+	sampleSolnsFor
+		( peri::sim::SampleSpec const & radSpec
+		, peri::sim::SampleSpec const & parSpec
+		, peri::EarthModel const & earth
+		)
+	{
+		std::vector<std::pair<LocSamp, PVecSoln> > locSolns{};
+
+		std::vector<peri::XYZ> const xVecs
+			{ peri::sim::meridianPlaneSamples(radSpec, parSpec) };
+		for (peri::XYZ const & xVec : xVecs)
+		{
+			// expected POE
+			peri::XYZ const pVecExp{ earth.nearEllipsoidPointFor(xVec) };
+
+			// evaluate pVec (and related) using 'zeta' polynomial
+			ZetaSoln const zSoln(xVec, pVecExp, earth.theEllip.theShapeOrig);
+			PVecSoln const & pSoln = zSoln.thePVecs;
+
+			// put into return collection
+			locSolns.emplace_back(std::pair<LocSamp, PVecSoln>{ xVec, pSoln });
+		}
+
+		return locSolns;
+	}
+
+	//! Evaluate pVec errors at specified sampling locations
+	void
+	saveZetaDiffs
+		( std::vector<std::pair<LocSamp, PVecSoln> > const & locSolns
+		, std::ostream & ofsZetaDiff
+		)
+	{
+		for (std::pair<LocSamp, PVecSoln> const & locSoln : locSolns)
+		{
+			LocSamp const & locSamp = locSoln.first;
+			PVecSoln const & pSoln = locSoln.second;
+
+			ofsZetaDiff
+				<< peri::string::allDigits(locSamp.elev(), "theta")
+				<< " "
+				<< peri::string::allDigits(locSamp.theMag, "xMag")
+				<< " "
+				<< peri::string::allDigits(pSoln.diffApx1(), "difMagApx1")
+				<< " "
+				<< peri::string::allDigits(pSoln.diffApx2(), "difMagApx2")
+			//	<< " "
+			//	<< peri::string::allDigits(locSamp.theVecX, "xVec")
+				<< '\n';
+		}
 	}
 
 } // [annon]
@@ -695,8 +798,8 @@ main
 		);
 	std::ofstream ofsZeta
 		(
-		"/dev/null"
-	//	"zetaDiff.dat"
+	//	"/dev/null"
+		"zetaDiff.dat"
 		);
 
 	constexpr std::size_t numRad{  32u + 1u };
@@ -726,7 +829,9 @@ main
 	errCount += evalExcess(radSpec, parSpec, earth, ofsExcess);
 	errCount += evalVecP(radSpec, parSpec, earth, ofsDifPVec);
 
-	saveZetaDiffs(radSpec, parSpec, earth, ofsZeta);
+	std::vector<std::pair<LocSamp, PVecSoln> > const locSolns
+		{ sampleSolnsFor(radSpec, parSpec, earth) };
+	saveZetaDiffs(locSolns, ofsZeta);
 
 	return errCount;
 }
