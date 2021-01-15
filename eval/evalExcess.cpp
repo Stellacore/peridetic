@@ -616,6 +616,7 @@ namespace
 		peri::XYZ theExact{}; // "exact" solution (from periDetail)
 		peri::XYZ theApx1{};  // first order zetaQuadratic approximation
 		peri::XYZ theApx2{};  // second order zetaQuadratic approximation
+		peri::XYZ theApx3{};  // third order zetaQuadratic approximation
 
 		//! Compute pVec values from zeta polynomial
 		static
@@ -634,14 +635,17 @@ namespace
 			std::array<double, 3u> const coCBAs{ zpoly2.coCBAs() };
 			double const zetaQuadApx1{ zpoly2.rootApprox1st(coCBAs) };
 			double const zetaQuadApx2{ zpoly2.rootApprox2nd(coCBAs) };
+			double const zetaQuadApx3{ zpoly2.rootApprox3rd(coCBAs) };
 
 			// computed POE with different approximation orders
 			peri::XYZ const pVecApx1
 				{ pVecFor(xVec, zetaQuadApx1, eta0, grMag, shape) };
 			peri::XYZ const pVecApx2
 				{ pVecFor(xVec, zetaQuadApx2, eta0, grMag, shape) };
+			peri::XYZ const pVecApx3
+				{ pVecFor(xVec, zetaQuadApx3, eta0, grMag, shape) };
 
-			return { pVecExp, pVecApx1, pVecApx2 };
+			return { pVecExp, pVecApx1, pVecApx2, pVecApx3 };
 		}
 
 		//! Error in 1st order approximation
@@ -660,6 +664,15 @@ namespace
 		{
 			using peri::operator-;
 			return peri::magnitude(theApx2 - theExact);
+		}
+
+		//! Error in 3rd order approximation
+		double
+		diffApx3
+			() const
+		{
+			using peri::operator-;
+			return peri::magnitude(theApx3 - theExact);
 		}
 
 	}; // PVecSoln
@@ -769,6 +782,8 @@ namespace
 				<< peri::string::allDigits(pSoln.diffApx1(), "difMagApx1")
 				<< " "
 				<< peri::string::allDigits(pSoln.diffApx2(), "difMagApx2")
+				<< " "
+				<< peri::string::allDigits(pSoln.diffApx3(), "difMagApx3")
 			//	<< " "
 			//	<< peri::string::allDigits(locSamp.theVecX, "xVec")
 				<< '\n';
