@@ -31,6 +31,7 @@
 set(perideticEvals
 	
 	evalExcess # evaluate elliptical excess over large range of values
+	evalSpeed # assess computation timing
 
 	)
 
