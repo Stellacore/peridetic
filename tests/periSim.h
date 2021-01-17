@@ -33,6 +33,8 @@
 
 #include "peridetic.h"
 
+#include "periLocal.h"
+
 #include <cmath>
 #include <cstdint>
 #include <utility>
