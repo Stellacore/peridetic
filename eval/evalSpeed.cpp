@@ -129,6 +129,22 @@ namespace eval
 		{
 		}
 
+		//! abs() of components - simple, but non-trivial to estimate overhead
+		inline
+		static
+		Array
+		absOf // arbitrary simple computation as reference for timing
+			( Array const & array
+			)
+		{
+			return
+				{ std::sqrt(std::abs(array[0]))
+				, std::sqrt(std::abs(array[1]))
+				, std::sqrt(std::abs(array[2]))
+				};
+		}
+
+
 		//! Sqrt(abs()) of each component - for complexity reference
 		inline
 		static
@@ -185,7 +201,16 @@ namespace eval
 		//! Perform reference computations
 		inline
 		void
-		computeReference
+		computeAbs
+			()
+		{
+			compute(absOf);
+		}
+
+		//! Perform reference computations
+		inline
+		void
+		computeSqrt
 			()
 		{
 			compute(sqrtAbsOf);
@@ -271,14 +296,10 @@ namespace eval
 	std::string
 	timeString
 		( double const & timeValue
-		, std::string const & title = {}
+		, std::string const & description = {}
 		)
 	{
 		std::ostringstream oss;
-		if (! title.empty())
-		{
-			oss << std::setw(16u) << title << " ";
-		}
 		constexpr std::size_t numTailDigits{ 9u };
 		oss
 			<< std::fixed
@@ -286,6 +307,15 @@ namespace eval
 			<< std::setprecision(numTailDigits)
 			<< timeValue
 			;
+		if (! description.empty())
+		{
+			oss << "  : ";
+			oss
+				<< std::setw(40u)
+				<< std::left
+				<< description
+				;
+		}
 		return oss.str();
 	}
 
@@ -296,34 +326,80 @@ int
 main
 	()
 {
-	std::cout << "hi" << std::endl;
+	constexpr std::size_t num1D{ 256u };
+	constexpr std::size_t numLon{ num1D };
+	constexpr std::size_t numPar{ num1D };
+	constexpr std::size_t numAlt{ num1D };
 
-	eval::DataSet const data{};
+	std::cout << "--- setup: " << std::endl;
+
+	eval::DataSet const data(numLon, numPar, numAlt);
 	eval::Transformer xformer{};
 
-	std::function<void(void)> const funcRef
-		{ std::bind(&eval::Transformer::computeReference, xformer) };
+	// configure tests
+	std::function<void(void)> const funcAbs
+		{ std::bind(&eval::Transformer::computeAbs, xformer) };
+	std::function<void(void)> const funcSqt
+		{ std::bind(&eval::Transformer::computeSqrt, xformer) };
 	std::function<void(void)> const funcXyz
 		{ std::bind(&eval::Transformer::computeToXyz, xformer) };
 	std::function<void(void)> const funcLpa
 		{ std::bind(&eval::Transformer::computeToLpa, xformer) };
 
-	double const dCount{ static_cast<double>(data.size()) };
-	double const perEachRef{ eval::timeToRun(funcRef) / dCount };
-	double const perEachXyz{ eval::timeToRun(funcXyz) / dCount };
-	double const perEachLpa{ eval::timeToRun(funcLpa) / dCount };
+	std::string const nameAbs{ "Reference evaluations - abs(): " };
+	std::string const nameSqt{ "Reference evaluations - sqrt(abs()): " };
+	std::string const nameXyz{ "Cartesian from Geodetic - xyzForLpa(): " };
+	std::string const nameLpa{ "Geodetic from Cartesian - lpaForXyz(): " };
 
-	double const relativeRef{ perEachRef / perEachRef };
+	std::cout << "--- evaluating: " << std::endl;
+
+	double const timeAbs{ eval::timeToRun(funcAbs) };
+	double const timeSqt{ eval::timeToRun(funcSqt) };
+	double const timeXyz{ eval::timeToRun(funcXyz) };
+	double const timeLpa{ eval::timeToRun(funcLpa) };
+
+	std::cout << "--- reporting: " << std::endl;
+
+	double const dCount{ static_cast<double>(data.size()) };
+
+	double const perEachAbs{ timeAbs / dCount };
+	double const perEachSqt{ timeSqt / dCount };
+	double const perEachXyz{ timeXyz / dCount };
+	double const perEachLpa{ timeLpa / dCount };
+
+	double const & perEachRef = perEachAbs;
+
+	double const relativeAbs{ perEachAbs / perEachRef };
+	double const relativeSqt{ perEachSqt / perEachRef };
 	double const relativeXyz{ perEachXyz / perEachRef };
 	double const relativeLpa{ perEachLpa / perEachRef };
 
-	std::cout << eval::timeString(perEachRef, "perEachRef") << std::endl;
-	std::cout << eval::timeString(perEachXyz, "perEachXyz") << std::endl;
-	std::cout << eval::timeString(perEachLpa, "perEachLpa") << std::endl;
 
-	std::cout << eval::timeString(relativeRef, "relativeRef") << std::endl;
-	std::cout << eval::timeString(relativeXyz, "relativeXyz") << std::endl;
-	std::cout << eval::timeString(relativeLpa, "relativeLpa") << std::endl;
+	std::cout << std::endl;
+	std::cout << "# Number samples tested: " << data.size() << std::endl;
+
+	std::cout << std::endl;
+	std::cout << "# absolute times ('wall-clock' time in sec)" << std::endl;
+	std::cout << eval::timeString(timeAbs, nameAbs) << std::endl;
+	std::cout << eval::timeString(timeSqt, nameSqt) << std::endl;
+	std::cout << eval::timeString(timeXyz, nameXyz) << std::endl;
+	std::cout << eval::timeString(timeLpa, nameLpa) << std::endl;
+
+	std::cout << std::endl;
+	std::cout << "# per each times (in sec)" << std::endl;
+	std::cout << eval::timeString(perEachAbs, nameAbs) << std::endl;
+	std::cout << eval::timeString(perEachSqt, nameSqt) << std::endl;
+	std::cout << eval::timeString(perEachXyz, nameXyz) << std::endl;
+	std::cout << eval::timeString(perEachLpa, nameLpa) << std::endl;
+
+	std::cout << std::endl;
+	std::cout << "# relative times (ratio to 'abs')" << std::endl;
+	std::cout << eval::timeString(relativeAbs, nameAbs) << std::endl;
+	std::cout << eval::timeString(relativeSqt, nameSqt) << std::endl;
+	std::cout << eval::timeString(relativeXyz, nameXyz) << std::endl;
+	std::cout << eval::timeString(relativeLpa, nameLpa) << std::endl;
+
+	std::cout << std::endl;
 
 	return 0;
 }
