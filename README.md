@@ -990,7 +990,8 @@ into a (pre-allocated) work space.
 The test transformation operations include:
 
 * "copy": Simply copy sample data from source into work space (no computation).
-	This should provide an indication of data handling overhead.
+	This should provide an indication of data handling overhead which is
+	present in *all* transformation operations
 
 * "multiply": Multiply each component of the 3D data input by a constant value.
 
@@ -1004,6 +1005,10 @@ The test transformation operations include:
 	values from Cartesisn "X/Y/Z" coordinates.
 
 Results:
+
+Time values include all computation infrastructure and overhead as well
+as specific computation times. The 'copy' transform is included to provide
+a ballpark estimate of time associated with data handling overhead.
 
 	# Number samples tested: 17508141
 
@@ -1026,4 +1031,20 @@ Results:
 	1.25   1.01   1.00   0.40   0.18  : Reference evaluation - sqrt(abs()):
 	3.10   2.51   2.48   1.00   0.45  : Cartesian from Geodetic - xyzForLpa():
 	6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
+
+Note the timing values fluctuate by a percent or so from run to run, but
+provide a general idea of what to expect (at least this class of processor).
+
+For this test, the xyzForLpa() computation is about two and a half times
+more expensive than simple multiplication of all three coordinate values.
+
+Computation of geodetic "Lon,Lat,Alt" values from Cartesian "X,Y,Z"
+coordinates is approximately five and half times more expensive than simple
+multiplication of all three coordinate values.
+
+Note that these results apply to point locations within the optimum design
+domain (locations within approximately +/-100[km] of Earth surface). For
+points outside this range (e.g. geosynchronous orbits, etc), computations
+require slightly (but only slightly) more time (potentially 50% or sometimes
+100% longer for the lpaForXyz() conversion).
 
