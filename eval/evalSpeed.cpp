@@ -69,9 +69,9 @@ namespace eval
 		inline
 		explicit
 		DataSet
-			( std::size_t const & numLon = 128u
-			, std::size_t const & numPar = 128u
-			, std::size_t const & numAlt = 128u
+			( std::size_t const & numLon
+			, std::size_t const & numPar
+			, std::size_t const & numAlt
 			)
 			: theLpas{ peri::sim::bulkSamplesLpa(numLon, numPar, numAlt) }
 			, theXyzs{ xyzsFor(theLpas) }
@@ -123,33 +123,48 @@ namespace eval
 		inline
 		explicit
 		Transformer
-			()
-			: theDataSet{}
+			( DataSet const & dataSet
+			)
+			: theDataSet{ dataSet }
 			, theWorkSpace(theDataSet.size())
 		{
+		}
+
+		// should optimize away, e.g. for timing only data loop/move overhead
+		//! Copy component values unchanged
+		inline
+		static
+		Array
+		funcCpy
+			( Array const & array
+			)
+		{
+			return array;
 		}
 
 		//! abs() of components - simple, but non-trivial to estimate overhead
 		inline
 		static
 		Array
-		toAbs // arbitrary simple computation as reference for timing
+		funcMul
 			( Array const & array
 			)
 		{
+			constexpr double co0{ .1 };
+			constexpr double co1{ .3 };
+			constexpr double co2{ .7 };
 			return
-				{ std::sqrt(std::abs(array[0]))
-				, std::sqrt(std::abs(array[1]))
-				, std::sqrt(std::abs(array[2]))
+				{ co0 * array[0]
+				, co1 * array[1]
+				, co2 * array[2]
 				};
 		}
-
 
 		//! Sqrt(abs()) of each component - for complexity reference
 		inline
 		static
 		Array
-		toSqt // arbitrary simple computation as reference for timing
+		funcSqt
 			( Array const & array
 			)
 		{
@@ -164,7 +179,7 @@ namespace eval
 		inline
 		static
 		Array
-		toXyz
+		funcXyz
 			( Array const & lpa
 			)
 		{
@@ -175,7 +190,7 @@ namespace eval
 		inline
 		static
 		Array
-		toLpa
+		funcLpa
 			( Array const & xyz
 			)
 		{
@@ -187,63 +202,75 @@ namespace eval
 		inline
 		void
 		run
-			( Func const & func
+			( std::vector<Array> const & locData
+			, Func const & func
 			)
 		{
 			std::transform
-				( theDataSet.theXyzs.cbegin()
-				, theDataSet.theXyzs.cend()
+				( locData.cbegin()
+				, locData.cend()
 				, theWorkSpace.insert_iterator()
 				, func
 				);
 		}
 
-		//! Perform reference computations
+		//! Run simple copy operation ('compute' should be optimized away)
 		inline
 		void
-		runToAbs
+		runCpy
 			()
 		{
-			run(toAbs);
+			run(theDataSet.theXyzs, funcCpy);
 		}
 
-		//! Perform reference computations
+		//! Perform simple multiplication on every element
 		inline
 		void
-		runToSqt
+		runMul
 			()
 		{
-			run(toSqt);
+			run(theDataSet.theXyzs, funcMul);
+		}
+
+		//! Perform square root (of abs()) on every element
+		inline
+		void
+		runSqt
+			()
+		{
+			run(theDataSet.theXyzs, funcSqt);
 		}
 
 		//! Perform (easy) forward computations
 		inline
 		void
-		runToXyz
+		runXyz
 			()
 		{
-			run(toXyz);
+			run(theDataSet.theLpas, funcXyz);
 		}
 
 		//! Perform (complex) inverse computations
 		inline
 		void
-		runToLpa
+		runLpa
 			()
 		{
-			run(toLpa);
+			run(theDataSet.theXyzs, funcLpa);
 		}
 
 	}; // Transformer
 
+	//! basic support for simple 'wall-clock' style timing
 	namespace timer
 	{
 		using namespace std::chrono;
 
+		static high_resolution_clock sClock{};
+
 		//! Utilize std::chrono to get simple timing information
 		struct ChronoAboration
 		{
-			high_resolution_clock theClock{};
 			time_point<high_resolution_clock, high_resolution_clock::duration>
 				theT0{};
 			time_point<high_resolution_clock, high_resolution_clock::duration>
@@ -253,14 +280,14 @@ namespace eval
 			start
 				()
 			{
-				theT0 = theClock.now();
+				theT0 = sClock.now();
 			}
 
 			void
 			stop
 				()
 			{
-				theT1 = theClock.now();
+				theT1 = sClock.now();
 			}
 
 			//! Time between t0 and t1 in seconds
@@ -277,6 +304,12 @@ namespace eval
 	} // [timer]
 
 	
+} // [eval]
+
+
+namespace report
+{
+
 	//! Return time (in sec) to run func()
 	template <typename Func>
 	inline
@@ -285,21 +318,22 @@ namespace eval
 		( Func const & func
 		)
 	{
-		timer::ChronoAboration timer{};
+		eval::timer::ChronoAboration timer{};
 		timer.start();
 		func();
 		timer.stop();
 		return timer.elapsed();
 	}
 
+	//! Consistently formatted time representation
 	std::string
 	timeString
 		( double const & timeValue
 		, std::string const & description = {}
+		, std::size_t const & numTailDigits = 9u
 		)
 	{
 		std::ostringstream oss;
-		constexpr std::size_t numTailDigits{ 9u };
 		oss
 			<< std::fixed
 			<< std::setw(5u+1u+numTailDigits)
@@ -318,13 +352,100 @@ namespace eval
 		return oss.str();
 	}
 
-} // [annon]
+	//! Pairing of time (sec) and test name
+	using TimeName = std::pair<double, std::string>;
 
+	//! relative run times (full values normalized by number of samples)
+	std::vector<TimeName>
+	perEachRunTimes
+		( std::size_t const & numSamps
+		, std::vector<TimeName> const & allTimeNames
+		)
+	{
+		std::vector<TimeName> perTimeNames;
+		perTimeNames.reserve(allTimeNames.size());
+		double const perSamp{ 1. / static_cast<double>(numSamps) };
+		for (TimeName const & allTimeName : allTimeNames)
+		{
+			double const perTime{ perSamp * allTimeName.first };
+			std::string const & name = allTimeName.second;
+			perTimeNames.emplace_back(std::make_pair(perTime, name));
+		}
+		return perTimeNames;
+	}
+
+	//! Report perTest timing info
+	std::string
+	absTimingInfo
+		( std::vector<report::TimeName> const & allTimeNames
+		, std::size_t const & numSamps
+		)
+	{
+		std::ostringstream rpt;
+		// report absolute timing (for full tests and average per operation)
+		rpt << std::endl;
+		rpt << "# Absolute times per test" << '\n';
+		rpt << "# -- time values are 'wall-clock' elapsed [in sec]" << '\n';
+		rpt << "# -- absolute total and 'per-each' times" << '\n';
+		rpt << std::endl;
+		std::size_t const numTests{ allTimeNames.size() };
+		double const perSamp{ 1. / static_cast<double>(numSamps) };
+		for (std::size_t nn{0u} ; nn < numTests ; ++nn)
+		{
+			double const & allTime = allTimeNames[nn].first;
+			std::string const & name = allTimeNames[nn].second;
+			double const perTime{ perSamp * allTime };
+			rpt
+				<< report::timeString(allTime)
+				<< " "
+				<< report::timeString(perTime, name)
+				<< '\n';
+		}
+		return rpt.str();
+	}
+
+	//! Report ratios of test times with respect to each other
+	std::string
+	relTimeInfo
+		( std::vector<report::TimeName> const & allTimeNames
+		)
+	{
+		std::ostringstream rpt;
+		rpt << std::endl;
+		rpt << "# Relative test times" << '\n';
+		rpt << "# -- times tests with respect to each other [ratio]" << '\n';
+		rpt << "# -- column order matches row order" << '\n';
+		rpt << std::endl;
+		std::size_t const & numTests = allTimeNames.size();
+		for (std::size_t nCurr{0u} ; nCurr < numTests ; ++nCurr)
+		{
+			double const & currTime = allTimeNames[nCurr].first;
+			std::string const & currName = allTimeNames[nCurr].second;
+			for (std::size_t nBase{0u} ; nBase < numTests ; ++nBase)
+			{
+				double const & baseTime = allTimeNames[nBase].first;
+				double const relTime{ currTime / baseTime };
+				constexpr std::size_t nDig{ 2u };
+				rpt << " "
+					<< std::fixed << std::setprecision(nDig)
+					<< std::setw(3u+1u+nDig)
+					<< relTime;
+			}
+			rpt << "  : " << currName << std::endl;
+		}
+		return rpt.str();
+	}
+
+
+
+} // [report]
 
 int
 main
 	()
 {
+	// 32 leads to about same number points as sq-deg in a sphere (41253)
+	// constexpr std::size_t num1D{ 32u };
 	constexpr std::size_t num1D{ 256u };
 	constexpr std::size_t numLon{ num1D };
 	constexpr std::size_t numPar{ num1D };
@@ -334,73 +455,56 @@ main
 
 	// allocate data with pre-set values in both domains
 	eval::DataSet const data(numLon, numPar, numAlt);
+	std::size_t const numSamps{ data.size() };
 	// allocate fixed workspace for available transformations
-	eval::Transformer xformer{};
+	eval::Transformer xformer(data);
 
-	// configure tests
-	std::function<void(void)> const funcAbs
-		{ std::bind(&eval::Transformer::runToAbs, xformer) };
-	std::function<void(void)> const funcSqt
-		{ std::bind(&eval::Transformer::runToSqt, xformer) };
-	std::function<void(void)> const funcXyz
-		{ std::bind(&eval::Transformer::runToXyz, xformer) };
-	std::function<void(void)> const funcLpa
-		{ std::bind(&eval::Transformer::runToLpa, xformer) };
+	using Func_t = std::function<void(void)>;
+	Func_t const funcCpy{ std::bind(&eval::Transformer::runCpy, xformer) };
+	Func_t const funcMul{ std::bind(&eval::Transformer::runMul, xformer) };
+	Func_t const funcSqt{ std::bind(&eval::Transformer::runSqt, xformer) };
+	Func_t const funcXyz{ std::bind(&eval::Transformer::runXyz, xformer) };
+	Func_t const funcLpa{ std::bind(&eval::Transformer::runLpa, xformer) };
 
-	std::string const nameAbs{ "Reference evaluations - abs(): " };
-	std::string const nameSqt{ "Reference evaluations - sqrt(abs()): " };
+	std::string const nameCpy{ "Reference evaluation - copy: " };
+	std::string const nameMul{ "Reference evaluation - multiply: " };
+	std::string const nameSqt{ "Reference evaluation - sqrt(abs()): " };
 	std::string const nameXyz{ "Cartesian from Geodetic - xyzForLpa(): " };
 	std::string const nameLpa{ "Geodetic from Cartesian - lpaForXyz(): " };
 
-	std::cout << "--- evaluating: " << std::endl;
+	// run each computation test and note (wall) time it takes
+	double const timeCpy{ report::runTimeFor(funcCpy) };
+	double const timeMul{ report::runTimeFor(funcMul) };
+	double const timeSqt{ report::runTimeFor(funcSqt) };
+	double const timeXyz{ report::runTimeFor(funcXyz) };
+	double const timeLpa{ report::runTimeFor(funcLpa) };
 
-	double const timeAbs{ eval::runTimeFor(funcAbs) };
-	double const timeSqt{ eval::runTimeFor(funcSqt) };
-	double const timeXyz{ eval::runTimeFor(funcXyz) };
-	double const timeLpa{ eval::runTimeFor(funcLpa) };
+	// gather results for use in reporting
+	std::vector<report::TimeName> const allTimeNames
+		{ std::make_pair(timeCpy, nameCpy)
+		, std::make_pair(timeMul, nameMul)
+		, std::make_pair(timeSqt, nameSqt)
+		, std::make_pair(timeXyz, nameXyz)
+		, std::make_pair(timeLpa, nameLpa)
+		};
 
 	std::cout << "--- reporting: " << std::endl;
 
-	double const dCount{ static_cast<double>(data.size()) };
+	// report test stats
+	std::ostringstream rpt;
 
-	double const perEachAbs{ timeAbs / dCount };
-	double const perEachSqt{ timeSqt / dCount };
-	double const perEachXyz{ timeXyz / dCount };
-	double const perEachLpa{ timeLpa / dCount };
+	// report test stats
+	rpt << std::endl;
+	rpt << "# Number samples tested: " << numSamps << std::endl;
 
-	double const & perEachRef = perEachAbs;
+	// report absolute timing (for full tests and average per operation)
+	rpt << report::absTimingInfo(allTimeNames, numSamps) << std::endl;
 
-	double const relativeAbs{ perEachAbs / perEachRef };
-	double const relativeSqt{ perEachSqt / perEachRef };
-	double const relativeXyz{ perEachXyz / perEachRef };
-	double const relativeLpa{ perEachLpa / perEachRef };
+	// generate table of times relative to each other
+	rpt << report::relTimeInfo(allTimeNames);
 
-
-	std::cout << std::endl;
-	std::cout << "# Number samples tested: " << data.size() << std::endl;
-
-	std::cout << std::endl;
-	std::cout << "# absolute times ('wall-clock' time in sec)" << std::endl;
-	std::cout << eval::timeString(timeAbs, nameAbs) << std::endl;
-	std::cout << eval::timeString(timeSqt, nameSqt) << std::endl;
-	std::cout << eval::timeString(timeXyz, nameXyz) << std::endl;
-	std::cout << eval::timeString(timeLpa, nameLpa) << std::endl;
-
-	std::cout << std::endl;
-	std::cout << "# per each times (in sec)" << std::endl;
-	std::cout << eval::timeString(perEachAbs, nameAbs) << std::endl;
-	std::cout << eval::timeString(perEachSqt, nameSqt) << std::endl;
-	std::cout << eval::timeString(perEachXyz, nameXyz) << std::endl;
-	std::cout << eval::timeString(perEachLpa, nameLpa) << std::endl;
-
-	std::cout << std::endl;
-	std::cout << "# relative times (ratio to 'abs')" << std::endl;
-	std::cout << eval::timeString(relativeAbs, nameAbs) << std::endl;
-	std::cout << eval::timeString(relativeSqt, nameSqt) << std::endl;
-	std::cout << eval::timeString(relativeXyz, nameXyz) << std::endl;
-	std::cout << eval::timeString(relativeLpa, nameLpa) << std::endl;
-
-	std::cout << std::endl;
+	// display results
+	std::cout << rpt.str() << std::endl;
 
 	return 0;
 }
