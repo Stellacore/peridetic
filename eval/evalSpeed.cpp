@@ -133,7 +133,7 @@ namespace eval
 		inline
 		static
 		Array
-		absOf // arbitrary simple computation as reference for timing
+		toAbs // arbitrary simple computation as reference for timing
 			( Array const & array
 			)
 		{
@@ -149,7 +149,7 @@ namespace eval
 		inline
 		static
 		Array
-		sqrtAbsOf // arbitrary simple computation as reference for timing
+		toSqt // arbitrary simple computation as reference for timing
 			( Array const & array
 			)
 		{
@@ -186,7 +186,7 @@ namespace eval
 		template <typename Func>
 		inline
 		void
-		compute
+		run
 			( Func const & func
 			)
 		{
@@ -201,39 +201,38 @@ namespace eval
 		//! Perform reference computations
 		inline
 		void
-		computeAbs
+		runToAbs
 			()
 		{
-			compute(absOf);
+			run(toAbs);
 		}
 
 		//! Perform reference computations
 		inline
 		void
-		computeSqrt
+		runToSqt
 			()
 		{
-			compute(sqrtAbsOf);
+			run(toSqt);
 		}
 
 		//! Perform (easy) forward computations
 		inline
 		void
-		computeToXyz
+		runToXyz
 			()
 		{
-			compute(toXyz);
+			run(toXyz);
 		}
 
 		//! Perform (complex) inverse computations
 		inline
 		void
-		computeToLpa
+		runToLpa
 			()
 		{
-			compute(toLpa);
+			run(toLpa);
 		}
-
 
 	}; // Transformer
 
@@ -282,7 +281,7 @@ namespace eval
 	template <typename Func>
 	inline
 	double
-	timeToRun
+	runTimeFor
 		( Func const & func
 		)
 	{
@@ -333,18 +332,20 @@ main
 
 	std::cout << "--- setup: " << std::endl;
 
+	// allocate data with pre-set values in both domains
 	eval::DataSet const data(numLon, numPar, numAlt);
+	// allocate fixed workspace for available transformations
 	eval::Transformer xformer{};
 
 	// configure tests
 	std::function<void(void)> const funcAbs
-		{ std::bind(&eval::Transformer::computeAbs, xformer) };
+		{ std::bind(&eval::Transformer::runToAbs, xformer) };
 	std::function<void(void)> const funcSqt
-		{ std::bind(&eval::Transformer::computeSqrt, xformer) };
+		{ std::bind(&eval::Transformer::runToSqt, xformer) };
 	std::function<void(void)> const funcXyz
-		{ std::bind(&eval::Transformer::computeToXyz, xformer) };
+		{ std::bind(&eval::Transformer::runToXyz, xformer) };
 	std::function<void(void)> const funcLpa
-		{ std::bind(&eval::Transformer::computeToLpa, xformer) };
+		{ std::bind(&eval::Transformer::runToLpa, xformer) };
 
 	std::string const nameAbs{ "Reference evaluations - abs(): " };
 	std::string const nameSqt{ "Reference evaluations - sqrt(abs()): " };
@@ -353,10 +354,10 @@ main
 
 	std::cout << "--- evaluating: " << std::endl;
 
-	double const timeAbs{ eval::timeToRun(funcAbs) };
-	double const timeSqt{ eval::timeToRun(funcSqt) };
-	double const timeXyz{ eval::timeToRun(funcXyz) };
-	double const timeLpa{ eval::timeToRun(funcLpa) };
+	double const timeAbs{ eval::runTimeFor(funcAbs) };
+	double const timeSqt{ eval::runTimeFor(funcSqt) };
+	double const timeXyz{ eval::runTimeFor(funcXyz) };
+	double const timeLpa{ eval::runTimeFor(funcLpa) };
 
 	std::cout << "--- reporting: " << std::endl;
 
