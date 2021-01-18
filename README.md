@@ -454,7 +454,8 @@ Processors
 
 Optimization:
 
-* NOTE! To obtain reasonable performance it is important to compile with
+* NOTE! To obtain [reasonable performance](#Transformation-Speed)
+	it is important to compile with
 	optimization enabled. (Implementation involves many, many short
 	inline functions and variable assignment operations that entirely
 	disappear when compiled with optimization, but will represent a
@@ -1002,6 +1003,7 @@ The test transformation operations include:
 * "lpaForXyz": Full geodetic transformation: compute Geodetic "Lon,Lat,Alt"
 	values from Cartesisn "X/Y/Z" coordinates.
 
+Results:
 
 	# Number samples tested: 17508141
 
@@ -1009,19 +1011,19 @@ The test transformation operations include:
 	# -- time values are 'wall-clock' elapsed [in sec]
 	# -- absolute total and 'per-each' times
 
-    0.385952462     0.000000022  : Reference evaluation - copy:
-    0.476933213     0.000000027  : Reference evaluation - multiply:
-    0.482271823     0.000000028  : Reference evaluation - sqrt(abs()):
-    1.196965868     0.000000068  : Cartesian from Geodetic - xyzForLpa():
-    2.642841151     0.000000151  : Geodetic from Cartesian - lpaForXyz():
+	0.385952462     0.000000022  : Reference evaluation - copy:
+	0.476933213     0.000000027  : Reference evaluation - multiply:
+	0.482271823     0.000000028  : Reference evaluation - sqrt(abs()):
+	1.196965868     0.000000068  : Cartesian from Geodetic - xyzForLpa():
+	2.642841151     0.000000151  : Geodetic from Cartesian - lpaForXyz():
 
 	# Relative test times
 	# -- times tests with respect to each other [ratio]
 	# -- column order matches row order
 
-   1.00   0.81   0.80   0.32   0.15  : Reference evaluation - copy:
-   1.24   1.00   0.99   0.40   0.18  : Reference evaluation - multiply:
-   1.25   1.01   1.00   0.40   0.18  : Reference evaluation - sqrt(abs()):
-   3.10   2.51   2.48   1.00   0.45  : Cartesian from Geodetic - xyzForLpa():
-   6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
+	1.00   0.81   0.80   0.32   0.15  : Reference evaluation - copy:
+	1.24   1.00   0.99   0.40   0.18  : Reference evaluation - multiply:
+	1.25   1.01   1.00   0.40   0.18  : Reference evaluation - sqrt(abs()):
+	3.10   2.51   2.48   1.00   0.45  : Cartesian from Geodetic - xyzForLpa():
+	6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
 
