@@ -488,6 +488,8 @@ This project can be used in your own code in two ways:
 	using the ["cmake" paradigms](https://cmake.org/documentation/).
 	I.e. with CMakeLists.txt command something like this
 
+Example CMakeFile syntax:
+
 	# dependency for myTarget
 	target_link_libraries(
 		${myTarget}
@@ -575,12 +577,12 @@ own data values, then everything should be fine. If you are uncomfortable
 with this level of responsibility, you might consider utilizing a few
 utility functions from the project test environment:
 
-	* Ref the
-	[periLocal.h](https://github.com/Stellacore/peridetic/blob/main/tests/periLocal.h)
+* Ref the [periLocal.h] (https://github.com/Stellacore/peridetic/blob/main/tests/periLocal.h)
 	header file in "/tests" subdirectory. This is a header file used
-	in development/testing programs. It includes various functions that
-	may be generally useful in the context of gedetic data value
-	interpretations (e.g. isValid(), infoString(), principalAngle(), etc).
+	in development/testing programs. It includes various functions
+	that may be generally useful in the context of gedetic data value
+	interpretations (e.g. isValid(), infoString(), principalAngle(),
+	etc).
 
 
 
