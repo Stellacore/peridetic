@@ -30,129 +30,10 @@
 #include "peridetic.h"
 
 #include "periLocal.h"
+#include "periSim.h"
 
 #include <iostream>
 #include <vector>
-
-
-namespace sim
-{
-	//! Collection of longitude angle values
-	std::vector<double>
-	lonSamples
-		( std::size_t const numBulk = 8u
-		)
-	{
-		std::vector<double> samps{};
-		samps.reserve(numBulk + 3u);
-		double const pi{ peri::pi() };
-		double const eps{ std::numeric_limits<double>::epsilon() };
-		// be sure to include several key values
-		samps.emplace_back(-pi);
-		samps.emplace_back(0.);
-		samps.emplace_back(pi*(1.-eps));
-		// fill bulk points
-		double const ang0{ -1. }; // arbitrary, let wrap around inside loop
-		double const angDelta{ (2.*pi) / static_cast<double>(numBulk) };
-		for (std::size_t nn{0u} ; nn < numBulk ; ++nn)
-		{
-			double const anAngle{ ang0 + static_cast<double>(nn)*angDelta };
-			double const lon{ peri::principalAngle(anAngle) };
-			samps.emplace_back(lon);
-		}
-		return samps;
-	}
-
-	//! Collection of parallel(latitude) angle values
-	std::vector<double>
-	parSamples
-		( std::size_t const numBulk = 8u
-		)
-	{
-		std::vector<double> samps{};
-		samps.reserve(numBulk + 5u);
-		double const pi{ peri::pi() };
-		// be sure to include several key values
-		samps.emplace_back(-.5*pi);
-		samps.emplace_back(-.25*pi);
-		samps.emplace_back(0.);
-		samps.emplace_back(.25*pi);
-		samps.emplace_back(.5*pi);
-		// fill bulk points
-		double const ang0{ -1. }; // arbitrary, let wrap around inside loop
-		double const angDelta{ (2.*pi) / static_cast<double>(numBulk) };
-		for (std::size_t nn{0u} ; nn < numBulk ; ++nn)
-		{
-			double const anAngle{ ang0 + static_cast<double>(nn)*angDelta };
-			// principal value misses open end (pi/2) but that caught by keyvals
-			double const par{ .5 * peri::principalAngle(anAngle) };
-			samps.emplace_back(par);
-		}
-		return samps;
-	}
-
-	//! Collection of altitude values
-	std::vector<double>
-	altSamples
-		( std::size_t const numBulk = 8u
-		)
-	{
-		std::vector<double> samps{};
-		samps.reserve(numBulk + 3u);
-		// be sure to include several key values
-		samps.emplace_back(-100000.);
-		samps.emplace_back(0.);
-		samps.emplace_back(100000.);
-		// fill bulk points
-		double const alt0{ -1.e+5 };
-		double const altDelta{ (2.e+5) / static_cast<double>(numBulk) };
-		for (std::size_t nn{0u} ; nn < numBulk ; ++nn)
-		{
-			double const alt{ alt0 + static_cast<double>(nn)*altDelta };
-			samps.emplace_back(alt);
-		}
-		return samps;
-	}
-
-	//! Collection of LPA locations (spanning domain of validity as defined)
-	std::vector<peri::LPA>
-	lpaCombos
-		( std::vector<double> const & lonSamps
-		, std::vector<double> const & parSamps
-		, std::vector<double> const & altSamps
-		)
-	{
-		std::vector<peri::LPA> lpas;
-		lpas.reserve(lonSamps.size() * parSamps.size() * altSamps.size());
-		for (double const & lonSamp : lonSamps)
-		{
-			for (double const & parSamp : parSamps)
-			{
-				for (double const & altSamp : altSamps)
-				{
-					lpas.emplace_back(peri::LPA{ lonSamp, parSamp, altSamp });
-				}
-			}
-		}
-		return lpas;
-	}
-
-	//! Collection of LPA locations (spanning domain of validity as defined)
-	std::vector<peri::LPA>
-	lpaSamples
-		( std::size_t const lonBulk = 8u
-		, std::size_t const parBulk = 8u
-		, std::size_t const altBulk = 8u
-		)
-	{
-		std::vector<double> const lonSamps{ lonSamples(lonBulk) };
-		std::vector<double> const parSamps{ parSamples(parBulk) };
-		std::vector<double> const altSamps{ altSamples(altBulk) };
-		return lpaCombos(lonSamps, parSamps, altSamps);
-	}
-
-
-} // [sim]
 
 
 namespace
@@ -286,7 +167,7 @@ namespace
 		constexpr std::size_t numPar{  67u };
 		constexpr std::size_t numAlt{  73u };
 		std::vector<peri::LPA> const expLPAs
-			{ sim::lpaSamples(numLon, numPar, numAlt) };
+			{ peri::sim::bulkSamplesLpa(numLon, numPar, numAlt) };
 
 		// test at full precision
 		RoundTripper const rt
@@ -319,8 +200,8 @@ namespace
 
 		constexpr std::size_t numLon{  19u };
 		constexpr std::size_t numPar{  37u };
-		std::vector<double> const lonSamps{ sim::lonSamples(numLon) };
-		std::vector<double> const parSamps{ sim::parSamples(numPar) };
+		std::vector<double> const lonSamps{ peri::sim::bulkSamplesLon(numLon) };
+		std::vector<double> const parSamps{ peri::sim::bulkSamplesPar(numPar) };
 		std::vector<double> const altSamps
 			{ -100.e+3 // lower design bound
 			,  100.e+3 // upper design bound
@@ -328,7 +209,7 @@ namespace
 			,   25.e+6 // nominal GNSS altitudes // tol ~= 1.e-8
 			};
 		std::vector<peri::LPA> const expLPAs
-			{ sim::lpaCombos(lonSamps, parSamps, altSamps) };
+			{ peri::sim::comboSamplesLpa(lonSamps, parSamps, altSamps) };
 
 		// test with reduced precision threshold for the large distances
 		constexpr double tolLinGNSS{ 2.e-8 };
@@ -361,15 +242,15 @@ namespace
 
 		constexpr std::size_t numLon{ 17u };
 		constexpr std::size_t numPar{ 29u };
-		std::vector<double> const lonSamps{ sim::lonSamples(numLon) };
-		std::vector<double> const parSamps{ sim::parSamples(numPar) };
+		std::vector<double> const lonSamps{ peri::sim::bulkSamplesLon(numLon) };
+		std::vector<double> const parSamps{ peri::sim::bulkSamplesPar(numPar) };
 		std::vector<double> const altSamps
 			{ -100.e+3 // lower design bound
 			,  100.e+3 // upper design bound
 			,  410.e+6 // slightly beyond lunar apogee
 			};
 		std::vector<peri::LPA> const expLPAs
-			{ sim::lpaCombos(lonSamps, parSamps, altSamps) };
+			{ peri::sim::comboSamplesLpa(lonSamps, parSamps, altSamps) };
 
 		// test with reduced precision threshold for the large distances
 		constexpr double tolLinGNSS{ 2.e-7 };
@@ -401,8 +282,8 @@ namespace
 
 		constexpr std::size_t numLon{ 59u };
 		constexpr std::size_t numPar{ 29u };
-		std::vector<double> const lonSamps{ sim::lonSamples(numLon) };
-		std::vector<double> const parSamps{ sim::parSamples(numPar) };
+		std::vector<double> const lonSamps{ peri::sim::bulkSamplesLon(numLon) };
+		std::vector<double> const parSamps{ peri::sim::bulkSamplesPar(numPar) };
 		std::vector<double> const altSamps
 			{ -100.e+3 // lower design bound
 			,  100.e+3 // upper design bound
@@ -411,7 +292,7 @@ namespace
 		//	, -6300.e+3 // approx limit on convergence
 			};
 		std::vector<peri::LPA> const expLPAs
-			{ sim::lpaCombos(lonSamps, parSamps, altSamps) };
+			{ peri::sim::comboSamplesLpa(lonSamps, parSamps, altSamps) };
 
 		// test with reduced precision threshold for the large distances
 		constexpr double tolLinGNSS{ peri::sSmallLinear };
@@ -440,8 +321,8 @@ namespace
 		// trials along a simple profile
 		constexpr std::size_t numLon{ 1u };
 		constexpr std::size_t numPar{ 19u };
-		std::vector<double> const lonSamps{ sim::lonSamples(numLon) };
-		std::vector<double> const parSamps{ sim::parSamples(numPar) };
+		std::vector<double> const lonSamps{ peri::sim::bulkSamplesLon(numLon) };
+		std::vector<double> const parSamps{ peri::sim::bulkSamplesPar(numPar) };
 
 		constexpr double lyDist{ 26700. };
 		constexpr double mPerSec{ 3.e8 };
@@ -459,7 +340,7 @@ namespace
 		constexpr double tolAngGNSS{ peri::sSmallAngular };
 
 		std::vector<peri::LPA> const expLPAs
-			{ sim::lpaCombos(lonSamps, parSamps, altSamps) };
+			{ peri::sim::comboSamplesLpa(lonSamps, parSamps, altSamps) };
 
 		// test with reduced precision threshold for the large distances
 		RoundTripper const rtGNSS{ earth, tolAngGNSS, tolLinGNSS };
@@ -468,7 +349,10 @@ namespace
 			errCount += rtGNSS.errCountAt(expLPA);
 		}
 
-		std::cout << "testLimits: errCount: " << errCount << std::endl;
+		if (0 < errCount)
+		{
+			std::cout << "testLimits: errCount: " << errCount << std::endl;
+		}
 	}
 }
 

@@ -232,6 +232,29 @@ namespace peri
 //! String encoding useful for geodetic data values
 namespace peri::string
 {
+	//! String representation of double with digits before and after decimal
+	std::string
+	fixedDigits
+		( double const & value
+		, std::string const & title = {}
+		, std::size_t const & digitsFirst = 7u
+		, std::size_t const & digitsLater = 6u
+		)
+	{
+		std::ostringstream oss;
+		// Size to: space + sign + digits + point + digits
+		std::size_t const numWide{ 1u + 1u + digitsFirst + 1u + digitsLater };
+		if (! title.empty())
+		{
+			oss << std::setw(16u) << title << " ";
+		}
+		oss << std::setw(numWide)
+			<< std::fixed
+			<< std::setprecision(digitsLater)
+			<< value;
+		return oss.str();
+	}
+
 
 	//! Value encoded as fixed format string suitable for Cartesian values
 	inline
@@ -242,15 +265,7 @@ namespace peri::string
 		)
 	{
 		constexpr std::size_t numDigits{ 3u }; //!< After decimal point
-		std::ostringstream oss;
-		if (! title.empty())
-		{
-			oss << std::setw(16u) << title << " ";
-		}
-		oss << std::fixed
-			<< std::setw(9u+numDigits) << std::setprecision(numDigits)
-			<< value;
-		return oss.str();
+		return fixedDigits(value, title, 7u, numDigits);
 	}
 
 	//! Value encoded as fixed format string suitable for Geodetic angle values
@@ -262,15 +277,7 @@ namespace peri::string
 		)
 	{
 		constexpr std::size_t numDigits{ 10u }; //!< After decimal point
-		std::ostringstream oss;
-		if (! title.empty())
-		{
-			oss << std::setw(16u) << title << " ";
-		}
-		oss << std::fixed
-			<< std::setw(3u+numDigits) << std::setprecision(numDigits)
-			<< value;
-		return oss.str();
+		return fixedDigits(value, title, 1u, numDigits);
 	}
 
 	//! Value encoded as maximum (8-byte) precision e-notation
@@ -408,5 +415,87 @@ namespace peri::lpa
 	}
 
 } // [peri::lpa]
+
+namespace peri::ellip
+{
+	//! Parameter combinations useful for computations
+	struct SquaredParms
+	{
+		double const the_x3Sq{}; //!< square of polar constituent
+		double const the_hSq{}; //!< square of equatorial constituent
+		double const the_xSq{}; //!< squared magnitude of full vector xyzAny
+		double const the_hoxSq{}; //!< hSq over xSq (a squared cosine value)
+
+	private:
+
+		SquaredParms
+			() = default;
+
+	public:
+
+		inline
+		explicit
+		SquaredParms
+			( XYZ const & xyzAny
+			)
+			: the_x3Sq{ sq(xyzAny[2]) }
+			, the_hSq{ sq(xyzAny[0]) + sq(xyzAny[1]) }
+			, the_xSq{ the_hSq + the_x3Sq }
+			, the_hoxSq{ the_hSq / the_xSq }
+		{
+		}
+
+	}; // SquaredParms
+
+
+	//! \b Squared first eccentricity of shape (1-(b/a)^2)
+	inline
+	double
+	squaredEccentricity
+		( peri::Shape const & shape
+		)
+	{
+		double const & alpha = shape.theRadA;
+		double const & beta = shape.theRadB;
+		double const boa{ beta / alpha };
+		double const eSq{ 1. - boa*boa };
+		return eSq;
+	}
+
+	/*! \brief Distance from center to surface of ellipsoid toward xyzAny.
+	 *
+	 * NOTE: xyzAny can be any \b non-zero arbitrary location.
+	 */
+	inline
+	double
+	radiusToward
+		( XYZ const & xyzAny
+		, peri::Shape const & shape
+		)
+	{
+		// ellipsoid shape parameters
+		double const eSq{ squaredEccentricity(shape) };
+		double const & beta = shape.theRadB;
+		// compute intermediate coordinate combinations
+		SquaredParms const parmSqs(xyzAny);
+		double const den{ 1. - eSq * parmSqs.the_hoxSq };
+		double const frac{ std::sqrt(1. / den) }; // fraction of polar radius
+		double const rho{ beta * frac }; // radial magnitude
+		return rho;
+	}
+
+	//! \brief Centric vector to surface of ellipsoid in direction of xyzAny.
+	inline
+	XYZ
+	vectorToward
+		( XYZ const & xyzAny
+			//!< Any (non-zero) vector indicating direction
+		, peri::Shape const & shape
+		)
+	{
+		return ellip::radiusToward(xyzAny, shape) * unit(xyzAny);
+	}
+
+} // [peri::ellip]
 
 #endif // peri_Local_INCL_
