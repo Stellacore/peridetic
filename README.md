@@ -488,12 +488,12 @@ This project can be used in your own code in two ways:
 	using the ["cmake" paradigms](https://cmake.org/documentation/).
 	I.e. with CMakeLists.txt command something like this
 
-	# dependency for myTarget
-	target_link_libraries(
-		${myTarget}
-		PRIVATE
-			peridetic::peridetic
-		)
+	> # dependency for myTarget
+	> target_link_libraries(
+	> 	${myTarget}
+	> 	PRIVATE
+	> 		peridetic::peridetic
+	> 	)
 
 #### Licensing
 
