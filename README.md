@@ -472,9 +472,9 @@ Language
 
 Compilers
 
-* GCC - primary
+* GCC - primary (9.3)
 
-* Clang - TODO
+* Clang - verified (7.0.1)
 
 Build
 
