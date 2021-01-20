@@ -63,11 +63,11 @@ which can be used to obtain:
 #### _Testing/Verification_:
 
 * Optimal Domain is within +/-100[km] altitude from Earth's (ellipsoid)
-	surface. (ref [Altitude Domain of Validity](#domain-of-validity))
+	surface. (ref [Altitude Optimal Domain](#optimal-domain))
 
 * [Precision](#Transformation-Precision):
 	Better than ~7.6[nm] within the
-	[optimal domain](#domain-of-validity) which corresponds
+	[optimal domain](#optimal-domain) which corresponds
 	with computational relative precision of approximately
 	1.e-15 which approaches the limit of [64-bit IEEE-754 'double'
 	type](https://en.wikipedia.org/wiki/Decimal64_floating-point_format)
@@ -155,7 +155,7 @@ and around (to Earth's surface), and "daiesthai" meaning "to divide"
 (into measurable units). The name Peredetic is intended to be refelctive
 of geodetic operations that are highly performant within the important
 practical domain of operation within approximately +/- 100[km] Earth's
-surface (ref: [domain of validity](#domain-of-validity)).
+surface (ref: [optimal domain](#optimal-domain)).
 
 ### Project Contributions
 
@@ -390,7 +390,7 @@ the point of interest.
 The magnitude of the altitude value may be interpreted as the shortest
 distance between the point of interest and any other point on the
 ellipsoidal surface (singularities and multiple solution conditions near
-Earth center are outside of the [design domain](#domain-of-validity).
+Earth center are outside of the [design domain](#optimal-domain).
 The algebraic sign of altitude values is positive for point locations
 outside the ellipsoid surface (locally upward) and is negative for points
 of interest within the ellipsoid (locally downward)
@@ -690,10 +690,10 @@ LPA representation. Also, the origin (center of Earth) has an infinite
 number of LPA representations.
 
 Peridetic transformations are concerned only with the locations on and
-"near" the surface of Earth (ref: [domain of validity](#domain-of-validity)).
+"near" the surface of Earth (ref: [optimal domain](#optimal-domain)).
 In this case, the singularity at the center of Earth is mostly irrelevant
 (ref: [special cases](#special-cases)).  Of the two dual LPA representations,
-only one is in the domain of validity (the one with altitude that has the
+only one is in the optimal domain (the one with altitude that has the
 smallest absolute value).
 
 #### XYZ <a id=XYZ-Coordinates></a>
@@ -735,10 +735,10 @@ Using XYZ coordinates, distances and angles can be computed directly
 from the coordinate component values (e.g. via Pythagorean theorem,
 the law of cosines, etc).
 
-### Domain of Validity on Altitude <a id=domain-of-validity></a>
+### Optimal Domain on Altitude <a id=optimal-domain></a>
 
 The quality of the results produced by the code in this project is
-associated with a particular domain of validity. Results remain fairly useful
+associated with a particular optimal domain. Results remain fairly useful
 outside of this domain, although the quality may be less than when operating
 inside the specified domain.
 
