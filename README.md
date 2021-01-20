@@ -25,6 +25,7 @@ This Page Content:
 * [Technical Detail](#Technical-Detail)
 * [Transformation Details](#Transformation-Details)
 * [Technical Deep Dive](#Technical-Deep-Dive)
+* [Runtime Performance](#Runtime-Performance)
 
 
 
@@ -47,9 +48,9 @@ Provides the two most fundamental and ubiquitous geodetic/rectangular
 coordinate transformations (ref [examples](#Definitive-Example-Code))
 which can be used to obtain:
 
-* Longitude/Parallel(latitude)/(ellipsoidal)Altitude from Cartesian (XYZ)
+* Longitude/Latitude/(ellipsoidal)Altitude from Cartesian (XYZ)
 
-* Cartesian XYZ coordinates from Longitude/Parallel/Altitude
+* Cartesian XYZ coordinates from Longitude/Latitude/Altitude
 
 #### _Applications_:
 
@@ -60,14 +61,17 @@ which can be used to obtain:
 
 * Aviation - E.g. aircraft, UAV/drones, balloons, instrumented birds, etc.
 
+* Space - E.g. near-Earth and geosynchronous satellites, but *slightly* less
+	optimal performance.
+
 #### _Testing/Verification_:
 
-* Optimal Domain is within +/-100[km] altitude from Earth's (ellipsoid)
-	surface. (ref [Altitude Domain of Validity](#domain-of-validity))
+* Optimal domain is within +/-100[km] altitude from Earth's (ellipsoid)
+	surface. (ref [Altitude Optimal Domain](#optimal-domain))
 
 * [Precision](#Transformation-Precision):
 	Better than ~7.6[nm] within the
-	[optimal domain](#domain-of-validity) which corresponds
+	[optimal domain](#optimal-domain) which corresponds
 	with computational relative precision of approximately
 	1.e-15 which approaches the limit of [64-bit IEEE-754 'double'
 	type](https://en.wikipedia.org/wiki/Decimal64_floating-point_format)
@@ -77,6 +81,10 @@ which can be used to obtain:
 	Agrees with select globally distributed NOAA/NGS CORS stations
 	within their published coordinate precision of 1[mm].
 
+* [Speed](#Runtime-Performance):
+	Comparable to fastest available algorithms in terms of floating point
+	operations counts.
+
 #### _Limitations and Cautions_:
 
 * Not optimized for use in outer space (although
@@ -85,7 +93,7 @@ which can be used to obtain:
 
 * Not optimized for use deep within Earth interior (although
 	transformations still meet design precision limits until
-	approximately below -5800[km] depths. 
+	below approximately -5800[km] depths. 
 
 	* Locations until altitudes below -6300[km], still transform
 		with sub[mm] precision (roundtrip consistency better than
@@ -93,16 +101,21 @@ which can be used to obtain:
 		to you, then you are working in a extremely specialized
 		and novel domain that is not within scope here.
 
-* This implementation addresses standard geodetic coordinate
+* This implementation addresses standard *Geodetic* coordinate
 	conversions in which longitude/paralell angles are associated
-	with an ellipsoidal Figure of Earth. By contrast, astrometric
+	to an ellipsoidal Figure of Earth. By contrast, astrodetic
 	lon/par values are referenced to a Geoid (local level surface)
 	instead.  Astrometric conversions are outside the scope of these
 	Peridetic transformations.
 
-* For detail on transformation precision both inside and outside the
-	optimal domain refer to the section on
-	[Transformation Precision](#Transformation-Precision)
+	* [This web page](https://www.oc.nps.edu/oc2902w/coord/coord.pdf)
+		provides a fairly clear and accessible description of the
+		various types of coordinate systems and distinctions between
+		them.
+
+* The section, [Transformation Precision](#Transformation-Precision),
+	provides detail on precision both inside and outside the optimal
+	altitude domain.
 
 
 ## Peridetic - Project Info <a id=Project-Info ></a>
@@ -112,26 +125,25 @@ which can be used to obtain:
 GNSS (Global Navigation Satellite System) receivers are everywhere
 (e.g. phones, cars, etc), and existing geodetic information is
 ubiquitous (e.g. maps, infrastructure databases, etc). Therefore,
-software operating with either/both types of data often needs to
+software operating with either/both generally needs to
 convert coordinate locations expressed in one system into an equivalent
-coordinates representation in the other.
+representation in the other domain.
 
 Geodetic transformations provide the means to convert the Cartesian
-coordinate data values (aka "ECEF", "XYZ") such as those from GNSS into
-and/or from Geodetic coordinates associated with conventional terrestrial
-locations expressed in geographic terms (aka "lon/lat" or "longitude,
-latitude, altitude").
+coordinate data values (aka "ECEF", "XYZ") into/from Geodetic coordinates
+associated with conventional terrestrial locations expressed in geographic
+terms (aka "lon/lat" or "longitude, latitude, altitude").
 
 Software development projects, even simple ones, often need to perform
 these transformations. However, available existing transformation software
-is typically only available as a small part of a much larger code project.
-This can be inconvenient by requiring a full installation processes,
-dealing with the package learning curve, and, most critically, can create
-the need to carry (potentially large) dependencies forward in the (often
-small) project work at hand.
+is typically only available as a small portion of a much larger project.
+This can be inconvenient in requiring a full installation processes,
+dealing with the large package learning curve, and, most critically,
+creates a need to carry (potentially large) dependencies forward in the
+(often small) project work otherwise at hand.
 
-Peridetic addresses this need by offering the two essential geodetic
-transformations without the overhead of installing or learning a new
+Peridetic addresses this need by offering the two core geodetic
+transformations without overhead of installing or learning a new
 environment and without creating any unnecessary dependencies for software
 development or runtime environments.
 
@@ -141,10 +153,10 @@ for you.
 
 ### Project Concept
 
-Peridetic provides (MIT license) C++ (header) code that performs
+Peridetic provides (MIT license) C++ header code that performs very
 precise and accurate transformation from/into geodetic coordinates
-(longitude, latitude, and ellipsoidal altitude) and Cartesian "XYZ"
-(Earth Centered Earth Fixed - ECEF). The transformations are optimized
+(longitude, latitude, and ellipsoidal altitude) and Cartesian "XYZ" (Earth
+Centered Earth Fixed - ECEF). The transformation performance is optimized
 for locations "near" (within +/- 100[km]) of Earth's ellipsoidal surface.
 
 ### Project Name
@@ -155,25 +167,29 @@ and around (to Earth's surface), and "daiesthai" meaning "to divide"
 (into measurable units). The name Peredetic is intended to be refelctive
 of geodetic operations that are highly performant within the important
 practical domain of operation within approximately +/- 100[km] Earth's
-surface (ref: [domain of validity](#domain-of-validity)).
+surface (ref: [optimal domain](#optimal-domain)).
 
 ### Project Contributions
+
+If you're interested to contribute...
 
 First of all, thank you for your interest in Perdetic and for considering
 to provide comments, suggestions, ideas and/or criticisms - all of which
 are welcomed with open arms.
 
-For quick comments, please send a short
+For quick comments, you can send a short
 [Email](mailto://peridetic@stellacore.com). If you wish to offer more
-extensive specific change suggestions, please fork the repository and
-issue a pull request from a rebased branch in the fork repo.
+extensive and/or specific change suggestions, please fork the repository
+and issue a pull request from a rebased branch in the fork repo.
 
-The "vision" behind Peridetic is "utility with simplicity"
+The vision behind Peridetic is "utility with simplicity". Candidate areas
+to consider contribution include:
 
 * Description/Documentation:
 	Feedback pertaining to further simplification of the code, its
 	description and/or this github project structure are particularly
-	welcome (especially to improve documentation).
+	welcome (especially to improve documentation). Perhaps starting
+	with this "README" page.
 
 * Correspoinding Coordinates:
 	Another useful contribution would be identification and selection
@@ -186,9 +202,9 @@ The "vision" behind Peridetic is "utility with simplicity"
 
 * Terminology:
 	The Peridetic project (code and documentation) strives to
-	use consistent accepted terminology. However, the initial
-	version did not focus on this and may be a bit sloppy with
-	terminology.  Identification of misleading or ambiguous
+	use consistent accepted terminology. However, some initial
+	work did not focus on this and may be a touch sloppy with
+	terminology.  Identification of any misleading or ambiguous
 	terminology is most welcome. As a target, the Peridetic
 	project terminology should be consistent with the
 [NGS glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
@@ -199,6 +215,7 @@ The "vision" behind Peridetic is "utility with simplicity"
 To get started immediately:
 
 * Grab the two header files described in [Grab-n-Go](#Grab-n-Go)
+* -or- Build and install library [more formally](#CMake-Build)
 * Use in your application as described in:
 	* [Quick Illustrative Description](#Illustrative-Example) - nominal
 	* [Definitive Example Code](#Definitive-Example-Code) - definitive
@@ -209,8 +226,9 @@ Documentation sources include:
 
 
 * Project documentation (doxygen pages) can be generated from a cloned
-	repository copy (ref [CMake Build](#CMake-Build) section. E.g. to
-	only generate documentation pages:
+	repository copy (ref [CMake Build](#CMake-Build) section.
+	
+E.g. to only generate documentation pages:
 
 	$ cd /tmp
 	$ git clone https://github.com/Stellacore/peridetic.git
@@ -236,20 +254,34 @@ and
 
 #### CMake Build <a id=CMake-Build></a>
 
-E.g. build in /tmp
+For a more formal development process, clone this project then build and use
+in one of two ways:
+
+* Library build: Since this is a header only implementation
+	the 'build' process is not necessary in order to use the
+	transformations. However it does produces the software API and
+	implementation documentation (via doxygen) as well as the test
+	and verification programs.
+
+* Build a formal software distribution package, then install it onto local
+	development environments (and/or into containers) for general use.
+
+E.g. to build in /tmp:
 
 	$ mkdir /tmp/perideticWorkArea  # or wherevever you like
 	$ cd /tmp/perideticWorkArea
 	$ git clone https://github.com/Stellacore/peridetic.git
 	$ mkdir tmpBuild  # i.e. /tmp/perideticWorkArea/tmpBuild
 	$ cd tmpBuild
-	$ cmake ../peridetic  # for other than default behavior
+	$ cmake ../peridetic -DCMAKE_BUILD_TYPE=Release
+		# for other than default behavior
 		# optionally add command line specifications
 		# or edit CMakeCache file (e.g. cmake-gui) as you like
-	$ make  # builds documentation with doxygen, peridetic{Targets,Config}.cmake
-	$ ctest # run package test programs
+	$ make  # builds documentation with doxygen
+		# provides peridetic{Targets,Config}.cmake files for cmake
+	$ ctest # run test and verification programs
 	$ cpack # creates install packages
-		# peridetic-*-Linux.deb
+		# e.g.: peridetic-*-Linux.deb
 
 Then continue with platform/package specific below
 
@@ -271,17 +303,20 @@ content of the CMakeCache.txt file), installation will include:
 
 On any system that supports Debian formatted packages, continue with e.g.
 
-	$ sudo apt-get install ./peridetic-*-Linux.deb  # use version ID for '*'
+	$ sudo apt-get install ./peridetic-<VER>-Linux.deb
+		# use version ID in place of '<VER>'
 
 Cleanup
 
-	$ cd /tmp  # e.g. if you prefer to avoid deleting tree containing 'pwd'
+	$ cd /tmp  # or somewhere else
 	$ rm -rf /tmp/perideticWorkArea
 
 To uninstall (e.g. some time later)
 
 	$ sudu apt-get remove peridetic
 
+
+Then proceed with use in your own work.
 
 * Usage:
 
@@ -304,7 +339,7 @@ To uninstall (e.g. some time later)
 ## Peridetic - General Use <a id=General-Use></a>
 
 Peridetic transformations are very easy to use. Include the source
-header file and call one of the transformation functions that are in the
+header file and call one or both transformation functions that are in the
 "peri" namespace. Functions use standard C++ structures for argument and
 return types. All data values are interpreted consistently in standard
 units: _radians_ for angles; _meters_ for distances.
@@ -313,13 +348,13 @@ units: _radians_ for angles; _meters_ for distances.
 
 NOTE: this section contains generally illustrative text (missing a
 few things and possibly including typos).
-For definitive compilable (correct) code, refer to the source files
-linked in [Definitive Example Code](#Definitive-Example-Code) section.
+For definitive, compilable, and executable code, refer to the source file
+links in [Definitive Example Code](#Definitive-Example-Code) section.
 
 In succinct terms, the core usage is:
 
 	{
-	using namespace peri;
+	using namespace peri; // for XYZ,LPA type aliases and function scope
 	LPA const gotLPA
 		{ lpaForXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
 	XYZ const gotXYZ
@@ -332,15 +367,16 @@ With a bit more explanation:
     #include "peridetic.h" // indirectly includes implementation periDetail.h
 
 	// standard C++ data types
-	//	(generally, use peri::LPA and peri::XYZ from header, but for clarity)
+	//	Generally, use the peri::LPA and peri::XYZ defined in peridetic.h
+	//  For clarity, these I/O data structures are defined consistent with
 	using LPA = std::array<double, 3u>;
 	using XYZ = std::array<double, 3u>;
 
 	// Start using the transformations (angle *Radians*, linear *meters*)
 	LPA const gotLPA
-		{ lpaForXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
+		{ peri::lpaForXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
 	XYZ const gotXYZ
-		{ xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
+		{ peri::xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
 
 ### Definitive Example Code <a id=Definitive-Example-Code></a>
 
@@ -372,10 +408,10 @@ Demonstration/utility example programs include:
 A comment on terminology and notation:
 
 * "XYZ" is used herein to denote classic Cartesian coordinates. In
-	technical math speak - the three components of a vector as it is
-	expressed with respect to a orthonormal dextral (right-handed)
-	basis. For code, all data values (input arguments and return
-	values) are interpreted as _meters_.
+	technical math speak - the three components of a true 3D
+	vector as it is expressed with respect to a orthonormal dextral
+	(right-handed) basis. For code purposes, all data values (input
+	arguments and return values) are interpreted as _meters_.
 
 * "LPA" is used herein to denote geodetic coordinates. The letters stand
 	for "Longitude", "Parallel" (of latitude), and (ellipsoidal)
@@ -390,7 +426,7 @@ the point of interest.
 The magnitude of the altitude value may be interpreted as the shortest
 distance between the point of interest and any other point on the
 ellipsoidal surface (singularities and multiple solution conditions near
-Earth center are outside of the [design domain](#domain-of-validity).
+Earth center are outside of the [design domain](#optimal-domain).
 The algebraic sign of altitude values is positive for point locations
 outside the ellipsoid surface (locally upward) and is negative for points
 of interest within the ellipsoid (locally downward)
@@ -410,7 +446,7 @@ and GRS80 ellipsoids, which are commonly encountered with GNSS data
 and modern geographic data uses. Other standard and/or entirely custom
 ellipsoids are easily created and can be used directly with the
 transformation functions (Ref peri::model namespace classes in
-periDetail.h header).
+periDetail.h implementation header).
 
 The transformations offer the WGS84 as a default ellipsoid so that
 transformations are out-of-box compatible with most modern GNSS data.
@@ -422,7 +458,7 @@ shape as does the GRS80 ellipsoid (to within 0.1[mm] at the North pole).
 
 At it's core, this Peridetic project comprises two source code header files:
 
-* peridetic.h -- public interface (includes periDetail.h)
+* peridetic.h -- public interface (with #include periDetail.h)
 
 * periDetail.h -- implementation (inline functions) code
 
@@ -432,21 +468,25 @@ Software development points include:
 
 Language
 
-* Standard C++11 for usage (i.e. public headers), but C++17 for test code.
+* Standard C++11 for header use (i.e. public headers), C++17 for test code.
 
 Compilers
 
-* GCC - primary
+* GCC - primary (9.3)
 
-* Clang - TODO
+* Clang - verified (7.0.1)
+
+Build
+
+* Via [CMake](https://cmake.org/)
 
 Documentation
 
-* Via doxygen utility
+* Via ['doxygen' program](https://www.doxygen.nl/index.html)
 
 Processors
 
-* Precision relies on 8-byte (64-bit) or larger "double" type.
+* Precision assumes availability of 8-byte (64-bit) or larger "double" type
 
 * Tested on
 
@@ -459,8 +499,9 @@ Optimization:
 	optimization enabled. (Implementation involves many, many short
 	inline functions and variable assignment operations that entirely
 	disappear when compiled with optimization, but will represent a
-	very large number of (slow) function calls and (redundant) copy
-	assignments if not compiled with optimization (such as debug builds).
+	very large number of (slow) function calls and (unnecessary) copy
+	assignments if not compiled with optimization (cmake default debug
+	builds).
 
 Error Handling:
 
@@ -468,13 +509,14 @@ Error Handling:
 	(none used, none thrown)
 
 * Internal code supports quite_NaN propagation
-	(e.g. if any input data are NaN, then an all NaN result value is returned)
+	(if any input data are NaN, then result is returned with all
+	components set to NaN values)
 
 Thread safety:
 
-* Functions are both re-entrant and thread safe
+* Functions should be(+) both re-entrant and thread safe
 
-	* TODO - should be, but needs verification
+	* (+) expected to be true, but has not been verified explicitly.
 
 #### Use and Integration
 
@@ -486,9 +528,10 @@ This project can be used in your own code in two ways:
 
 * -or- Incorporate this project into another development effort
 	using the ["cmake" paradigms](https://cmake.org/documentation/).
-	I.e. with CMakeLists.txt command something like this
+	If using CMake in your own project, you can include something 
+	like the folloing in relevant CMakeLists.txt file.
 
-Example CMakeFile syntax:
+Example CMakeLists.txt file syntax:
 
 	# dependency for myTarget
 	target_link_libraries(
@@ -500,38 +543,40 @@ Example CMakeFile syntax:
 #### Licensing
 
 This code may be used for any purpose (including commercial) provided
-the copy right notice is retained as described in the
+the copy right notice is retained specifically as described in the
 [MIT (aka X11) License)](https://directory.fsf.org/wiki/License:X11)
 
 #### Data Preconditions
 
 Function arguments have a generally valid interpretation if they contain
 non-degenerate numeric values (i.e.  provided values are not NaN or
-infinity values. Therefore, no input argument value testing is performed.
+infinity values. Therefore, no input argument value testing is performed
+within transformation functions.
 
-However, if input data contain any NaN values, those are propagated
-through computations, then _all components_ of the return array are set
-to NaN.
+However, if input data contain any NaN values, then those are propagated
+through computations, such that _all components_ of the return array are
+set to NaN (e.g. supports null value propagation).
 
 ##### Crazy Values
 
 Internal checking of values is limited to conditions that may occur
 in the course of processing meaningful data.
 
-There intentionally is no code (nor overhead) to test for infinity or
+Intentionally there is no code (nor overhead) to test for infinity or
 subnormal data values. Instead, such values are propagated through
 computations based on the properties and characteristics of local
 compiler, libraries and hardware.
 
 If an ability to provide bad data values is important, then consider
-wrapping the transforms functions inside a test along the lines of:
+wrapping the transforms functions inside a data qualification/validity
+test along the lines of:
 
 	double const wildValueComponent{ ... };
 	// test for each component that might contain bad data
 	if ((0. == wildValueComponent) || std::isnormal(wildValueComponent))
 	{
-		// Here, wildValueComponent is a valid LP or XYZ component
-		// Altitude should still satisfy (MinAlt < Alt)
+		// Here, wildValueComponent will be a computationally valid component.
+		// -- application can introduce further restrictions as appropriate
 	}
 
 NaN values are used internally to represent "null" (i.e. undefined or
@@ -567,10 +612,15 @@ Overall, consuming code is expected to be nominally responsible
 for itself in terms of providing values that are meaningful in a geodetic
 sense.
 
+For best numeric stability provide angle values within principle domain
+between +/-pi in order to capture full precision of angle values.
+
 For example, negative altitude values with magnitude greater than
 the ellipsoid's polar radius are not valid geodetic coordinates.
 To avoid the overhead in testing for such a silly condition, Peridetic
-assumes the consuming code is sufficiently responsible to avoid this.
+assumes the consuming code is sufficiently responsible to avoid this. If
+not, add your own data validation wrapper guards around the Peridetic
+function calls.
 
 Overall, as long as the calling code is reasonably responsible handling its
 own data values, then everything should be fine. If you are uncomfortable
@@ -582,7 +632,8 @@ utility functions from the project test environment:
 	in development/testing programs. It includes various functions
 	that may be generally useful in the context of gedetic data value
 	interpretations (e.g. isValid(), infoString(), principalAngle(),
-	etc).
+	etc). For usage information, build the project and point browser at
+	the generated doxygen html documentation.
 
 
 
@@ -603,24 +654,24 @@ are described in detail further below.
 It is important to note that the conversion between XYZ/LPA representations
 is inextricably associated with a specific model for the Figure of Earth.
 For Peridetic (as for geodetic coordinates in general), the Earth shape
-model is an ellipsoid. (Note: astrometric lon/par values are referenced
+model is an ellipsoid. (Note: astrodetic lon/par values are referenced
 to Geoid instead of an ellipsoid. Astrometric conversions are outside 
 the scope of these Peridetic transformations).
 
 #### Reference Ellipsoids
 
-Reference Ellipsoids - are used to define the origin and alignment of
-the underlying coordinate frames for both XYZ and LPA data values.  
+Reference Ellipsoids - are used to define the origin and alignment
+of the underlying coordinate frames for both XYZ and LPA data values.
 Specific reference ellipsoid may be provided to each transformation. If
 none is provided then the WGS84 ellipsoid is used.
 
 There are many subtleties in exactly what constitutes a
-"best-fit" ellipsoid means when it pertains to the
+"best-fit" ellipsoid when it pertains to the
 ["Figure of the Earth"](https://en.wikipedia.org/wiki/Figure_of_the_Earth).
 However most commonly used ellipsoid definitions have dimensions that
 are within a few 100[m] of each other and the commonly used ellipsoids
-differ from a pure spherical model by less than about +/- 11[km] between
-equatorial and polar axes.
+differ from a pure spherical model by less than about +/- 11[km] difference
+between equatorial and polar axes.
 
 Peridetic provides two common Earth model specifications:
 
@@ -630,7 +681,8 @@ Peridetic provides two common Earth model specifications:
 
 * Other standard as well as custom ellipsoids may be
 	created easily via peri::Shape and peri::EarthModel data
-	structures. Ref doxygen-comment documentation in periDetail.h file.
+	structures. Ref doxygen-comment documentation in periDetail.h file
+	(viz the peri::model namespace documentation).
 
 #### LPA <a id=LPA-Coordinates></a>
 
@@ -648,22 +700,24 @@ Geodetic Surface Location is expressed by three values denoted as
 * P(arallel) - (of latitude) is an elevation angle (in radians),
 	positive Northward from the equator.
 
-* Origin.A - is dynamically defined to lie on the surface of the ellipsoid
-	at a location specified by the LP coordinates.
+* Origin.A - is dynamically defined to lie *on the surface* of the ellipsoid
+	at the location specified by the LP ellispoid angle coordinates.
 
 * A(ltitude) - is the distance of a point from the Origin.A location.
 	The "A" value is associated with a distance value that is
-	"stationary" with respect to small changes in LP coordinates.
-	In practice, dual solutions are resolved by selecting the "A"
-	to be the shortest distance from the ellipsoid surface to the
-	point of interest.
+	differentially "stationary" with respect to small changes in
+	LP coordinates. In practice, multiple solutions are resolved by
+	selecting the "A" to be at point on the ellipsoid that is closest
+	to the point of interest. The altitude is positive for points
+	outside the ellipsoid (e.g. "upward"), and negative for points
+	inside it (e.g. "downward").
 
-For explanation of Longitude and Latitude angles, ref: the NGS glossary
+For an explanation of Longitude and Latitude angles, ref: the NGS glossary
 entry for
 ["coordinate, geocentric"](https://www.ngs.noaa.gov/PUBS_LIB/GEOID/Droman_papers/glossary/xml/C.xml).
 
 Note that Peridetic uses the term "parallel" in place of latitude
-(to facility unique naming notation) and uses the term "altitude"
+(to facility unique naming notations) and uses the term "altitude"
 to be clear that the interpretation is applied to an ellipsoid (in
 effort to reduce confusion associated with the many uses of "height"
 and "elevation").
@@ -679,22 +733,33 @@ unique basis vectors (aka axes) can be defined for each individual point
 in space.  However, for these basis directions to be defined uniquely,
 requires specification (or assumption) of a specific underlying
 ellipsoid. I.e. the LPA coordinate values are a determined _BOTH_ by
-the point location _AND_ by the ellipsoid in acting in combination with
+the point location _AND_ by the ellipsoid acting in combination with
 each other.
 
-Note that, even for a given fixed ellipsoid, the LPA values are
+Note that, even given a specific fixed ellipsoid, the LPA values are
 *_NOT_ unique*. As just one illustrative example, a point with
 LPA of (0,0,0) can also be expressed as (pi,0,-2b) where 'b' is an
 equatorial radius of the ellipsoid. Every point in space has this dual
 LPA representation. Also, the origin (center of Earth) has an infinite
-number of LPA representations.
+number of LPA representations (both poles as well as anywhere on equator).
 
-Peridetic transformations are concerned only with the locations on and
-"near" the surface of Earth (ref: [domain of validity](#domain-of-validity)).
+In mathematical terms, there are generally four separate LPA
+representations for a given XYZ location away from the center of the
+ellipsoid. In some cases, two of these solutions are mathematically
+"imaginary" and no physical correspondence.
+
+Although LPA values are fundamentally defined for locations arbitrarily
+far away from the ellipsoid (i.e. in deep space), it may be questionable
+if it is correct to be using Geodetic LPA values (vs. e.g. Astrodetic
+ones). E.g. At geostationary satellite distances (altitude of ~3e5[km]),
+a one arc-minute deflection of vertical (difference of between Geodetic
+and Astrodetic locations) corresponds to "horizontal" position difference
+approaching 10[m].
+
+Peridetic's Geodetic transformations are optimized for locations "on" and
+"near" the surface of Earth (ref: [optimal domain](#optimal-domain)).
 In this case, the singularity at the center of Earth is mostly irrelevant
-(ref: [special cases](#special-cases)).  Of the two dual LPA representations,
-only one is in the domain of validity (the one with altitude that has the
-smallest absolute value).
+(ref: [special cases](#special-cases)).
 
 #### XYZ <a id=XYZ-Coordinates></a>
 
@@ -711,19 +776,23 @@ with GNSS (Global Navigation Satellite System) observations and/or other
 computations that are global in scope.
 
 * Origin -  Is associated with the geometric center of the reference
-	ellipsoid. For most geodetic ellipsoids, this is associated with the
-	centroid of Earth's mass distribution.
+	ellipsoid. For modern geodetic ellipsoids, the ellipsoid center is
+	associated with the centroid of Earth's overall mass distribution.
+	For older geodetic ellipsoids, the center may be defined such that
+	(only a portion of) the ellipsoid has a "best" fit to a specific
+	region or country.
 
 * Z - is the axis orthogonal to the equator (The rotation plane of
 	symmetry associated with the ellipsoid under consideration). On
 	Earth, points toward the North pole.
 
 * X - is axis orthogonal to "Z" (in the equatorial plane) and directed
-	toward the prime meridian. On Earth, for the Greenwich prime
+	toward the prime meridian. On Earth, when using the Greenwich prime
 	meridian, this points approximately toward Gulf of Guinea.
 
 * Y - is axis mutually orthogonal to Z and X in "right-hand" sense. On
-	Earth, points approximately south of Bay of Bengal.
+	Earth (for Greenwich prime), this points to location south of Bay
+	of Bengal.
 
 The XYZ is a classic orthonormal rectangular coordinate system. It is
 associated with three basis vectors (aka "axes"). Each basis vector
@@ -733,31 +802,34 @@ chirality interpretation (in the order: "X", "Y", "Z").
 
 Using XYZ coordinates, distances and angles can be computed directly
 from the coordinate component values (e.g. via Pythagorean theorem,
-the law of cosines, etc).
+the law of cosines, etc). The XYZ (vector) coordinates can be added,
+subtracted, and otherwise manipulated *as* vectors (because they *are*
+vectors).
 
-### Domain of Validity on Altitude <a id=domain-of-validity></a>
+### Optimal Domain on Altitude <a id=optimal-domain></a>
 
-The quality of the results produced by the code in this project is
-associated with a particular domain of validity. Results remain fairly useful
-outside of this domain, although the quality may be less than when operating
-inside the specified domain.
+The good performance of computations and high quality of results produced
+by the code in this project are associated with a particular optimal
+domain. Results remain fairly useful outside of this domain, although
+the quality and performance may be less than when operating inside the
+optimum domain.
 
 Practical applications are typically concerned with locations and motions
-within the atmosphere, at sea, or on the surface of Earth. A useful
-(conservative) definition of this region may be arbitrarily specified as
-the volume of space within +/- 100[km] of an ellipsoidal shape that best-fits
-the Earth surface.
+within the atmosphere, at sea, and on, or just below, the surface
+of Earth.  A useful (conservative) definition of this region may be
+specified arbitrarily as the volume of space within +/-100[km] of the
+ellipsoidal shape being used to approximate the Earth surface.
 
-There is nothing magic about this arbitrary +/- 100[km] threshold. However
+There is nothing magic about this arbitrary +/-100[km] threshold. However
 it is a useful limit at which to evaluate and express transformation
-precision and accuracy since it encompasses the overwhelming majority of
-practical use-cases. Higher altitudes are conventionally associated with
-"outer space" while lower altitudes are physically inaccessible with
-current technology.
+precision and accuracy since this region encompasses the overwhelming
+majority of practical use-cases. Higher altitudes are conventionally
+associated with "outer space" while lower altitudes are physically
+inaccessible with current technology.
 
 The [Transformation Precision](#Transformation-Precision) section describes
 what to expect for transformation of locations outside this optimum
-domain, 
+domain.
 
 ## Peridetic - Technical Deep Dive <a id=Technical-Deep-Dive></a>
 
@@ -768,34 +840,40 @@ which computation can be somewhat complex and involved. However, most
 practical applications of Geodesy involve spatial locations that are
 fairly "near" to Earth's surface (within +/-100[km]). Within this domain,
 the transformations can exploit techniques that remain highly accurate
-and precise while being simpler to implement and faster to run.
+and precise while being simpler to implement and faster to run than
+various "theoretically-elegant" analytical solutions.
 
 There are a number of papers that espouse the use of "closed form"
-solutions for the LPA from XYZ conversion. Certainly this is one approach
-that can be taken for implementation. However, these solutions require
-evaluation of n-th root computations (i.e. cube roots and square roots)
+solutions for the LPA from XYZ conversion. Certainly these approaches
+could be utilized for implementation. However, those solutions (based
+on solving a quartic equation) require evaluation of n-th root
+computations (i.e. cube roots and square roots).
 
-The root evaluations are not algebraic operations but are themselves
-evaluated by iterative algorithms (generally within math library source
-code, processor firmware, or in transistor hardware structures).
+The root evaluations are not elementary algebraic operations but are
+are themselves evaluated by iterative algorithms. Although this may
+be implemented within processor silicon, for some architectures,
+the iterative root algorithms are implemented in math library source
+code or processor firmware which may be much slower than simple algebraic
+instruction evaluations.
 
-Peridetic algorithms utilize a simple, fast and precise direct iterative
-approach followed by the use of two trig function evaluations (of
-std::atan2()) that are used to express the solution in angular units
-for return of longitude/parallel coordinates as conventional angle values.
+Peridetic algorithms utilize a simple, fast and precise direct numeric
+iteration approach followed by the use of two trig function evaluations
+(for std::atan2()) used to return longitude/parallel solution as
+conventional angle values.
 
 The XYZ from LPA algorithm utilizes a single std::sqrt() call.
 
 The mathematical formulae and algorithm detail is described in:
 
-* PerideticMath.{lyx,pdf} -- TODO
+* PerideticMath.{lyx,pdf} -- TODO (cleanup/post)
 
 ### Transformation Precision <a id=Transformation-Precision></a>
 
 For purposes here, "precision" is defined loosely as "self-consistency",
 "repeatability", "computational significance". As such, it is an intrinsic
-metric that describes the quality of the computations more so than
-the quality associated with data values.
+metric that describes the quality of the *computations* more so than
+the quality associated with data values. (Quality of data *values* is
+addressed in following section on accuracy).
 
 Peridetic transformations are self-consistent with a precision on the
 order of 7.6[nm] for locations within the operational optimal design
@@ -813,8 +891,8 @@ function of point location altitudes (Alt values):
 		is outside the scope of validity for using Peridetic.
 
 	* If you have a legitimate use-case for needing to do this, please
-		describe briefly in an [email](mailto://peridetic@stellacore.com),
-		and the author will buy you a beverage.
+		describe it briefly in an [email](mailto://peridetic@stellacore.com),
+		and the project author will buy you a beverage.
 
  * -6300[km] <= Alt < -5800[km]: -- Reduced precision, < 100[um]
 
@@ -826,12 +904,12 @@ function of point location altitudes (Alt values):
 
  * Beyond lunar distances, precision will continue to drop as
 	altitude increases.  As an extreme example: at the altitude of
-	the Milkyway's black hole, Sagittarius A-star, the transform
+	Sagittarius A-star, the Milkyway's black hole, transform
 	precision reduces to <100[km]. On the order of 1/4 of the way to
 	Andromeda gallaxy, a 64-bit double completely loses all precision
 	for expressing distances relative to the size of Earth.
 
-The above precision estimates are created by testing round trip
+The above precision reports are created by testing round trip
 transformations for various point locations well distributed with respect
 ellipsoid. For testing within the optimal domain, results for approximately
 1M point locations have been evaluated.
@@ -851,7 +929,7 @@ The question of accuracy is addressed in the section
 To determine transformation accuracy it is necessary to compare results
 with "absolute" or "known" values available from external sources.
 
-This current implementation of Peridetic is evaluated using the
+This current implementation of Peridetic is evaluated using
 published data sources described in the following sections.
 
 #### NOAA/NGS/CORS network comparisons:
@@ -868,9 +946,9 @@ a branch of the United States National Oceanic and Atmospheric Administration
 	for all positioning activities in the Nation."
 
 The NGS manages the Continuously Operating Reference Stations
-([CORS](https://www.ngs.noaa.gov/CORS/)) network of survey locations.
-Although concentrated within the U.S. the network includes a number
-of stations scattered around the globe.
+([CORS](https://www.ngs.noaa.gov/CORS/)) network of station location
+observations.  Although the network is concentrated within the U.S. it
+includes a number of stations scattered around the globe.
 
 The following stations were selected with an emphasis on variation 
 of geodetic location (longitude and latitude) and elevation
@@ -900,15 +978,17 @@ from the interactive [NGS CORS Map](https://geodesy.noaa.gov/CORS_Map/):
 These values are used to evaluate Peridetic transforms via a process
 that includes:
 
-* Cut-n-paste data from the interactive map site into a header
-	file (in the peridetic development and testing codebase).
-	Ref
+* Cut-n-paste data from the NGS interactive map site into a header
+	file (in the peridetic development and testing codebase). Ref
 	[corsDataPairs.h](https://github.com/Stellacore/peridetic/blob/main/tests/corsDataPairs.h)
 	header in /tests directory.
 
-* Unit test reads data from the header file and populates variables
-	with these "expected" data values (after decoding d-m-s values
-	into Radians).
+* Unit test code reads data from this header file and populates program
+	variables with "expected" data values. E.g.:
+
+	* expXYZ
+
+	* expLPA -- after decoding d-m-s values into Radians.
 
 * The expected values are transformed in each direction to obtain "got"
 	values. E.g.
@@ -917,7 +997,7 @@ that includes:
 
 	* gotLPA=lpaForXYZ(expXYZ).
 
-* The "got" values are compared with the corresponding "expected" values
+* The "got" values are compared with their corresponding "expected" values
 	and differences from zero are compared against tolerance values. The
 	tolerance values used reflect the published data precision:
 
@@ -928,10 +1008,10 @@ that includes:
 		of 1[mm] corresponds with a larger angle ~.16[nRad] which is
 		therefore used for testing.
 
-	* Linear tolerance of { 1./1024. }; // CORS files XYZ published to [mm]
+	* Linear tolerance of { 1./1024. }; // CORS file XYZ published to [mm]
 
 * All pairs of coordinates are required to pass this tolerance test (in
-	both directions (lpaforXyz and xyzforLpa).
+	both directions (lpaForXyz and xyzForLpa).
 
 Overall, the Peridetic transforms are thought to be correct as described
 above. The open source transparency of the algorithm and implementation
@@ -963,20 +1043,24 @@ compiled and run using the CMake/CTest paradigm.
 	Individual tests may be run independently (e.g. from command line
 	or desktop).
 
-### Transformation Speed <a id=Transformation-Speed></a>
 
-Although there are no special optimizations, the computational performance
-is reasonably good. The following presents simple (wall-clock-style) timing
-results obtained by transforming a reasonably large sample of points under
-the following conditions:
+### Runtime Performance<a id=Runtime-Performance></a>
+
+The Peridetic code implementation emphasizes clarity and portability.
+Even though there are no special optimizations, the computational
+performance is reasonably good. The following presents simple
+(wall-clock-style) timing results obtained by transforming a reasonably
+sized sample of points.
 
 #### Example Timing Results
 
 Configuration:
 
-* Hardware: AMD Ryzen 7 2700  (using only a single core)
+* Hardware: AMD Ryzen 7 2700  (using only *one* single processor core)
 
-* Points are generated spanning:
+* Compiled with GCC 9.3
+
+* Generated sample point distribution spanning:
 
 	* All longitude values in the range [-pi:pi) radians
 
@@ -995,10 +1079,12 @@ The test transformation operations include:
 	This should provide an indication of data handling overhead which is
 	present in *all* transformation operations
 
-* "multiply": Multiply each component of the 3D data input by a constant value.
+* "multiply": Multiply each component of the 3D data input by a constant
+	value (the non-binary values of .1, .3, .7).
 
 * "sqrt(abs)": Compute the square root of absolute value of each component.
-	Note on this AMD processor, sqrt() operation is about as fast as a multiply.
+	Note on this AMD processor, sqrt() operation is about as fast as 
+	a multiply.
 
 * "xyzForLpa": Full geodetic transformation: compute Cartesian "X,Y,Z"
 	coordinates from Geodetic "Lon,Lat,Alt" values.
@@ -1025,7 +1111,7 @@ a ballpark estimate of time associated with data handling overhead.
 	2.642841151     0.000000151  : Geodetic from Cartesian - lpaForXyz():
 
 	# Relative test times
-	# -- times tests with respect to each other [ratio]
+	# -- test times with respect to each other [ratio]
 	# -- column order matches row order
 
 	1.00   0.81   0.80   0.32   0.15  : Reference evaluation - copy:
@@ -1034,8 +1120,9 @@ a ballpark estimate of time associated with data handling overhead.
 	3.10   2.51   2.48   1.00   0.45  : Cartesian from Geodetic - xyzForLpa():
 	6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
 
-Note the timing values fluctuate by a percent or so from run to run, but
-provide a general idea of what to expect (at least this class of processor).
+Note the timing values fluctuate by a percent or two from run to run, but
+this provides a general idea of what to expect (at least this class
+of processor).
 
 For this test, the xyzForLpa() computation is about two and a half times
 more expensive than simple multiplication of all three coordinate values.
@@ -1047,6 +1134,6 @@ multiplication of all three coordinate values.
 Note that these results apply to point locations within the optimum design
 domain (locations within approximately +/-100[km] of Earth surface). For
 points outside this range (e.g. geosynchronous orbits, etc), computations
-require slightly (but only slightly) more time (potentially 50% or sometimes
-100% longer for the lpaForXyz() conversion).
+require slightly (but only slightly) more time for the lpaForXyz()
+conversion (approximately 50%, or possibly 100% longer).
 
