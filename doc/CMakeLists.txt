@@ -7,7 +7,7 @@ if (DOXYGEN_FOUND)
 	set(DoxyProjName "${PerideticProjName}")
 	set(DoxyProjVersion "${PerideticProjVersion}")
 	set( DoxyProjTagline
-		"Easy Accurate Geodetic form/into Cartesian Coordinate Transformation"
+		"Easy Accurate Geodetic from/into Cartesian Coordinate Transformation"
 		)
 
 	# Default enable doxygen build option
