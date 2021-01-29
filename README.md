@@ -351,32 +351,35 @@ few things and possibly including typos).
 For definitive, compilable, and executable code, refer to the source file
 links in [Definitive Example Code](#Definitive-Example-Code) section.
 
-In succinct terms, the core usage is:
+Using data type aliases from peridetic.h the core usage is:
 
-	{
-	using namespace peri; // for XYZ,LPA type aliases and function scope
-	LPA const gotLPA
-		{ lpaForXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
-	XYZ const gotXYZ
-		{ xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
-	}
-
-With a bit more explanation:
-
-	// include header file
+	// include header for function declarations and definitions
     #include "peridetic.h" // indirectly includes implementation periDetail.h
 
-	// standard C++ data types
-	//	Generally, use the peri::LPA and peri::XYZ defined in peridetic.h
-	//  For clarity, these I/O data structures are defined consistent with
-	using LPA = std::array<double, 3u>;
-	using XYZ = std::array<double, 3u>;
+	// Geodetic from Cartesian
+	peri::XYZ const haveXyz{ -1266643.136, -4727176.539, 4079014.032 };
+	peri::LPA const wantLPA{ peri::lpaForXyz(haveXyz) };
 
-	// Start using the transformations (angle *Radians*, linear *meters*)
-	LPA const gotLPA
-		{ peri::lpaForXyz( XYZ{ -1266643.136, -4727176.539, 4079014.032 } ) };
-	XYZ const gotXYZ
-		{ peri::xyzForLpa( LPA{ -1.832595715, 0.698131701, 1600.000 }) };
+	peri::LPA const haveLpa{ -1.832595715, 0.698131701, 1600.000 };
+	peri::XYZ const wantXYZ{ peri::xyzForLpa(haveLpa) };
+
+In terms of explicit data types:
+
+	// include header for function declarations and definitions
+    #include "peridetic.h" // indirectly includes implementation periDetail.h
+
+	// Geodetic from Cartesian
+	std::array<double, 3u> const gotLPA
+		{ peri::lpaForXyz
+			( std::array<double, 3u>{ -1266643.136, -4727176.539, 4079014.032 }
+			)
+		};
+	// Cartesian from Geodetic
+	std::array<double, 3u> const gotXYZ
+		{ peri::xyzForLpa
+			( std::array<double, 3u>{ -1.832595715, 0.698131701, 1600.000 }
+			)
+		};
 
 ### Definitive Example Code <a id=Definitive-Example-Code></a>
 
@@ -458,7 +461,7 @@ shape as does the GRS80 ellipsoid (to within 0.1[mm] at the North pole).
 
 At it's core, this Peridetic project comprises two source code header files:
 
-* peridetic.h -- public interface (with #include periDetail.h)
+* peridetic.h -- public interface (which has internal #include periDetail.h)
 
 * periDetail.h -- implementation (inline functions) code
 
