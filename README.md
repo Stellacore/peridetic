@@ -24,7 +24,7 @@ This Page Content:
 * [General Use](#General-Use)
 * [Technical Detail](#Technical-Detail)
 * [Transformation Details](#Transformation-Details)
-* [Technical Deep Dive](#Technical-Deep-Dive)
+* [Technical Deep Dive](#Technical-Deep-Dive) -- math description in [./doc/perideticSummary.pdf](https://github.com/Stellacore/peridetic/tree/main/doc/perideticSummary.pdf)
 * [Runtime Performance](#Runtime-Performance)
 
 
@@ -405,6 +405,10 @@ Demonstration/utility example programs include:
 
 ## Peridetic - Technical Detail <a id=Technical-Detail></a>
 
+A mathematical description of the equations and formulae involved
+is presented in the
+[technical note: ./doc/perideticSummary.pdf](https://github.com/Stellacore/peridetic/tree/main/doc/perideticSummary.pdf)
+
 ### Terminology
 
 A comment on terminology and notation:
@@ -474,7 +478,7 @@ Language
 
 Compilers
 
-* GCC - primary (9.3)
+* GCC - primary (9.3), (10.1)
 
 * Clang - verified (7.0.1)
 
