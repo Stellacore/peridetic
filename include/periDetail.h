@@ -618,6 +618,17 @@ namespace peri
 
 	private: // Note: private functions operate with normalized data units
 
+		//! Initial estimate for sigma factor (based on sphere approximation)
+		inline
+		double
+		sigmaNormWrtSphere  // EarthModel::
+			( XYZ const & xVecNorm
+			) const
+		{
+			double const xMagNorm{ std::sqrt(dot(xVecNorm, xVecNorm)) };
+			return (xMagNorm - 1.);
+		}
+
 		//! A linearly refined improvement to altitude scale factor currSigma
 		inline
 		double
@@ -634,17 +645,6 @@ namespace peri
 			double const den{ fdfs[1] };
 			double const nextSigma{ currSigmaNorm - num/den };
 			return nextSigma;
-		}
-
-		//! Initial estimate for sigma factor (based on sphere approximation)
-		inline
-		double
-		sigmaNormWrtSphere  // EarthModel::
-			( XYZ const & xVecNorm
-			) const
-		{
-			double const xMagNorm{ std::sqrt(dot(xVecNorm, xVecNorm)) };
-			return (xMagNorm - 1.);
 		}
 
 		//! Refined altitude scale factor at normalized point location xVecNorm
