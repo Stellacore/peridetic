@@ -15,6 +15,7 @@ Quick Links:
 * [Example Usage](#General-Use)
 * [Quick Start](#Getting-Started)
 * [MIT/X11 License](LICENSE)
+* [Context and Alternatives](#Context-and-Alternatives)
 
 This Page Content:
 
@@ -401,6 +402,56 @@ Demonstration/utility example programs include:
 	-- Report equivalent Cartesian coordinates for three command line
 	geodetic coordinate values with longitude/parallel(latitude)
 	expressed in (non-standard)*degrees* and altitude expressed in meters.
+
+
+## Peridetic - Context and Alternatives <a id =Context-and-Alternatives></a>
+
+Perietic is extremely focused software capability that exists in the overall
+context of general geospatial technologies. There are many software 
+applications and development resources available in this domain.
+
+* ... OSGeo -- A particularly useful archive of complementary geospatial
+technologies may be found at the OSGeo Foundation website:
+
+	* https://www.osgeo.org/
+
+
+For Geodetic/Cartesian coordinate conversions, there are a number
+of existing alternative software options for performing Geodetic
+transformations. Most of these include many additional capabilities
+and involve installing large software packages. However, if you
+need more extensive geodetic capabilities and/or additional features
+(e.g. cartography, magnetism, etc.), these are well worth consideration.
+
+* ... GeographicLib -- Full C++ environment with *many* additional
+capabilities (geodesic paths, cartographic projections, magnetism, Geoid, etc).
+
+	* https://sourceforge.net/projects/geographiclib/
+
+	* By comparison, requires installing large software package/dependencies
+	and data files.
+
+* ... PROJ -- Full blown mapping package with *many* additional
+capabilities especially in relation to cartographic projections and datum
+accommodations.
+
+	* https://www.osgeo.org/projects/proj/
+
+	* By comparison requires installing a large software package/dependency
+	and database files.
+
+After creating the Peridetic code, a previously existing similarly capable
+and lightweight package was discovered that was missed during initial searches
+prior to developing Peridetic.
+
+* ... ecef-geodetic -- provides a collection of multiple ECEF-to-geodetic
+coordinate conversion functions.
+
+	* https://github.com/planet36/ecef-geodetic
+
+	* By comparison, this offers a selection of multiple algorithms
+	whereas Peridetic provides only a single (but well tested, externally
+	verified, and fast) computation algorithm.
 
 
 ## Peridetic - Technical Detail <a id=Technical-Detail></a>
