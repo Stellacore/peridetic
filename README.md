@@ -119,6 +119,7 @@ which can be used to obtain:
 	altitude domain.
 
 
+
 ## Peridetic - Project Info <a id=Project-Info ></a>
 
 ### Project Motivation
@@ -151,6 +152,9 @@ development or runtime environments.
 If "All you want to do is convert XYZ into/from LPA values and vice versa",
 and you're using C++, then this Peridetic package has been created just
 for you.
+	
+If you need more than these two most-simple of transformations, consider
+[more extensive full-featured alternatives](#Context-and-Alternatives)
 
 ### Project Concept
 
@@ -209,6 +213,7 @@ to consider contribution include:
 	terminology is most welcome. As a target, the Peridetic
 	project terminology should be consistent with the
 [NGS glossary](https://www.ngs.noaa.gov/CORS-Proxy/Glossary/xml/NGS_Glossary.xml)
+
 
 
 ## Peridetic - Getting Started <a id=Getting-Started></a>
@@ -335,6 +340,7 @@ Then proceed with use in your own work.
 
 
 
+
 ## Peridetic - General Use <a id=General-Use></a>
 
 Peridetic transformations are very easy to use. Include the source
@@ -404,6 +410,7 @@ Demonstration/utility example programs include:
 	expressed in (non-standard)*degrees* and altitude expressed in meters.
 
 
+
 ## Peridetic - Context and Alternatives <a id =Context-and-Alternatives></a>
 
 Perietic is extremely focused software capability that exists in the overall
@@ -428,8 +435,8 @@ capabilities (geodesic paths, cartographic projections, magnetism, Geoid, etc).
 
 	* https://sourceforge.net/projects/geographiclib/
 
-	* By comparison, requires installing large software package/dependencies
-	and data files.
+	* By comparison with Peridetic, requires installing large software
+	package/dependencies and data files.
 
 * ... PROJ -- Full blown mapping package with *many* additional
 capabilities especially in relation to cartographic projections and datum
@@ -437,8 +444,8 @@ accommodations.
 
 	* https://www.osgeo.org/projects/proj/
 
-	* By comparison requires installing a large software package/dependency
-	and database files.
+	* By comparison with Peridetic, requires installing a large
+	software package/dependency and database files.
 
 After creating the Peridetic code, a previously existing similarly capable
 and lightweight package was discovered that was missed during initial searches
@@ -449,9 +456,10 @@ coordinate conversion functions.
 
 	* https://github.com/planet36/ecef-geodetic
 
-	* By comparison, this offers a selection of multiple algorithms
-	whereas Peridetic provides only a single (but well tested, externally
-	verified, and fast) computation algorithm.
+	* By comparison with Peridetic, this offers a selection of
+	multiple algorithms whereas Peridetic provides only a single (but
+	well tested, externally verified, and fast) computation algorithm.
+
 
 
 ## Peridetic - Technical Detail <a id=Technical-Detail></a>
@@ -913,6 +921,8 @@ inaccessible with current technology.
 The [Transformation Precision](#Transformation-Precision) section describes
 what to expect for transformation of locations outside this optimum
 domain.
+
+
 
 ## Peridetic - Technical Deep Dive <a id=Technical-Deep-Dive></a>
 
