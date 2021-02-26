@@ -356,9 +356,8 @@ Then proceed with use in your own work.
 ### Using Installed Peridetic <a id=Using-Installed></a>
 
 For a concrete example of building an independent/stand-alone consuming
-project against an already installed Peridetic,
-refer to the
-[periUse sub directory](https://github.com/Stellacore/peridetic/tree/main/periUse).
+project against an already installed Peridetic, refer to the
+[periUse sub directory](./periUse/README.md).
 The "hello world" style  periUse 'mini-project' example also demonstrates
 the use of CMake "find-package()" command to locate an already-installed
 Peridetic resource.
