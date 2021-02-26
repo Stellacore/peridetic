@@ -33,7 +33,7 @@
 cmake_minimum_required(VERSION 3.13)
 set(PerideticProjName "peridetic")
 
-set(PerideticVersion "0.1.0")
+set(PerideticVersion "1.1.0")
 
 project(
 	${PerideticProjName}
