@@ -286,10 +286,11 @@ E.g. to build in /tmp:
 	$ mkdir tmpBuild  # i.e. /tmp/perideticWorkArea/tmpBuild
 	$ cd tmpBuild
 	$ cmake ../peridetic -DCMAKE_BUILD_TYPE=Release
+		# -DCMAKE_INSTALL_PREFIX=/tmp # e.g. install location (here /tmp)
 		# for other than default behavior
 		# optionally add command line specifications
 		# or edit CMakeCache file (e.g. cmake-gui) as you like
-	$ make  # builds documentation with doxygen
+	$ make -j `nproc` # builds documentation with doxygen (also eval/tests)
 		# provides peridetic{Targets,Config}.cmake files for cmake
 	$ ctest # run test and verification programs
 	$ cpack # creates install packages
