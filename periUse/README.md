@@ -5,7 +5,8 @@
 # Mini-Project Example - Independent Project Using Peridetic
 
 This directory contains a trivial, but perhaps useful, compilable example
-of a stand-alone andd independent 'project' that uses Peridetic capabilities.
+of a stand-alone and independent 'project' that utilizes Peridetic
+capabilities from an already-existing Peridetic installation.
 
 ## Description
 
