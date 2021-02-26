@@ -23,7 +23,9 @@ This Page Content:
 * [Project Info](#Project-Info)
 * [Getting Started](#Getting-Started)
 * [General Use](#General-Use)
+	* [Using Installed Peridetic with CMake](#Using-Installed)
 * [Technical Detail](#Technical-Detail)
+	* [Software/Dev Considerations](#Software-Considerations)
 * [Transformation Details](#Transformation-Details)
 * [Technical Deep Dive](#Technical-Deep-Dive) -- math description in [./doc/perideticSummary.pdf](https://github.com/Stellacore/peridetic/tree/main/doc/perideticSummary.pdf)
 * [Runtime Performance](#Runtime-Performance)
@@ -35,13 +37,20 @@ This Page Content:
 #### _Easy_:
 Simplicity, simplicity, simplicity, lightweight, small and easy.
 
-* Install (or simply copy the (two) header files from /include directory)
+* Install (or simply copy the header file pair from /include directory),
 	compile and go. (ref [Getting Started](#Getting-Started))
+
+#### _Lightweight_:
+Tiny code size with [extremely low memory/data usage](#Code-Overhead)
+(on the order of 5kB).
+
+* Ideal for low-power and low-performance devices (e.g. phones, raspberry-pi,
+custom ARM processors, etc).
 
 #### _Freedom_:
 
-* Peridetic is a liberally licensed [MIT/X11 License](LICENSE)
-	for any uses including commercial ones.
+* Peridetic uses the permissive [MIT/X11 License](LICENSE) supporting
+	any use cases including commercial ones.
 
 #### _Useful_:
 
@@ -88,11 +97,11 @@ which can be used to obtain:
 
 #### _Limitations and Cautions_:
 
-* Not optimized for use in outer space (although
+* Less optimized for use in outer space (although
 	internal precision remains under approximately 0.2[um] at lunar
 	distances).
 
-* Not optimized for use deep within Earth interior (although
+* Less optimized for use deep within Earth interior (although
 	transformations still meet design precision limits until
 	below approximately -5800[km] depths. 
 
@@ -260,8 +269,8 @@ and
 
 #### CMake Build <a id=CMake-Build></a>
 
-For a more formal development process, clone this project then build and use
-in one of two ways:
+In general, for a formal development process, clone this project then
+build and use in one of two ways:
 
 * Library build: Since this is a header only implementation
 	the 'build' process is not necessary in order to use the
@@ -272,7 +281,7 @@ in one of two ways:
 * Build a formal software distribution package, then install it onto local
 	development environments (and/or into containers) for general use.
 
-E.g. to build in /tmp:
+E.g. to build Perdietic in /tmp:
 
 	$ mkdir /tmp/perideticWorkArea  # or wherevever you like
 	$ cd /tmp/perideticWorkArea
@@ -280,10 +289,11 @@ E.g. to build in /tmp:
 	$ mkdir tmpBuild  # i.e. /tmp/perideticWorkArea/tmpBuild
 	$ cd tmpBuild
 	$ cmake ../peridetic -DCMAKE_BUILD_TYPE=Release
+		# -DCMAKE_INSTALL_PREFIX=/tmp # e.g. install location (here /tmp)
 		# for other than default behavior
 		# optionally add command line specifications
 		# or edit CMakeCache file (e.g. cmake-gui) as you like
-	$ make  # builds documentation with doxygen
+	$ make -j `nproc` # builds documentation with doxygen (also eval/tests)
 		# provides peridetic{Targets,Config}.cmake files for cmake
 	$ ctest # run test and verification programs
 	$ cpack # creates install packages
@@ -333,11 +343,24 @@ Then proceed with use in your own work.
 		"/examples" directory.
 		Ref [Detail Examples](#Definitive-Example-Code)
 
+	* This project's [./periUse sub directory](#Using-Installed)
+		contains an example mini-project (hello world style) using
+		Peridetic as part of an external project built with CMake.
+
 * Questions and Feedback:
 
 	* Comments/requests and questions
 		via [Email](mailto://peridetic@stellacore.com).
 
+
+### Using Installed Peridetic <a id=Using-Installed></a>
+
+For a concrete example of building an independent/stand-alone consuming
+project against an already installed Peridetic, refer to the
+[periUse sub directory](./periUse/README.md).
+The "hello world" style  periUse 'mini-project' example also demonstrates
+the use of CMake "find-package()" command to locate an already-installed
+Peridetic resource.
 
 
 
@@ -566,10 +589,11 @@ Optimization:
 	very large number of (slow) function calls and (unnecessary) copy
 	assignments if not compiled with optimization
 	
-		* If using CMake, note that the default CMake setup
-			configuration creates builds for debug mode. To
-			obtain reasonable transformation performance,
-			be sure to override this behavior.
+		If using CMake, note that the default CMake setup
+		configuration, by default, creates build instructions
+		for debug mode. To obtain reasonable transformation
+		performance, be sure to override this behavior. (E.g.
+		with "-DCMAKE_BUILD_TYPE=Release" option).
 
 Error Handling:
 
@@ -586,6 +610,12 @@ Thread safety:
 
 	* (+) expected to be true, but has not been verified explicitly.
 
+Executable Code Overhead: <a id=Code-Overhead></a>
+
+* Peridetic adds very little code/data size to executable programs.
+	Ref. the code size example in [periUse sub directory](./periUse/README.md).
+
+
 #### Use and Integration
 
 This project can be used in your own code in two ways:
@@ -601,6 +631,11 @@ This project can be used in your own code in two ways:
 	like the folloing in relevant CMakeLists.txt file.
 
 Example CMakeLists.txt file syntax:
+
+	# Find (previously) installed perdietic library
+	find_package(peridetic REQUIRED NO_MODULE)
+	message(Found: ${peridetic_FOUND})
+	message(Version: ${peridetic_VERSION})
 
 	# dependency for myTarget
 	target_link_libraries(
@@ -814,10 +849,16 @@ with the point on the ellipsoid surface that is *closest* to the point
 of interest.
 
 Note that, even given a specific fixed ellipsoid, the LPA values still
-are *_NOT_ unique*. As just one illustrative example, a point with LPA of
-(0,0,0) can also be expressed as (pi,0,-2b) where 'b' is an equatorial
-radius of the ellipsoid. Every point in space has at least this dual
-LPA representation. Point locations near and below Earth's surface are
+are *_NOT_ unique*. As just one illustrative example, a point at zero
+longitude, on the equator and on surface of ellipsoid has conventional LPA
+value of (0,0,0). A second, mathematically valid solution, is associated
+with the antipodal point on the other side of Earth that is also on the
+equator but for which the altitude is an extreme negative value equal to
+twice the equatorial radius, i.e. mathematical LPA value of (pi,0,-2b)
+where 'b' is an equatorial radius of the ellipsoid.
+
+Every point in space has at least this kind of dual LPA
+representation. Point locations near and below Earth's surface are
 typically associated with an additional pair of candidate LPA solutions.
 Some locations are associated with an infinity of potential LPA
 expressions. E.g. the origin (center of Earth) has an infinite number
