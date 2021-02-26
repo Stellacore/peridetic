@@ -35,8 +35,14 @@ This Page Content:
 #### _Easy_:
 Simplicity, simplicity, simplicity, lightweight, small and easy.
 
-* Install (or simply copy the (two) header files from /include directory)
+* Install (or simply copy the header file pair from /include directory),
 	compile and go. (ref [Getting Started](#Getting-Started))
+
+#### _Lightweight_:
+Nearly imperceptible code size and virtually no memory/data usage.
+
+* Ideal for low-power and low-computation devices (e.g. phones, raspberry-pi,
+custom ARM processors, etc).
 
 #### _Freedom_:
 
@@ -88,11 +94,11 @@ which can be used to obtain:
 
 #### _Limitations and Cautions_:
 
-* Not optimized for use in outer space (although
+* Less optimized for use in outer space (although
 	internal precision remains under approximately 0.2[um] at lunar
 	distances).
 
-* Not optimized for use deep within Earth interior (although
+* Less optimized for use deep within Earth interior (although
 	transformations still meet design precision limits until
 	below approximately -5800[km] depths. 
 
@@ -814,10 +820,16 @@ with the point on the ellipsoid surface that is *closest* to the point
 of interest.
 
 Note that, even given a specific fixed ellipsoid, the LPA values still
-are *_NOT_ unique*. As just one illustrative example, a point with LPA of
-(0,0,0) can also be expressed as (pi,0,-2b) where 'b' is an equatorial
-radius of the ellipsoid. Every point in space has at least this dual
-LPA representation. Point locations near and below Earth's surface are
+are *_NOT_ unique*. As just one illustrative example, a point at zero
+longitude, on the equator and on surface of ellipsoid has conventional LPA
+value of (0,0,0). A second, mathematically valid solution, is associated
+with the antipodal point on the other side of Earth that is also on the
+equator but for which the altitude is an extreme negative value equal to
+twice the equatorial radius, i.e. mathematical LPA value of (pi,0,-2b)
+where 'b' is an equatorial radius of the ellipsoid.
+
+Every point in space has at least this kind of dual LPA
+representation. Point locations near and below Earth's surface are
 typically associated with an additional pair of candidate LPA solutions.
 Some locations are associated with an infinity of potential LPA
 expressions. E.g. the origin (center of Earth) has an infinite number
