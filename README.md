@@ -24,6 +24,7 @@ This Page Content:
 * [Getting Started](#Getting-Started)
 * [General Use](#General-Use)
 * [Technical Detail](#Technical-Detail)
+	* [Software/Dev Considerations](#Software-Considerations)
 * [Transformation Details](#Transformation-Details)
 * [Technical Deep Dive](#Technical-Deep-Dive) -- math description in [./doc/perideticSummary.pdf](https://github.com/Stellacore/peridetic/tree/main/doc/perideticSummary.pdf)
 * [Runtime Performance](#Runtime-Performance)
@@ -39,15 +40,16 @@ Simplicity, simplicity, simplicity, lightweight, small and easy.
 	compile and go. (ref [Getting Started](#Getting-Started))
 
 #### _Lightweight_:
-Nearly imperceptible code size and virtually no memory/data usage.
+Tiny code size with [extremely low memory/data usage](#Code-Overhead)
+(on the order of 5kB).
 
-* Ideal for low-power and low-computation devices (e.g. phones, raspberry-pi,
+* Ideal for low-power and low-performance devices (e.g. phones, raspberry-pi,
 custom ARM processors, etc).
 
 #### _Freedom_:
 
-* Peridetic is a liberally licensed [MIT/X11 License](LICENSE)
-	for any uses including commercial ones.
+* Peridetic uses the permissive [MIT/X11 License](LICENSE) supporting
+	any use cases including commercial ones.
 
 #### _Useful_:
 
@@ -573,10 +575,11 @@ Optimization:
 	very large number of (slow) function calls and (unnecessary) copy
 	assignments if not compiled with optimization
 	
-		* If using CMake, note that the default CMake setup
-			configuration creates builds for debug mode. To
-			obtain reasonable transformation performance,
-			be sure to override this behavior.
+		If using CMake, note that the default CMake setup
+		configuration, by default, creates build instructions
+		for debug mode. To obtain reasonable transformation
+		performance, be sure to override this behavior. (E.g.
+		with "-DCMAKE_BUILD_TYPE=Release" option).
 
 Error Handling:
 
@@ -592,6 +595,18 @@ Thread safety:
 * Functions should be(+) both re-entrant and thread safe
 
 	* (+) expected to be true, but has not been verified explicitly.
+
+Executable Code Overhead: <a id=Code-Overhead></a>
+
+* Peridetic adds very little code/data to executable programs. For example
+a 'hello world' type program build both with/without Peridetic use (both
+transform directions) produces the executables with the following sizes
+(excluding standard C++ related dynamic link libraries).
+
+		Target Sizes:
+		Linux 4.15.0-122-generic x86_64 GNU/Linux
+		FileSize: helloSansPeri 17208 [bytes]
+		FileSize: helloWithPeri 21856 [bytes]
 
 #### Use and Integration
 
