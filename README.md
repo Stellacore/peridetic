@@ -23,6 +23,7 @@ This Page Content:
 * [Project Info](#Project-Info)
 * [Getting Started](#Getting-Started)
 * [General Use](#General-Use)
+	* [Using Installed Peridetic with CMake](#Using-Installed)
 * [Technical Detail](#Technical-Detail)
 	* [Software/Dev Considerations](#Software-Considerations)
 * [Transformation Details](#Transformation-Details)
@@ -268,8 +269,8 @@ and
 
 #### CMake Build <a id=CMake-Build></a>
 
-For a more formal development process, clone this project then build and use
-in one of two ways:
+In general, for a formal development process, clone this project then
+build and use in one of two ways:
 
 * Library build: Since this is a header only implementation
 	the 'build' process is not necessary in order to use the
@@ -280,7 +281,7 @@ in one of two ways:
 * Build a formal software distribution package, then install it onto local
 	development environments (and/or into containers) for general use.
 
-E.g. to build in /tmp:
+E.g. to build Perdietic in /tmp:
 
 	$ mkdir /tmp/perideticWorkArea  # or wherevever you like
 	$ cd /tmp/perideticWorkArea
@@ -342,15 +343,25 @@ Then proceed with use in your own work.
 		"/examples" directory.
 		Ref [Detail Examples](#Definitive-Example-Code)
 
-	* This project's ./periUse sub directory contains an example
-		mini-project (hello world style) using Peridetic as part of an
-		external project built with CMake.
+	* This project's [./periUse sub directory](#Using-Installed)
+		contains an example mini-project (hello world style) using
+		Peridetic as part of an external project built with CMake.
 
 * Questions and Feedback:
 
 	* Comments/requests and questions
 		via [Email](mailto://peridetic@stellacore.com).
 
+
+### Using Installed Peridetic <a id=Using-Installed></a>
+
+For a concrete example of building an independent/stand-alone consuming
+project against an already installed Peridetic,
+refer to the
+[periUse sub directory](https://github.com/Stellacore/peridetic/tree/main/periUse).
+The "hello world" style  periUse 'mini-project' example also demonstrates
+the use of CMake "find-package()" command to locate an already-installed
+Peridetic resource.
 
 
 
