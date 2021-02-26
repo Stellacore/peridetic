@@ -342,6 +342,10 @@ Then proceed with use in your own work.
 		"/examples" directory.
 		Ref [Detail Examples](#Definitive-Example-Code)
 
+	* This project's ./periUse sub directory contains an example
+		mini-project (hello world style) using Peridetic as part of an
+		external project built with CMake.
+
 * Questions and Feedback:
 
 	* Comments/requests and questions
@@ -600,7 +604,7 @@ Executable Code Overhead: <a id=Code-Overhead></a>
 
 * Peridetic adds very little code/data size to executable programs.
 For example
-[two 'hello world' type programs](https://github.com/Stellacore/peridetic/blob/main/doc/periCodeSizeMains.png)
+[two 'hello world' type programs](https://github.com/Stellacore/peridetic/blob/main/periUse/periCodeSizeMains.png)
 build both with/without Peridetic use (both transform directions) produces
 the executables with the following sizes (excluding standard C++ related
 dynamic link libraries).
