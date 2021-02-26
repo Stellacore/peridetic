@@ -614,16 +614,8 @@ Thread safety:
 Executable Code Overhead: <a id=Code-Overhead></a>
 
 * Peridetic adds very little code/data size to executable programs.
-For example
-[two 'hello world' type programs](https://github.com/Stellacore/peridetic/blob/main/periUse/periCodeSizeMains.png)
-build both with/without Peridetic use (both transform directions) produces
-the executables with the following sizes (excluding standard C++ related
-dynamic link libraries).
+	Ref. the code size example in [periUse sub directory](./periUse/README).
 
-		Target Sizes:
-		Linux 4.15.0-122-generic x86_64 GNU/Linux
-		FileSize: helloSansPeri 17208 [bytes]
-		FileSize: helloWithPeri 21856 [bytes]
 
 #### Use and Integration
 
