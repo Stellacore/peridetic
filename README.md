@@ -608,6 +608,11 @@ This project can be used in your own code in two ways:
 
 Example CMakeLists.txt file syntax:
 
+	# Find (previously) installed perdietic library
+	find_package(peridetic REQUIRED NO_MODULE)
+	message(Found: ${peridetic_FOUND})
+	message(Version: ${peridetic_VERSION})
+
 	# dependency for myTarget
 	target_link_libraries(
 		${myTarget}
