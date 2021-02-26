@@ -4,9 +4,6 @@
 
 # Mini-Project Example - Independent Project Using Peridetic
 
-of Peridetic use in external CMake build
-# Mini-Project example of Peridetic use in external CMake build
-
 This directory contains a trivial, but perhaps useful, compilable example
 of a stand-alone andd independent 'project' that uses Peridetic capabilities.
 
