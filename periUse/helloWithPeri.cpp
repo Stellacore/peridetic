@@ -37,7 +37,7 @@ int
 main
 	()
 {
-	// allocate same data space used in the 'sans Peridetic' example
+	// allocate same data space for both "with" and "sans" cases
 	hello::WorkSpace workSpace;
 
 	// perform data transformation operations - *WITH* Peridetic use
@@ -45,7 +45,7 @@ main
 	workSpace.theDataOut = peri::lpaForXyz(workSpace.theDataTmp);
 
 	// output data values to confirm that
-	// (simulated) transform is actually present in executable
+	// above code operations are actually present in executable
 	using hello::operator<<;
 	std::cout << workSpace << std::endl;
 	return 0;
