@@ -919,12 +919,17 @@ computations that are global in scope.
 
 * X - is axis orthogonal to "Z" (in the equatorial plane) and directed
 	toward the prime meridian. On Earth, when using the Greenwich prime
-	meridian, the positive "X" points approximately toward the Gulf of
+	meridian(+), the positive "X" points approximately toward the Gulf of
 	Guinea.
 
 * Y - is axis mutually orthogonal to Z and X in "right-hand" sense. On
 	Earth (for Greenwich prime), the positive "Y" axis points to a
 	location south of the Bay of Bengal.
+
+(+) Historical Note: the historically defined "Greenwich Meridian"
+identified with the "Airy Transit Circle" is slightly West of the
+WGS84 0-longitude meridian. Cf.
+[Why the Greenwich meridian moved](https://link.springer.com/content/pdf/10.1007/s00190-015-0844-y.pdf)
 
 The XYZ is a classic orthonormal rectangular coordinate system. It is
 associated with three basis vectors (aka "axes"). Each basis vector
