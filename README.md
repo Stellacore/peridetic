@@ -8,7 +8,7 @@
 Peridetic is an extremely lightweight, easy-to-use, simple C++
 header file implementation providing precise, accurate and fast
 transformations between Geodetic (lon/lat/alt) and Cartesian (x/y/z)
-coordinate expressions.
+coordinate expressions - without any other overhead.
 
 Quick Links:
 
