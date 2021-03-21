@@ -1009,7 +1009,7 @@ used to return longitude/parallel solution as conventional angle values.
 
 The mathematical formulae and algorithm detail is described in:
 
-* PerideticMath.{lyx,pdf} -- TODO (cleanup/post)
+* [./doc/perideticSummary.pdf](https://github.com/Stellacore/peridetic/tree/main/doc/perideticSummary.pdf)
 
 ### Transformation Precision <a id=Transformation-Precision></a>
 
