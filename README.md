@@ -995,17 +995,18 @@ Numerically iterative approaches are sometimes considered inelegant.
 However, consider that the n-th root computations required to evaluate
 "closed form" geodetic solutions are not elementary algebraic
 operations. Rather the root extraction computations are themselves
-evaluated by iterative algorithms. These root computations may be
-implemented within processor silicon and by very fast. However, for
-some architectures, the iterative root algorithms are implemented in
+evaluated numerically with iterative algorithms. These root computations
+may be implemented within processor silicon and by very fast. However,
+for some architectures, the iterative root algorithms are implemented in
 processor firmware or in math library source code which may be much
-slower than evaluating the simple algebraic instructions employed by
-the direct numeric iteration in Peridetic.
+slower.
 
 Peridetic algorithms utilize a simple, [fast](#Runtime-Performance) and
 [precise](#Transformation-Precision) direct numeric iteration approach
-followed by the use of two trig function evaluations (for std::atan2())
-used to return longitude/parallel solution as conventional angle values.
+which involves minimal use of transcendental function evaluations - a
+minimum number of square root evaluations are used during solution and then
+only two trig function evaluations (of std::atan2()) to return longitude/parallel
+as conventional (radian) angle values.
 
 The mathematical formulae and algorithm detail is described in:
 
