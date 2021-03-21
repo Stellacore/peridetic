@@ -913,11 +913,12 @@ computations that are global in scope.
 	(only a portion of) the ellipsoid has a "best" fit for its surface
 	over a specific region or country.
 
-* Z - is the axis orthogonal to the equator (The rotation plane of
-	symmetry associated with the ellipsoid under consideration). On
-	Earth, the positive "Z" axis points toward the North pole.
+* Z - is the axis orthogonal to the equator, i.e. orthogonal to the
+	rotation plane of symmetry for the ellipsoid under
+	consideration. On Earth, the positive "Z" axis points toward
+	the North pole.
 
-* X - is axis orthogonal to "Z" (in the equatorial plane) and directed
+* X - is axis in the equatorial plane, orthogonal to "Z" and directed
 	toward the prime meridian. On Earth, when using the Greenwich prime
 	meridian(+), the positive "X" points approximately toward the Gulf of
 	Guinea.
