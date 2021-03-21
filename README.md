@@ -8,7 +8,7 @@
 Peridetic is an extremely lightweight, easy-to-use, simple C++
 header file implementation providing precise, accurate and fast
 transformations between Geodetic (lon/lat/alt) and Cartesian (x/y/z)
-coordinate expressions.
+coordinate expressions - without any other overhead.
 
 Quick Links:
 
@@ -913,18 +913,24 @@ computations that are global in scope.
 	(only a portion of) the ellipsoid has a "best" fit for its surface
 	over a specific region or country.
 
-* Z - is the axis orthogonal to the equator (The rotation plane of
-	symmetry associated with the ellipsoid under consideration). On
-	Earth, the positive "Z" axis points toward the North pole.
+* Z - is the axis orthogonal to the equator, i.e. orthogonal to the
+	rotation plane of symmetry for the ellipsoid under
+	consideration. On Earth, the positive "Z" axis points toward
+	the North pole.
 
-* X - is axis orthogonal to "Z" (in the equatorial plane) and directed
+* X - is axis in the equatorial plane, orthogonal to "Z" and directed
 	toward the prime meridian. On Earth, when using the Greenwich prime
-	meridian, the positive "X" points approximately toward the Gulf of
+	meridian(+), the positive "X" points approximately toward the Gulf of
 	Guinea.
 
 * Y - is axis mutually orthogonal to Z and X in "right-hand" sense. On
 	Earth (for Greenwich prime), the positive "Y" axis points to a
 	location south of the Bay of Bengal.
+
+(+) Historical Note: the historically defined "Greenwich Meridian"
+identified with the "Airy Transit Circle" is slightly West of the
+WGS84 0-longitude meridian. Cf.
+[Why the Greenwich meridian moved](https://link.springer.com/content/pdf/10.1007/s00190-015-0844-y.pdf)
 
 The XYZ is a classic orthonormal rectangular coordinate system. It is
 associated with three basis vectors (aka "axes"). Each basis vector
@@ -1003,7 +1009,7 @@ used to return longitude/parallel solution as conventional angle values.
 
 The mathematical formulae and algorithm detail is described in:
 
-* PerideticMath.{lyx,pdf} -- TODO (cleanup/post)
+* [./doc/perideticSummary.pdf](https://github.com/Stellacore/peridetic/tree/main/doc/perideticSummary.pdf)
 
 ### Transformation Precision <a id=Transformation-Precision></a>
 

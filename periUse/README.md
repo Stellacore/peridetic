@@ -25,6 +25,10 @@ Comparing the sizes of the two exectuable programs provides an indication
 of how much extra executable code is added by including Peridetic. (ref.
 output of commands invoked from the runExample.sh bash script).
 
+This mini-project also provides a concrete example of how to build an
+independent code project with CMake in a manner that utilizes a version
+of Peridetic that is already installed on the development system.
+
 
 ## Content
 
@@ -46,10 +50,10 @@ This "periUse" example includes:
 A screen shot "code diff" between the two programs is captured in the
 [screen shot image](./periCodeSizeMains.png).
 
-The build both with/without Peridetic use (both transform directions) produces
-
-For example, on one system, with gcc 10.3, the executable programs have
-the following sizes (exclusive of standard system/C++ dynamic link libraries).
+Building the two programs with/without Peridetic use (both transform
+directions) produces two executables of different sizes. For example,
+on one system, with gcc 10.3, the executable programs have the following
+sizes (exclusive of standard system/C++ dynamic link libraries).
 
 	Target Sizes:
 	Linux 4.15.0-122-generic x86_64 GNU/Linux
