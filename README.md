@@ -672,7 +672,7 @@ formed data values such as infinity or subnormal values. Any such
 values are propagated through computations based on the properties and
 characteristics of local compiler, libraries and hardware.
 
-If an handling of questionable data values is important, then consider
+If handling of questionable data values is important, then consider
 wrapping the transforms functions inside a data qualification/validity
 test along the lines of:
 
@@ -882,7 +882,7 @@ Peridetic's Geodetic transformations are optimized for locations "on" and
 In this case, the singularities near to the center of Earth are irrelevant
 (ref: [special cases](#special-cases)).
 
-LPA values are not true coordinates (in the sense of "co-important
+LPA values are not true coordinates (in the sense of "co-important"
 ordinate values). Rather the LPA expression comprises a triple of
 hetrogenous values for every point location in *combination with* two
 global, and often implicit, values expressing the shape of an ellipsoid of
@@ -914,7 +914,7 @@ computations that are global in scope.
 	over a specific region or country.
 
 * Z - is the axis orthogonal to the equator, i.e. orthogonal to the
-	rotation plane of symmetry for the ellipsoid under
+	plane of circular symmetry for the ellipsoid under
 	consideration. On Earth, the positive "Z" axis points toward
 	the North pole.
 
@@ -948,7 +948,7 @@ vectors).
 
 The good performance of computations and high quality of results produced
 by the code in this project are associated with a particular optimal
-domain. Results remain fairly useful outside of this domain, although
+domain. Results remain entirely useful outside of this domain, although
 the quality and performance may be less than when operating inside the
 optimum domain.
 
@@ -986,14 +986,14 @@ precise while being simpler to implement and faster to run than various
 There are a number of papers that espouse the use of "closed form"
 solutions for the LPA from XYZ conversion. Certainly these approaches
 could be utilized for implementation of Peridetic. However, those
-solutions (generally based on solving a quartic equation) generally
+solutions (generally based on analytical solutions of quartic equations)
 involve a fair number of steps, sometimes also testing and switching
 logic, and they require evaluation of n-th roots computations (i.e. cube
 roots and square roots).
 
-Numerically iterative approaches are sometimes considered inelegant.
+Numerically iterative approaches are sometimes considered "inelegant".
 However, consider that the n-th root computations required to evaluate
-"closed form" geodetic solutions are not elementary algebraic
+the "closed form" geodetic solutions are not actually elementary algebraic
 operations. Rather the root extraction computations are themselves
 evaluated numerically with iterative algorithms. These root computations
 may be implemented within processor silicon and by very fast. However,
@@ -1004,11 +1004,12 @@ slower.
 Peridetic algorithms utilize a simple, [fast](#Runtime-Performance) and
 [precise](#Transformation-Precision) direct numeric iteration approach
 which involves minimal use of transcendental function evaluations - a
-minimum number of square root evaluations are used during solution and then
-only two trig function evaluations (of std::atan2()) to return longitude/parallel
-as conventional (radian) angle values.
+minimum number of square root evaluations are needed during solution process
+and only two trig function evaluations (of std::atan2()) at the end for
+expressing longitude/parallel information as conventional (radian) angle
+values.
 
-The mathematical formulae and algorithm detail is described in:
+The mathematical formulae and algorithm detail are described in:
 
 * [./doc/perideticSummary.pdf](https://github.com/Stellacore/peridetic/tree/main/doc/perideticSummary.pdf)
 
@@ -1043,7 +1044,7 @@ function of point location altitudes (Alt values):
 
  * -5800[km] <= Alt < +11000[km]: -- Meets *design precision*, < 7.6[nm]
 
-	* **-100[km] <= Alt <= 100[km]: -- is optimal design domain**
+	* **-100[km] <= Alt <= 100[km]: -- is optimal performance design domain**
 
  * +11000[km] <= Alt < +405[Mm]: -- Reduced precision, < 0.2[um]
 
@@ -1056,8 +1057,8 @@ function of point location altitudes (Alt values):
 
 The above precision reports are created by testing round trip
 transformations for various point locations well distributed with respect
-ellipsoid. For testing within the optimal domain, results for approximately
-1M point locations have been evaluated.
+to the ellipsoid. For testing within the optimal domain, results for
+approximately 1M point locations are evaluated.
 
 For precision testing, the transformations are evaluated for
 self-consistency.  Note that self-consistency does _not_ constitute a
@@ -1093,7 +1094,7 @@ a branch of the United States National Oceanic and Atmospheric Administration
 The NGS manages the Continuously Operating Reference Stations
 ([CORS](https://www.ngs.noaa.gov/CORS/)) network of station location
 observations.  Although the network is concentrated within the U.S. it
-includes a number of stations scattered around the globe.
+also includes a number of stations scattered around the globe.
 
 The following stations were selected with an emphasis on variation 
 of geodetic location (longitude and latitude) and elevation
@@ -1143,11 +1144,11 @@ that includes:
 	* gotLPA=lpaForXYZ(expXYZ).
 
 * The "got" values are compared with their corresponding "expected" values
-	and differences from zero are compared against tolerance values. The
+	and differences are compared against tolerance values. The
 	tolerance values used reflect the published data precision:
 
 	* Angular tolerance of { 172. / 1024./1024./1024./1024. };
-		This is <.16[nRad] (published angular values have resolution of
+		This is <.16[nRad] (published LP angular values have resolution of
 		approximately .049[nRad], but the published XYZ coordinates
 		only have +/-1[mm] precision for comparison. A surface distance
 		of 1[mm] corresponds with a larger angle ~.16[nRad] which is
@@ -1156,7 +1157,7 @@ that includes:
 	* Linear tolerance of { 1./1024. }; // CORS file XYZ published to [mm]
 
 * All pairs of coordinates are required to pass this tolerance test (in
-	both directions (lpaForXyz and xyzForLpa).
+	both directions, lpaForXyz and xyzForLpa).
 
 Overall, the Peridetic transforms are thought to be correct as described
 above. The open source transparency of the algorithm and implementation
@@ -1183,7 +1184,7 @@ compiled and run using the CMake/CTest paradigm.
 	[CMake Build](#CMake-Build)
 	section
 
-* The full test suite may run using CTest as described in
+* The full test suite may be run using CTest as described in
 	[CMake Build](#CMake-Build)
 	Individual tests may be run independently (e.g. from command line
 	or desktop).
@@ -1211,7 +1212,7 @@ Configuration:
 
 	* All parallel (latitude) values in the range [-pi/2:pi/2] radians
 
-	* Altitudes in the range [-100,000:+100,000] meters
+	* Altitudes in the range [-100000:+100000] meters
 
 Each test includes transformation of the entire collection of samples. Each
 transformation involves fetching a (pre-computed) data value from memory,
@@ -1228,8 +1229,8 @@ The test transformation operations include:
 	value (the non-binary values of .1, .3, .7).
 
 * "sqrt(abs)": Compute the square root of absolute value of each component.
-	Note on this AMD processor, sqrt() operation is about as fast as 
-	a multiply.
+	(Note on this AMD processor used for results below, the sqrt() operation
+    is about as fast as a multiply operation).
 
 * "xyzForLpa": Full geodetic transformation: compute Cartesian "X,Y,Z"
 	coordinates from Geodetic "Lon,Lat,Alt" values.
@@ -1266,7 +1267,7 @@ a ballpark estimate of time associated with data handling overhead.
 	6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
 
 Note the timing values fluctuate by a percent or two from run to run, but
-this provides a general idea of what to expect (at least this class
+this provides a general idea of what to expect (at least for this class
 of processor).
 
 For this test, the xyzForLpa() computation is about two and a half times
