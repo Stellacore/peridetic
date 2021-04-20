@@ -369,7 +369,7 @@ Peridetic resource.
 Peridetic transformations are very easy to use. Include the source
 header file and call one or both transformation functions that are in the
 "peri" namespace. Functions use standard C++ structures for argument and
-return types. All data values are interpreted consistently in standard
+return types. All data values are interpreted consistently in ISO standard
 units: _radians_ for angles; _meters_ for distances.
 
 ### Illustrative Description: <a id=Illustrative-Example></a>
@@ -597,7 +597,7 @@ Optimization:
 
 Error Handling:
 
-* No exceptions are involved or utilized within the code
+* No exceptions are involved or utilized within the Peridetic code
 	(none used, none thrown)
 
 * Internal code supports quite_NaN propagation
