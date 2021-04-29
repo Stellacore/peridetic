@@ -824,7 +824,7 @@ entry for
 ["coordinate, geocentric"](https://www.ngs.noaa.gov/PUBS_LIB/GEOID/Droman_papers/glossary/xml/C.xml).
 
 Note that Peridetic uses the term "parallel" in place of latitude
-(to facility unique naming notations) and uses the term "altitude"
+(to facilitate unique naming notations) and uses the term "altitude"
 to be clear that the interpretation is applied to an ellipsoid (in
 effort to reduce confusion associated with the many uses of "height"
 and "elevation").
@@ -849,7 +849,7 @@ with the point on the ellipsoid surface that is *closest* to the point
 of interest.
 
 Note that, even given a specific fixed ellipsoid, the LPA values still
-are *_NOT_ unique*. As just one illustrative example, a point at zero
+are *_NOT_ mathematically unique*. As just one illustrative example, a point at zero
 longitude, on the equator and on surface of ellipsoid has conventional LPA
 value of (0,0,0). A second, mathematically valid solution, is associated
 with the antipodal point on the other side of Earth that is also on the
@@ -873,7 +873,7 @@ Although LPA values are fundamentally defined for locations
 arbitrarily far away from the ellipsoid (i.e. in deep space), it may be
 questionable if it is correct to be using Geodetic LPA values (instead of
 e.g. astrodetic ones). E.g. At geostationary satellite distances (altitude
-of ~3e5[km]), a one arc-minute deflection of vertical (difference of
+of ~=3e5[km]), a one arc-minute deflection of vertical (difference of
 between Geodetic and Astrodetic locations) corresponds to "horizontal"
 position difference approaching 10[m].
 
@@ -914,9 +914,8 @@ computations that are global in scope.
 	over a specific region or country.
 
 * Z - is the axis orthogonal to the equator, i.e. orthogonal to the
-	plane of circular symmetry for the ellipsoid under
-	consideration. On Earth, the positive "Z" axis points toward
-	the North pole.
+	plane of rotation for the ellipsoid under consideration. On Earth,
+    the positive "Z" axis points toward the North pole.
 
 * X - is axis in the equatorial plane, orthogonal to "Z" and directed
 	toward the prime meridian. On Earth, when using the Greenwich prime
