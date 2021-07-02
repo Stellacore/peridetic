@@ -697,7 +697,7 @@ if desired, can rely on this for use as part of a "null object pattern"
 paradigm.
 
 E.g. consumer code can verify that return data values are valid (which they
-should always been unless input values are out of control) by checking for
+should always be unless input values are out of control) by checking for
 quite_NaN. For invalid return values, if any component is bad, then *all*
 components are set to NaN values, so that only one of the array elements
 need be tested. E.g.
@@ -735,8 +735,8 @@ function calls.
 
 Overall, as long as the calling code is reasonably responsible handling its
 own data values, then everything should be fine. If you are uncomfortable
-with this level of responsibility, you might consider utilizing a few
-utility functions from the project test environment:
+with this level of responsibility in consuming code, you might consider
+utilizing a few utility functions from the project test environment:
 
 * Ref the [periLocal.h] (https://github.com/Stellacore/peridetic/blob/main/tests/periLocal.h)
 	header file in "/tests" subdirectory. This is a header file used
