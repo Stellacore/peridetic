@@ -886,14 +886,16 @@ Peridetic's Geodetic transformations are optimized for locations "on" and
 In this case, the singularities near to the center of Earth are irrelevant
 (ref: [special cases](#special-cases)).
 
-LPA values are not true coordinates (in the sense of "co-important"
-ordinate values). Rather the LPA expression comprises a triple of
-hetrogenous values for every point location in *combination with* two
-global, and often implicit, values expressing the shape of an ellipsoid of
-revolution. The individual components generally can not be meaningfully
-combined with each other nor with the components of other LPA locations
-without involving elaborate transformation operations (like first
-converting into corresponding XYZ expressions;-).
+LPA values are not true coordinates (in the sense of co-important
+ordinate values). Rather the LPA expression is a "labeling convention"
+that comprises a triple of hetrogenous values for every point location in
+*combination with* two global, and often implicit, values expressing the
+shape of an ellipsoid of revolution. The individual components generally
+can not be meaningfully combined with each other nor with the components
+of other LPA locations without involving elaborate transformation
+operations (like first converting into corresponding XYZ expressions,
+doing the math, then converting back - which is another use-case for
+this project;-).
 
 #### XYZ <a id=XYZ-Coordinates></a>
 
