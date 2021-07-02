@@ -93,7 +93,8 @@ which can be used to obtain:
 
 * [Speed](#Runtime-Performance):
 	Comparable to fastest available algorithms in terms of floating point
-	operations counts.
+	operations counts. For speed, be sure to
+	[build with optimization enabled](#Build-Optimization)
 
 #### _Limitations and Cautions_:
 
@@ -566,11 +567,14 @@ Compilers
 
 Build
 
-* Via [CMake](https://cmake.org/)
+* Via "#include" directive for simple use
+
+* Via [CMake](https://cmake.org/) for building documentation and/or distribution package.
 
 Documentation
 
 * Via ['doxygen'](https://www.doxygen.nl/index.html)
+
 Processors
 
 * Precision requires availability of 8-byte (64-bit) or larger "double" type.
@@ -579,7 +583,7 @@ Processors
 
 	* x86 - (primary: AMD Ryzen 2700)
 
-Optimization:
+Optimization: <a id=Build-Optimization></a>
 
 * NOTE! To obtain [reasonable performance](#Transformation-Speed)
 	it is important to compile with
