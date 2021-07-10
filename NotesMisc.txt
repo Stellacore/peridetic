@@ -1,0 +1,14 @@
+
+
+Focaloid:
+
+	https://en.wikipedia.org/wiki/Focaloid
+
+	Ref: "Physical Significance" - two different, but confocal focaloids of same mass produce same
+	action on test mass in exterior region!
+
+	The 'sigma' parameter (as additive term in ellipsoid function denominators) produces a focaloid.
+	This suggests that the dilated ellipsoid might be useful for other gravity-relationships, in
+	addition to Cartesian/geographic conversions.
+
+
