@@ -1024,7 +1024,7 @@ For purposes here, "precision" is defined loosely as "self-consistency",
 "repeatability", "computational significance". As such, it is an intrinsic
 metric that describes the quality of the *computations* more so than
 the quality associated with data values. (Quality of data *values* is
-addressed in following section on accuracy).
+addressed in the following [section on accuracy](#Transformation-Accuracy)).
 
 Peridetic transformations are self-consistent with a precision on the
 order of 7.6[nm] for locations within the operational optimal design
@@ -1072,8 +1072,8 @@ noise involved.  Therefore, even if transformation computations are
 precise, there is the completely independent question concerning how
 accurate (correct) are the results.
 
-The question of accuracy is addressed in the section
-[Transform Accuracy](#Transformation-Accuracy) below.
+The question of accuracy is addressed in the following
+[section on accuracy](#Transformation-Accuracy).
 
 ### Transformation Accuracy <a id=Transformation-Accuracy></a>
 
