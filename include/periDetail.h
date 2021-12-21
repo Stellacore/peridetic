@@ -174,6 +174,7 @@ namespace peri
 
 
 	//! Geodetic (Lon/Par) angles for local ellipsoid gradient (or up dir)
+	inline
 	std::pair<double, double>
 	anglesLonParOf // Note: units are unimportant since angles are ratios
 		( XYZ const & anyVec
