@@ -36,6 +36,9 @@
 #include <numeric>
 
 
+//! \file periDetail.h Implementation details for Peridetic.
+
+
 // utilities
 namespace peri
 {

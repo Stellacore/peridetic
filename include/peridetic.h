@@ -34,6 +34,7 @@
 #include <array>
 #include <limits>
 
+//! \file peridetic.h Main include for Peridetic (includes periDetail.h).
 
 /*! \brief Enclosing namespace for Peridetic functions (and implementation).
  *
