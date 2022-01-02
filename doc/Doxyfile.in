@@ -442,6 +442,7 @@ EXTRACT_ALL            = YES
 # The default value is: NO.
 
 EXTRACT_PRIVATE        = NO
+#EXTRACT_PRIVATE        = YES
 
 # If the EXTRACT_PACKAGE tag is set to YES, all members with package or internal
 # scope will be included in the documentation.
@@ -793,8 +794,9 @@ WARN_LOGFILE           =
 INPUT                  = \
 	@CMAKE_CURRENT_SOURCE_DIR@/.. \
 	@CMAKE_CURRENT_SOURCE_DIR@/../include/peridetic.h \
+	@CMAKE_CURRENT_SOURCE_DIR@/../include/periDetail.h \
 
-##	@CMAKE_CURRENT_SOURCE_DIR@/../include/periDetail.h \
+#	@CMAKE_CURRENT_SOURCE_DIR@/../tests/periLocal.h \
 
 
 # This tag can be used to specify the character encoding of the source files

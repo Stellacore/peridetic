@@ -40,6 +40,10 @@
 #include <limits>
 #include <sstream>
 
+
+//! \file periLocal.h Utility functions (mostly for testing, but some useful).
+
+
 /* -- consider adding
 
 	* TODO - principalValueForLpa() // put angles in principal domain

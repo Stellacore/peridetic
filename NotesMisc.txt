@@ -12,3 +12,13 @@ Focaloid:
 	addition to Cartesian/geographic conversions.
 
 
+Threading:
+
+	// some good discussion points on threading architecture and issues
+	https://codereview.stackexchange.com/questions/221617/thread-pool-c-implementation
+	// including link to this simple thread pool (unstudied, untried).
+	https://github.com/PaulRitaldato1/ThreadPool/blob/master/ThreadPool.h
+
+	// another candidate
+	https://github.com/vit-vit/ctpl
+

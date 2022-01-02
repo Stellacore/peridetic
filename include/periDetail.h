@@ -36,6 +36,9 @@
 #include <numeric>
 
 
+//! \file periDetail.h Implementation details for Peridetic.
+
+
 // utilities
 namespace peri
 {
@@ -174,6 +177,7 @@ namespace peri
 
 
 	//! Geodetic (Lon/Par) angles for local ellipsoid gradient (or up dir)
+	inline
 	std::pair<double, double>
 	anglesLonParOf // Note: units are unimportant since angles are ratios
 		( XYZ const & anyVec
