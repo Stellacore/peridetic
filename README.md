@@ -71,8 +71,9 @@ which can be used to obtain:
 
 * Aviation - E.g. aircraft, UAV/drones, balloons, instrumented birds, etc.
 
-* Space - E.g. near-Earth and geosynchronous satellites, but *slightly* less
-	optimal performance.
+* Space - E.g. low-Earth and remote sensing satellite orbits out to
+	geosynchronous satellites and beyond (although with *slightly* reduced
+	speed at the most extreme distances)
 
 #### _Testing/Verification_:
 
@@ -104,7 +105,8 @@ which can be used to obtain:
 
 * Less optimized for use deep within Earth interior (although
 	transformations still meet design precision limits until
-	below approximately -5800[km] depths. 
+	below approximately -5800[km] depths (within about 600[km]
+	of Earth's center. 
 
 	* Locations until altitudes below -6300[km], still transform
 		with sub[mm] precision (roundtrip consistency better than
@@ -126,7 +128,10 @@ which can be used to obtain:
 
 * The section, [Transformation Precision](#Transformation-Precision),
 	provides detail on precision both inside and outside the optimal
-	altitude domain.
+	altitude domain and the section,
+	[Trasnformation Accuracy](#Transformation-Accuracy)), addresses
+	"truth" of values on Earth's surface as compared with established
+	and accepted National standards.
 
 
 
@@ -437,9 +442,9 @@ Demonstration/utility example programs include:
 
 ## Peridetic - Context and Alternatives <a id =Context-and-Alternatives></a>
 
-Perietic is extremely focused software capability that exists in the overall
-context of general geospatial technologies. There are many software 
-applications and development resources available in this domain.
+Perietic is an extremely focused software capability that exists in the
+context of overall general geospatial technologies. There are many software 
+applications and development resources available in this overall domain.
 
 * ... OSGeo -- A particularly useful archive of complementary geospatial
 technologies may be found at the OSGeo Foundation website:
@@ -460,7 +465,10 @@ capabilities (geodesic paths, cartographic projections, magnetism, Geoid, etc).
 	* https://sourceforge.net/projects/geographiclib/
 
 	* By comparison with Peridetic, requires installing large software
-	package/dependencies and data files.
+	package/dependencies and data files, but it provides a much, much
+	larger collection of general geospatial capabilities especialy for
+	working with map projections, geoid models, path distances and
+	geodesics, and magnestism.
 
 * ... PROJ -- Full blown mapping package with *many* additional
 capabilities especially in relation to cartographic projections and datum
@@ -469,7 +477,10 @@ accommodations.
 	* https://www.osgeo.org/projects/proj/
 
 	* By comparison with Peridetic, requires installing a large
-	software package/dependency and database files.
+	software package/dependency and database files, but provides an
+	extremely complete and detailed collection of capabilities for
+	determining cartographic (map) coordinate in a plethora of 
+	reference systems.
 
 After creating the Peridetic code, a previously existing similarly capable
 and lightweight package was discovered that was missed during initial searches
@@ -480,8 +491,9 @@ coordinate conversion functions.
 
 	* https://github.com/planet36/ecef-geodetic
 
-	* By comparison with Peridetic, this offers a selection of
-	multiple algorithms whereas Peridetic provides only a single (but
+	* By comparison with Peridetic, this package offers a selection of
+	multiple different algorithms for performing geodetic/rectangular
+	coordinate conversions whereas Peridetic provides only a single (but
 	well tested, externally verified, and fast) computation algorithm.
 
 
@@ -515,7 +527,7 @@ the point of interest.
 The magnitude of the altitude value may be interpreted as the shortest
 distance between the point of interest and any other point on the
 ellipsoidal surface (singularities and multiple solution conditions near
-Earth center are outside of the [design domain](#optimal-domain).
+Earth center are outside of the [design domain](#optimal-domain)).
 The algebraic sign of altitude values is positive for point locations
 outside the ellipsoid surface (locally upward) and is negative for points
 of interest within the ellipsoid (locally downward)
@@ -593,11 +605,12 @@ Optimization: <a id=Build-Optimization></a>
 	very large number of (slow) function calls and (unnecessary) copy
 	assignments if not compiled with optimization
 	
-		If using CMake, note that the default CMake setup
-		configuration, by default, creates build instructions
-		for debug mode. To obtain reasonable transformation
-		performance, be sure to override this behavior. (E.g.
-		with "-DCMAKE_BUILD_TYPE=Release" option).
+		If using CMake, NOTE that the default CMake setup
+		configuration, when cmake is run with no override options,
+		creates build instructions for debug mode. To obtain
+		reasonable transformation performance, be sure to override
+		the default behavior. (E.g. with "-DCMAKE_BUILD_TYPE=Release"
+		option).
 
 Error Handling:
 
@@ -632,7 +645,7 @@ This project can be used in your own code in two ways:
 * -or- Incorporate this project into another development effort
 	using the ["cmake" paradigm](https://cmake.org/documentation/).
 	If using CMake in your own project, you can include something 
-	like the folloing in relevant CMakeLists.txt file.
+	like the following in relevant CMakeLists.txt file.
 
 Example CMakeLists.txt file syntax:
 
@@ -724,7 +737,8 @@ for itself in terms of providing values that are meaningful in a geodetic
 sense.
 
 For best numeric stability provide angle values within principle domain
-between +/-pi in order to capture full precision of angle values.
+between +/-pi in order to capture full precision of the specified angle
+values.
 
 For example, negative altitude values with magnitude greater than
 the ellipsoid's polar radius are not valid geodetic coordinates.
@@ -740,7 +754,7 @@ utilizing a few utility functions from the project test environment:
 
 * Ref the [periLocal.h] (https://github.com/Stellacore/peridetic/blob/main/tests/periLocal.h)
 	header file in "/tests" subdirectory. This is a header file used
-	in development/testing programs. It includes various functions
+	in development/testing. It includes various functions
 	that may be generally useful in the context of gedetic data value
 	interpretations (e.g. isValid(), infoString(), principalAngle(),
 	etc). For usage information, build the project and point browser at
@@ -1201,7 +1215,7 @@ The Peridetic code implementation emphasizes clarity and portability.
 Even though there are no special optimizations, the computational
 performance is reasonably good. The following presents simple
 (wall-clock-style) timing results obtained by transforming a reasonably
-sized sample of points.
+large number of sample of points (a few tens of millions).
 
 #### Example Timing Results
 
@@ -1213,11 +1227,11 @@ Configuration:
 
 * Generated sample point distribution spanning:
 
-	* All longitude values in the range [-pi:pi) radians
+	* All longitude values in the half-open interval [-pi:pi) radians
 
-	* All parallel (latitude) values in the range [-pi/2:pi/2] radians
+	* All parallel (latitude) values for closed interval [-pi/2:pi/2] radians
 
-	* Altitudes in the range [-100000:+100000] meters
+	* Altitudes in the closed interval of [-100000:+100000] meters
 
 Each test includes transformation of the entire collection of samples. Each
 transformation involves fetching a (pre-computed) data value from memory,
@@ -1271,7 +1285,7 @@ a ballpark estimate of time associated with data handling overhead.
 	3.10   2.51   2.48   1.00   0.45  : Cartesian from Geodetic - xyzForLpa():
 	6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
 
-Note the timing values fluctuate by a percent or two from run to run, but
+Note the timing values fluctuate by a few percent from run to run, but
 this provides a general idea of what to expect (at least for this class
 of processor).
 
