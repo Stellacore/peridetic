@@ -1269,12 +1269,13 @@ points outside this range (e.g. geosynchronous orbits, etc), computations
 require slightly (but only slightly) more time for the lpaForXyz()
 conversion (approximately 50%, or possibly 100% longer).
 
-* Platform AMD Ryzen 7 2700, GCC 9.3
+##### Platform AMD Ryzen 7 2700, GCC 9.3
 
 	Hardware: AMD Ryzen 7 2700
 	(using only *one* single processor core)
 	Compiled with GCC 9.3
 
+	```
 	# Number samples tested: 17508141
 
 	# Absolute times per test
@@ -1296,6 +1297,7 @@ conversion (approximately 50%, or possibly 100% longer).
 	1.25   1.01   1.00   0.40   0.18  : Reference evaluation - sqrt(abs()):
 	3.10   2.51   2.48   1.00   0.45  : Cartesian from Geodetic - xyzForLpa():
 	6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
+	```
 
 For this test, the xyzForLpa() computation is about two and a half times
 more expensive than simple multiplication of all three coordinate values.
@@ -1304,12 +1306,13 @@ Computation of geodetic "Lon,Lat,Alt" values from Cartesian "X,Y,Z"
 coordinates is approximately five and half times more expensive than simple
 multiplication of all three coordinate values.
 
-* Platform: Raspberry Pi 5
+##### Platform: Raspberry Pi 5
 
 	Hardware: Raspberry Pi 5 Model B Rev 1.0
 	(using only *one* single processor core)
 	Compiled with GCC g++ 12.2.0
 
+	```
 	# Number samples tested: 14467005
 
 	# Absolute times per test
@@ -1331,6 +1334,7 @@ multiplication of all three coordinate values.
 	1.02   1.01   1.00   0.44   0.18  : Reference evaluation - sqrt(abs()):
 	2.30   2.26   2.25   1.00   0.40  : Cartesian from Geodetic - xyzForLpa():
 	5.79   5.70   5.66   2.52   1.00  : Geodetic from Cartesian - lpaForXyz():
+	```
 
 Note the test size is smaller than the one above, (number of samples
 was reduced to fit into smaller memory on this device).  Therefore the
@@ -1338,12 +1342,13 @@ absolute times shouldn't be compared between these tests. However,
 the per instruction and relative times are all comparable.
 
 
-* Platform AMD Ryzen 7840HS
+##### Platform AMD Ryzen 7840HS
 
 	Hardware: AMD Ryzen 7 7840HS
 	(using only *one* single processor core)
 	Compiled with GCC g++ 12.2.0
-	
+
+	```
 	# Number samples tested: 17508141
 
 	# Absolute times per test
@@ -1365,4 +1370,5 @@ the per instruction and relative times are all comparable.
 	1.22   1.22   1.00   0.40   0.18  : Reference evaluation - sqrt(abs()):
 	3.04   3.03   2.48   1.00   0.46  : Cartesian from Geodetic - xyzForLpa():
 	6.62   6.59   5.41   2.18   1.00  : Geodetic from Cartesian - lpaForXyz():
+	```
 
