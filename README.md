@@ -106,7 +106,7 @@ which can be used to obtain:
 * Less optimized for use deep within Earth interior (although
 	transformations still meet design precision limits until
 	below approximately -5800[km] depths (within about 600[km]
-	of Earth's center. 
+	of Earth's center.
 
 	* Locations until altitudes below -6300[km], still transform
 		with sub[mm] precision (roundtrip consistency better than
@@ -443,7 +443,7 @@ Demonstration/utility example programs include:
 ## Peridetic - Context and Alternatives <a id =Context-and-Alternatives></a>
 
 Perietic is an extremely focused software capability that exists in the
-context of overall general geospatial technologies. There are many software 
+context of overall general geospatial technologies. There are many software
 applications and development resources available in this overall domain.
 
 * ... OSGeo -- A particularly useful archive of complementary geospatial
@@ -479,7 +479,7 @@ accommodations.
 	* By comparison with Peridetic, requires installing a large
 	software package/dependency and database files, but provides an
 	extremely complete and detailed collection of capabilities for
-	determining cartographic (map) coordinate in a plethora of 
+	determining cartographic (map) coordinate in a plethora of
 	reference systems.
 
 After creating the Peridetic code, a previously existing similarly capable
@@ -644,7 +644,7 @@ This project can be used in your own code in two ways:
 
 * -or- Incorporate this project into another development effort
 	using the ["cmake" paradigm](https://cmake.org/documentation/).
-	If using CMake in your own project, you can include something 
+	If using CMake in your own project, you can include something
 	like the following in relevant CMakeLists.txt file.
 
 Example CMakeLists.txt file syntax:
@@ -1051,7 +1051,7 @@ The precision (worst case for any coordinate component) changes as
 function of point location altitudes (Alt values):
 
  * Alt < -6300[km]: -- Out of range! Don't do - expect garbage.
- 
+
 	* If you expect data in this range, then your application
 		is outside the scope of validity for using Peridetic.
 
@@ -1115,7 +1115,7 @@ The NGS manages the Continuously Operating Reference Stations
 observations.  Although the network is concentrated within the U.S. it
 also includes a number of stations scattered around the globe.
 
-The following stations were selected with an emphasis on variation 
+The following stations were selected with an emphasis on variation
 of geodetic location (longitude and latitude) and elevation
 (altitude).
 
@@ -1221,10 +1221,6 @@ large number of sample of points (a few tens of millions).
 
 Configuration:
 
-* Hardware: AMD Ryzen 7 2700  (using only *one* single processor core)
-
-* Compiled with GCC 9.3
-
 * Generated sample point distribution spanning:
 
 	* All longitude values in the half-open interval [-pi:pi) radians
@@ -1263,6 +1259,22 @@ Time values include all computation infrastructure and overhead as well
 as specific computation times. The 'copy' transform is included to provide
 a ballpark estimate of time associated with data handling overhead.
 
+Note the timing values fluctuate by a few percent from run to run, but
+this provides a general idea of what to expect (at least for this class
+of processor).
+
+Note that these results apply to point locations within the optimum design
+domain (locations within approximately +/-100[km] of Earth surface). For
+points outside this range (e.g. geosynchronous orbits, etc), computations
+require slightly (but only slightly) more time for the lpaForXyz()
+conversion (approximately 50%, or possibly 100% longer).
+
+* Platform AMD Ryzen 7 2700, GCC 9.3
+
+	Hardware: AMD Ryzen 7 2700
+	(using only *one* single processor core)
+	Compiled with GCC 9.3
+
 	# Number samples tested: 17508141
 
 	# Absolute times per test
@@ -1285,10 +1297,6 @@ a ballpark estimate of time associated with data handling overhead.
 	3.10   2.51   2.48   1.00   0.45  : Cartesian from Geodetic - xyzForLpa():
 	6.85   5.54   5.48   2.21   1.00  : Geodetic from Cartesian - lpaForXyz():
 
-Note the timing values fluctuate by a few percent from run to run, but
-this provides a general idea of what to expect (at least for this class
-of processor).
-
 For this test, the xyzForLpa() computation is about two and a half times
 more expensive than simple multiplication of all three coordinate values.
 
@@ -1296,9 +1304,65 @@ Computation of geodetic "Lon,Lat,Alt" values from Cartesian "X,Y,Z"
 coordinates is approximately five and half times more expensive than simple
 multiplication of all three coordinate values.
 
-Note that these results apply to point locations within the optimum design
-domain (locations within approximately +/-100[km] of Earth surface). For
-points outside this range (e.g. geosynchronous orbits, etc), computations
-require slightly (but only slightly) more time for the lpaForXyz()
-conversion (approximately 50%, or possibly 100% longer).
+* Platform: Raspberry Pi 5
+
+	Hardware: Raspberry Pi 5 Model B Rev 1.0
+	(using only *one* single processor core)
+	Compiled with GCC g++ 12.2.0
+
+	# Number samples tested: 14467005
+
+	# Absolute times per test
+	# -- time values are 'wall-clock' elapsed [in sec]
+	# -- absolute total and 'per-each' times
+
+	0.527640772     0.000000036  : Reference evaluation - copy:
+	0.536013605     0.000000037  : Reference evaluation - multiply:
+	0.539373344     0.000000037  : Reference evaluation - sqrt(abs()):
+	1.213375750     0.000000084  : Cartesian from Geodetic - xyzForLpa():
+	3.054334882     0.000000211  : Geodetic from Cartesian - lpaForXyz():
+
+	# Relative test times
+	# -- times tests with respect to each other [ratio]
+	# -- column order matches row order
+
+	1.00   0.98   0.98   0.43   0.17  : Reference evaluation - copy:
+	1.02   1.00   0.99   0.44   0.18  : Reference evaluation - multiply:
+	1.02   1.01   1.00   0.44   0.18  : Reference evaluation - sqrt(abs()):
+	2.30   2.26   2.25   1.00   0.40  : Cartesian from Geodetic - xyzForLpa():
+	5.79   5.70   5.66   2.52   1.00  : Geodetic from Cartesian - lpaForXyz():
+
+Note the test size is smaller than the one above, (number of samples
+was reduced to fit into smaller memory on this device).  Therefore the
+absolute times shouldn't be compared between these tests. However,
+the per instruction and relative times are all comparable.
+
+
+* Platform AMD Ryzen 7840HS
+
+	Hardware: AMD Ryzen 7 7840HS
+	(using only *one* single processor core)
+	Compiled with GCC g++ 12.2.0
+	
+	# Number samples tested: 17508141
+
+	# Absolute times per test
+	# -- time values are 'wall-clock' elapsed [in sec]
+	# -- absolute total and 'per-each' times
+
+	0.290866259     0.000000017  : Reference evaluation - copy:
+	0.292260351     0.000000017  : Reference evaluation - multiply:
+	0.356131933     0.000000020  : Reference evaluation - sqrt(abs()):
+	0.884455615     0.000000051  : Cartesian from Geodetic - xyzForLpa():
+	1.925541528     0.000000110  : Geodetic from Cartesian - lpaForXyz():
+
+	# Relative test times
+	# -- times tests with respect to each other [ratio]
+	# -- column order matches row order
+
+	1.00   1.00   0.82   0.33   0.15  : Reference evaluation - copy:
+	1.00   1.00   0.82   0.33   0.15  : Reference evaluation - multiply:
+	1.22   1.22   1.00   0.40   0.18  : Reference evaluation - sqrt(abs()):
+	3.04   3.03   2.48   1.00   0.46  : Cartesian from Geodetic - xyzForLpa():
+	6.62   6.59   5.41   2.18   1.00  : Geodetic from Cartesian - lpaForXyz():
 
